@@ -4,6 +4,7 @@ import { CardMatcher } from 'core/cards/libs/card_matcher';
 import { CardId } from 'core/cards/libs/card_props';
 import { CharacterEquipSections, CharacterId } from 'core/characters/character';
 import {
+  CardMoveArea,
   CardMoveReason,
   ClientEventFinder,
   EventPicker,
@@ -12,6 +13,7 @@ import {
   WorkPlace,
 } from 'core/event/event';
 import { MoveCardEventInfos, PinDianReport } from 'core/event/event.server';
+import { EventPacker } from 'core/event/event_packer';
 import { Sanguosha } from 'core/game/engine';
 import { GameInfo } from 'core/game/game_props';
 import { GameCommonRules } from 'core/game/game_rules';
@@ -849,5 +851,26 @@ export abstract class Room<T extends WorkPlace = WorkPlace> {
 
   public get EventStack() {
     return this.eventStack;
+  }
+
+  public getRoundDropCards(): Card[] {
+    const records = this.Analytics.getRecordEvents<GameEventIdentifiers.MoveCardEvent>(
+      event =>
+        EventPacker.getIdentifier(event) === GameEventIdentifiers.MoveCardEvent &&
+        !!event.infos.find(info => info.toArea === CardMoveArea.DropStack),
+      undefined,
+      'round',
+    );
+
+    const cards: Card[] = [];
+    for (const record of records) {
+      for (const info of record.infos) {
+        for (const cardInfo of info.movingCards) {
+          cards.push(Sanguosha.getCardById(cardInfo.card));
+        }
+      }
+    }
+
+    return cards;
   }
 }
