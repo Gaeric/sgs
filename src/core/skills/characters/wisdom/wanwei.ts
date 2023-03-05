@@ -1,15 +1,23 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PlayerDyingStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CircleSkill, CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  CircleSkill,
+  CommonSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
 @CircleSkill
-@CommonSkill({ name: 'wanwei', description: 'wanwei_description' })
+@CommonSkill({ name: "wanwei", description: "wanwei_description" })
 export class WanWei extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return !owner.hasUsedSkill(this.Name);
@@ -19,7 +27,11 @@ export class WanWei extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner;
   }
 
@@ -27,7 +39,12 @@ export class WanWei extends ActiveSkill {
     return cards.length === 0;
   }
 
-  public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId, selectedCards: CardId[]): boolean {
+  public isAvailableCard(
+    owner: PlayerId,
+    room: Room,
+    cardId: CardId,
+    selectedCards: CardId[]
+  ): boolean {
     return false;
   }
 
@@ -35,7 +52,10 @@ export class WanWei extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
@@ -58,27 +78,36 @@ export class WanWei extends ActiveSkill {
 @CircleSkill
 @CommonSkill({ name: WanWei.Name, description: WanWei.Description })
 export class WanWeiShadow extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PlayerDyingStage.PlayerDying;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
+  ): boolean {
     return (
-      content.dying !== owner.Id && !owner.hasUsedSkill(this.GeneralName) && room.getPlayerById(content.dying).Hp <= 0
+      content.dying !== owner.Id &&
+      !owner.hasUsedSkill(this.GeneralName) &&
+      room.getPlayerById(content.dying).Hp <= 0
     );
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to let {1} recover {2} hp, then you lose {3} hp?',
+      "{0}: do you want to let {1} recover {2} hp, then you lose {3} hp?",
       this.Name,
       TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.dying)),
       owner.Hp + 1,
-      owner.Hp,
+      owner.Hp
     ).extract();
   }
 
@@ -86,9 +115,13 @@ export class WanWeiShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = event;
-    const dyingEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>;
+    const dyingEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>;
 
     const hp = room.getPlayerById(fromId).Hp;
     await room.recover({

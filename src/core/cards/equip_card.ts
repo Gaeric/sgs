@@ -1,7 +1,7 @@
-import { GameCardExtensions } from 'core/game/game_props';
-import { RulesBreakerSkill, Skill } from 'core/skills/skill';
-import { Card, CardType } from './card';
-import { CardSuit, RealCardId } from './libs/card_props';
+import { GameCardExtensions } from "@/core/game/game_props";
+import { RulesBreakerSkill, Skill } from "@/core/skills/skill";
+import { Card, CardType } from "./card";
+import { CardSuit, RealCardId } from "./libs/card_props";
 
 export abstract class EquipCard extends Card {
   protected cardType = [CardType.Equip];
@@ -33,7 +33,7 @@ export abstract class WeaponCard extends EquipCard {
     protected skill: Skill,
     private attackDistance: number,
     generalName?: string,
-    protected shadowSkills: Skill[] = [],
+    protected shadowSkills: Skill[] = []
   ) {
     super(CardType.Weapon);
     this.generalName = generalName || this.name;
@@ -55,7 +55,7 @@ export abstract class ArmorCard extends EquipCard {
     protected fromPackage: GameCardExtensions,
     protected skill: Skill,
     generalName?: string,
-    protected shadowSkills: Skill[] = [],
+    protected shadowSkills: Skill[] = []
   ) {
     super(CardType.Shield);
     this.generalName = generalName || this.name;
@@ -74,7 +74,7 @@ export abstract class PreciousCard extends EquipCard {
     protected fromPackage: GameCardExtensions,
     protected skill: Skill,
     generalName?: string,
-    protected shadowSkills: Skill[] = [],
+    protected shadowSkills: Skill[] = []
   ) {
     super(CardType.Precious);
     this.generalName = generalName || this.name;
@@ -101,7 +101,7 @@ export class DefenseRideCard extends RideCard {
     protected fromPackage: GameCardExtensions,
     protected skill: RulesBreakerSkill,
     generalName?: string,
-    protected shadowSkills: Skill[] = [],
+    protected shadowSkills: Skill[] = []
   ) {
     super(CardType.DefenseRide);
     this.generalName = generalName || this.name;
@@ -120,7 +120,7 @@ export class OffenseRideCard extends RideCard {
     protected fromPackage: GameCardExtensions,
     protected skill: RulesBreakerSkill,
     generalName?: string,
-    protected shadowSkills: Skill[] = [],
+    protected shadowSkills: Skill[] = []
   ) {
     super(CardType.OffenseRide);
     this.generalName = generalName || this.name;

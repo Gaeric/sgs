@@ -1,5 +1,5 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
 import {
   AllStage,
   DamageEffectStage,
@@ -7,23 +7,34 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { PersistentSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  PersistentSkill,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'weilu', description: 'weilu_description' })
+@CompulsorySkill({ name: "weilu", description: "weilu_description" })
 export class WeiLu extends TriggerSkill {
-  public static readonly WeiLuCurrent = 'weilu_current';
+  public static readonly WeiLuCurrent = "weilu_current";
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DamageEffectStage.AfterDamagedEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ): boolean {
     return (
       content.toId === owner.Id &&
       content.fromId !== undefined &&
@@ -36,20 +47,26 @@ export class WeiLu extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
-    const source = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>).fromId!;
+    const source = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>
+    ).fromId!;
 
     const originalUsers = room.getFlag<PlayerId[]>(source, this.Name) || [];
     if (room.CurrentPlayer.Id === fromId) {
-      const currentUsers = room.getFlag<PlayerId[]>(source, WeiLu.WeiLuCurrent) || [];
+      const currentUsers =
+        room.getFlag<PlayerId[]>(source, WeiLu.WeiLuCurrent) || [];
       if (!currentUsers.includes(fromId)) {
         currentUsers.push(fromId);
         room.setFlag<PlayerId[]>(
           source,
           WeiLu.WeiLuCurrent,
           currentUsers,
-          originalUsers.length > 0 ? undefined : this.Name,
+          originalUsers.length > 0 ? undefined : this.Name
         );
       }
     } else {
@@ -71,7 +88,7 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
@@ -79,9 +96,9 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
       room
         .getOtherPlayers(owner)
         .find(
-          other =>
+          (other) =>
             other.getFlag<PlayerId[]>(this.GeneralName)?.includes(owner) ||
-            other.getFlag<PlayerId[]>(WeiLu.WeiLuCurrent)?.includes(owner),
+            other.getFlag<PlayerId[]>(WeiLu.WeiLuCurrent)?.includes(owner)
         ) === undefined
     );
   }
@@ -90,7 +107,7 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
     for (const other of room.getOtherPlayers(player.Id)) {
       const users = other.getFlag<PlayerId[]>(this.Name);
       if (users) {
-        const index = users.findIndex(user => user === player.Id);
+        const index = users.findIndex((user) => user === player.Id);
         if (index !== -1) {
           if (users.length === 1) {
             room.removeFlag(other.Id, this.Name);
@@ -103,7 +120,7 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
 
       const currentUser = other.getFlag<PlayerId[]>(WeiLu.WeiLuCurrent);
       if (currentUser) {
-        const index = currentUser.findIndex(user => user === player.Id);
+        const index = currentUser.findIndex((user) => user === player.Id);
         if (index !== -1) {
           if (currentUser.length === 1) {
             room.removeFlag(other.Id, this.Name);
@@ -113,7 +130,7 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
               other.Id,
               this.Name,
               currentUser,
-              other.getFlag<PlayerId[]>(this.Name) ? undefined : this.Name,
+              other.getFlag<PlayerId[]>(this.Name) ? undefined : this.Name
             );
           }
         }
@@ -126,24 +143,33 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.PhaseStageChangeEvent
+      | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
-    return stage === PhaseStageChangeStage.StageChanged || stage === PhaseChangeStage.PhaseChanged;
+    return (
+      stage === PhaseStageChangeStage.StageChanged ||
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.PhaseStageChangeEvent
+      | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): boolean {
     if (
       room
         .getOtherPlayers(owner.Id)
         .find(
-          other =>
+          (other) =>
             other.getFlag<PlayerId[]>(this.GeneralName)?.includes(owner.Id) ||
-            other.getFlag<PlayerId[]>(WeiLu.WeiLuCurrent)?.includes(owner.Id),
+            other.getFlag<PlayerId[]>(WeiLu.WeiLuCurrent)?.includes(owner.Id)
         ) === undefined
     ) {
       return false;
@@ -151,15 +177,21 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
 
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {
-      const phaseStageChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
+      const phaseStageChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
       return (
         phaseStageChangeEvent.playerId === owner.Id &&
-        (phaseStageChangeEvent.toStage === PlayerPhaseStages.PlayCardStageStart ||
+        (phaseStageChangeEvent.toStage ===
+          PlayerPhaseStages.PlayCardStageStart ||
           phaseStageChangeEvent.toStage === PlayerPhaseStages.PlayCardStageEnd)
       );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return phaseChangeEvent.fromPlayer === owner.Id && phaseChangeEvent.from === PlayerPhase.PhaseFinish;
+      const phaseChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        phaseChangeEvent.fromPlayer === owner.Id &&
+        phaseChangeEvent.from === PlayerPhase.PhaseFinish
+      );
     }
 
     return false;
@@ -169,15 +201,21 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
-      GameEventIdentifiers.PhaseStageChangeEvent | GameEventIdentifiers.PhaseChangeEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
+      | GameEventIdentifiers.PhaseChangeEvent
     >;
 
     const identifier = EventPacker.getIdentifier(unknownEvent);
     if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {
-      const toStage = (unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>).toStage;
+      const toStage = (
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+      ).toStage;
       if (toStage === PlayerPhaseStages.PlayCardStageStart) {
         for (const other of room.getOtherPlayers(fromId)) {
           const originalUsers = other.getFlag<PlayerId[]>(this.GeneralName);
@@ -204,13 +242,18 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
       for (const other of room.getOtherPlayers(fromId)) {
         const users = other.getFlag<PlayerId[]>(this.GeneralName);
         if (users) {
-          const index = users.findIndex(user => user === fromId);
+          const index = users.findIndex((user) => user === fromId);
           if (index !== -1) {
             if (users.length === 1) {
               room.removeFlag(other.Id, this.GeneralName);
             } else {
               users.splice(index, 1);
-              room.setFlag<PlayerId[]>(other.Id, this.GeneralName, users, this.GeneralName);
+              room.setFlag<PlayerId[]>(
+                other.Id,
+                this.GeneralName,
+                users,
+                this.GeneralName
+              );
             }
           }
         }
@@ -219,9 +262,16 @@ export class WeiLuShadow extends TriggerSkill implements OnDefineReleaseTiming {
         if (currentUsers) {
           room.removeFlag(other.Id, WeiLu.WeiLuCurrent);
           const newUsers = other.getFlag<PlayerId[]>(this.GeneralName) || [];
-          currentUsers = currentUsers.filter(user => !newUsers.includes(user));
+          currentUsers = currentUsers.filter(
+            (user) => !newUsers.includes(user)
+          );
           if (newUsers.length > 0 || currentUsers.length > 0) {
-            room.setFlag<PlayerId[]>(other.Id, this.GeneralName, newUsers.concat(currentUsers), this.GeneralName);
+            room.setFlag<PlayerId[]>(
+              other.Id,
+              this.GeneralName,
+              newUsers.concat(currentUsers),
+              this.GeneralName
+            );
           }
         }
       }

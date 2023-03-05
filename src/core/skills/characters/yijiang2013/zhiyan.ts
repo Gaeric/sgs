@@ -1,30 +1,49 @@
-import { CardType } from 'core/cards/card';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'zhiyan', description: 'zhiyan_description' })
+@CommonSkill({ name: "zhiyan", description: "zhiyan_description" })
 export class ZhiYan extends TriggerSkill {
   public get RelatedCharacters(): string[] {
-    return ['gexuan'];
+    return ["gexuan"];
   }
 
   public audioIndex(characterName?: string): number {
-    return characterName && this.RelatedCharacters.includes(characterName) ? 1 : 2;
+    return characterName && this.RelatedCharacters.includes(characterName)
+      ? 1
+      : 2;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
-    return owner.Id === content.playerId && content.toStage === PlayerPhaseStages.FinishStageStart;
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
+    return (
+      owner.Id === content.playerId &&
+      content.toStage === PlayerPhaseStages.FinishStageStart
+    );
   }
 
   public numberOfTargets() {
@@ -37,8 +56,8 @@ export class ZhiYan extends TriggerSkill {
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to choose a target to draw a card?',
-      this.Name,
+      "{0}: do you want to choose a target to draw a card?",
+      this.Name
     ).extract();
   }
 
@@ -46,10 +65,13 @@ export class ZhiYan extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds } = skillUseEvent;
     const toId = toIds![0];
-    const cardId = (await room.drawCards(1, toId, 'top', fromId, this.Name))[0];
+    const cardId = (await room.drawCards(1, toId, "top", fromId, this.Name))[0];
 
     const card = Sanguosha.getCardById(cardId);
     const to = room.getPlayerById(toId);
@@ -58,20 +80,21 @@ export class ZhiYan extends TriggerSkill {
       return false;
     }
 
-    const showCardEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-      fromId: toId,
-      displayCards: [cardId],
-      translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} display hand card {1}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-        TranslationPack.patchCardInTranslation(cardId),
-      ).extract(),
-    };
+    const showCardEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+      {
+        fromId: toId,
+        displayCards: [cardId],
+        translationsMessage: TranslationPack.translationJsonPatcher(
+          "{0} display hand card {1}",
+          TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+          TranslationPack.patchCardInTranslation(cardId)
+        ).extract(),
+      };
 
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, showCardEvent);
 
     if (card.is(CardType.Basic)) {
-      await room.drawCards(1, fromId, 'top', fromId, this.Name);
+      await room.drawCards(1, fromId, "top", fromId, this.Name);
     } else if (card.is(CardType.Equip) && to.canUseCard(room, cardId)) {
       await room.useCard({
         fromId: toId,

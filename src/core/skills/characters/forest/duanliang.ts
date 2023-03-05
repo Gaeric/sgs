@@ -1,22 +1,30 @@
-import { CardType, VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Slash } from 'core/cards/standard/slash';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_DISTANCE } from 'core/game/game_props';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, RulesBreakerSkill, ShadowSkill, ViewAsSkill } from 'core/skills/skill';
+import { CardType, VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Slash } from "@/core/cards/standard/slash";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_DISTANCE } from "@/core/game/game_props";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  RulesBreakerSkill,
+  ShadowSkill,
+  ViewAsSkill,
+} from "@/core/skills/skill";
 
-@CommonSkill({ name: 'duanliang', description: 'duanliang_description' })
+@CommonSkill({ name: "duanliang", description: "duanliang_description" })
 export class DuanLiang extends ViewAsSkill {
   public canViewAs(): string[] {
-    return ['bingliangcunduan'];
+    return ["bingliangcunduan"];
   }
 
   public canUse(room: Room, owner: Player): boolean {
-    return owner.canUseCard(room, new CardMatcher({ name: ['bingliangcunduan'] }));
+    return owner.canUseCard(
+      room,
+      new CardMatcher({ name: ["bingliangcunduan"] })
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -29,7 +37,7 @@ export class DuanLiang extends ViewAsSkill {
     pendingCardId: CardId,
     selectedCards: CardId[],
     containerCard?: CardId,
-    cardMatcher?: CardMatcher,
+    cardMatcher?: CardMatcher
   ): boolean {
     const card = Sanguosha.getCardById(pendingCardId);
     const isAvailable = cardMatcher
@@ -42,10 +50,10 @@ export class DuanLiang extends ViewAsSkill {
   public viewAs(selectedCards: CardId[]): VirtualCard {
     return VirtualCard.create<Slash>(
       {
-        cardName: 'bingliangcunduan',
+        cardName: "bingliangcunduan",
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
@@ -53,16 +61,26 @@ export class DuanLiang extends ViewAsSkill {
 @ShadowSkill
 @CommonSkill({ name: DuanLiang.Name, description: DuanLiang.Description })
 export class DuanLiangShadow extends RulesBreakerSkill {
-  breakCardUsableDistanceTo(cardId: CardId | CardMatcher, room: Room, owner: Player, target: Player) {
-    if (owner.getCardIds(PlayerCardsArea.HandArea).length > target.getCardIds(PlayerCardsArea.HandArea).length) {
+  breakCardUsableDistanceTo(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player,
+    target: Player
+  ) {
+    if (
+      owner.getCardIds(PlayerCardsArea.HandArea).length >
+      target.getCardIds(PlayerCardsArea.HandArea).length
+    ) {
       return 0;
     }
 
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ name: ['bingliangcunduan'] })) ? INFINITE_DISTANCE : 0;
+      return cardId.match(new CardMatcher({ name: ["bingliangcunduan"] }))
+        ? INFINITE_DISTANCE
+        : 0;
     } else {
       const card = Sanguosha.getCardById(cardId);
-      return card.GeneralName === 'bingliangcunduan' ? INFINITE_DISTANCE : 0;
+      return card.GeneralName === "bingliangcunduan" ? INFINITE_DISTANCE : 0;
     }
   }
 }

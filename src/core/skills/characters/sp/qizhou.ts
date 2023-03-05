@@ -1,18 +1,26 @@
-import { CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveArea, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
-import { QiXi } from '../standard/qixi';
-import { YingZi } from '../standard/yingzi';
-import { StdXuanFeng } from '../yijiang2011/std_xuanfeng';
+import { CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  CardMoveStage,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+import { QiXi } from "../standard/qixi";
+import { YingZi } from "../standard/yingzi";
+import { StdXuanFeng } from "../yijiang2011/std_xuanfeng";
 
-@CompulsorySkill({ name: 'qizhou', description: 'qizhou_description' })
+@CompulsorySkill({ name: "qizhou", description: "qizhou_description" })
 export class QiZhou extends TriggerSkill implements OnDefineReleaseTiming {
   public get RelatedSkills(): string[] {
     return [YingZi.Name, QiXi.Name, StdXuanFeng.Name];
@@ -32,7 +40,8 @@ export class QiZhou extends TriggerSkill implements OnDefineReleaseTiming {
     }
 
     for (const skillName of this.RelatedSkills) {
-      player.getFlag<string[]>(this.Name).includes(skillName) && (await room.loseSkill(player.Id, skillName));
+      player.getFlag<string[]>(this.Name).includes(skillName) &&
+        (await room.loseSkill(player.Id, skillName));
     }
     player.removeFlag(this.Name);
   }
@@ -43,17 +52,20 @@ export class QiZhou extends TriggerSkill implements OnDefineReleaseTiming {
     }
 
     for (const skillName of this.RelatedSkills) {
-      player.getFlag<string[]>(this.Name).includes(skillName) && (await room.loseSkill(player.Id, skillName));
+      player.getFlag<string[]>(this.Name).includes(skillName) &&
+        (await room.loseSkill(player.Id, skillName));
     }
     player.removeFlag(this.Name);
   }
 
   private async handleQiZhouSkills(room: Room, player: Player): Promise<void> {
-    const suitsNum = player.getCardIds(PlayerCardsArea.EquipArea).reduce<CardSuit[]>((suits, cardId) => {
-      const suit = Sanguosha.getCardById(cardId).Suit;
-      suits.includes(suit) || suits.push(suit);
-      return suits;
-    }, []).length;
+    const suitsNum = player
+      .getCardIds(PlayerCardsArea.EquipArea)
+      .reduce<CardSuit[]>((suits, cardId) => {
+        const suit = Sanguosha.getCardById(cardId).Suit;
+        suits.includes(suit) || suits.push(suit);
+        return suits;
+      }, []).length;
     const flagValue = Math.min(3, suitsNum);
     const originalSkillNames = player.getFlag<string[]>(this.Name) || [];
 
@@ -64,7 +76,9 @@ export class QiZhou extends TriggerSkill implements OnDefineReleaseTiming {
         originalSkillNames.push(skillName);
       } else if (i >= flagValue && originalSkillNames.includes(skillName)) {
         await room.loseSkill(player.Id, skillName, true);
-        const index = originalSkillNames.findIndex(name => name === skillName);
+        const index = originalSkillNames.findIndex(
+          (name) => name === skillName
+        );
         originalSkillNames.splice(index, 1);
       }
     }
@@ -84,34 +98,46 @@ export class QiZhou extends TriggerSkill implements OnDefineReleaseTiming {
     await this.handleQiZhouSkills(room, player);
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     if (
       !content.infos.find(
-        info =>
+        (info) =>
           (info.fromId === owner.Id &&
-            info.movingCards.find(cardInfo => cardInfo.fromArea === CardMoveArea.EquipArea)) ||
-          (info.toId === owner.Id && info.toArea === CardMoveArea.EquipArea),
+            info.movingCards.find(
+              (cardInfo) => cardInfo.fromArea === CardMoveArea.EquipArea
+            )) ||
+          (info.toId === owner.Id && info.toArea === CardMoveArea.EquipArea)
       )
     ) {
       return false;
     }
 
-    const suitsNum = owner.getCardIds(PlayerCardsArea.EquipArea).reduce<CardSuit[]>((suits, cardId) => {
-      const suit = Sanguosha.getCardById(cardId).Suit;
-      suits.includes(suit) || suits.push(suit);
-      return suits;
-    }, []).length;
-    const currentSkillNames = suitsNum > 0 ? this.RelatedSkills.slice(0, Math.min(suitsNum, 3)) : [];
+    const suitsNum = owner
+      .getCardIds(PlayerCardsArea.EquipArea)
+      .reduce<CardSuit[]>((suits, cardId) => {
+        const suit = Sanguosha.getCardById(cardId).Suit;
+        suits.includes(suit) || suits.push(suit);
+        return suits;
+      }, []).length;
+    const currentSkillNames =
+      suitsNum > 0 ? this.RelatedSkills.slice(0, Math.min(suitsNum, 3)) : [];
     return !!this.RelatedSkills.find(
-      skillName =>
+      (skillName) =>
         (currentSkillNames.includes(skillName) && !owner.hasSkill(skillName)) ||
         (owner.hasSkill(skillName) &&
           owner.getFlag<string[]>(this.Name)?.includes(skillName) &&
-          !currentSkillNames.includes(skillName)),
+          !currentSkillNames.includes(skillName))
     );
   }
 
@@ -119,7 +145,10 @@ export class QiZhou extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     await this.handleQiZhouSkills(room, room.getPlayerById(event.fromId));
 
     return true;

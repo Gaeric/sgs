@@ -1,24 +1,26 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Slash } from 'core/cards/standard/slash';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { CommonSkill, ViewAsSkill } from 'core/skills/skill';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Slash } from "@/core/cards/standard/slash";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ViewAsSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'qixi', description: 'qixi_description' })
+@CommonSkill({ name: "qixi", description: "qixi_description" })
 export class QiXi extends ViewAsSkill {
   public get RelatedCharacters(): string[] {
-    return ['heqi'];
+    return ["heqi"];
   }
 
   public audioIndex(characterName?: string): number {
-    return characterName && this.RelatedCharacters.includes(characterName) ? 1 : 2;
+    return characterName && this.RelatedCharacters.includes(characterName)
+      ? 1
+      : 2;
   }
 
   public canViewAs(): string[] {
-    return ['guohechaiqiao'];
+    return ["guohechaiqiao"];
   }
   public canUse(room: Room, owner: Player) {
     return owner.canUseCard(room, new CardMatcher({ name: this.canViewAs() }));
@@ -32,7 +34,7 @@ export class QiXi extends ViewAsSkill {
     owner: Player,
     pendingCardId: CardId,
     selectedCards: CardId[],
-    containerCard?: CardId | undefined,
+    containerCard?: CardId | undefined
   ): boolean {
     return Sanguosha.getCardById(pendingCardId).isBlack();
   }
@@ -40,10 +42,10 @@ export class QiXi extends ViewAsSkill {
   public viewAs(selectedCards: CardId[]) {
     return VirtualCard.create<Slash>(
       {
-        cardName: 'guohechaiqiao',
+        cardName: "guohechaiqiao",
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }

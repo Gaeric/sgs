@@ -1,26 +1,40 @@
-import { CardId } from 'core/cards/libs/card_props';
+import { CardId } from "@/core/cards/libs/card_props";
 import {
   CardDrawReason,
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, DrawCardStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  DrawCardStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ShadowSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'lilu', description: 'lilu_description' })
+@CommonSkill({ name: "lilu", description: "lilu_description" })
 export class LiLu extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DrawCardStage.BeforeDrawCardEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>
+  ): boolean {
     return (
       owner.Id === content.fromId &&
       room.CurrentPlayerPhase === PlayerPhase.DrawCardStage &&
@@ -30,16 +44,18 @@ export class LiLu extends TriggerSkill {
   }
 
   public getSkillLog(room: Room, owner: Player): PatchedTranslationObject {
-    const n = Math.min(owner.MaxHp, 5) - owner.getCardIds(PlayerCardsArea.HandArea).length;
+    const n =
+      Math.min(owner.MaxHp, 5) -
+      owner.getCardIds(PlayerCardsArea.HandArea).length;
     return n > 0
       ? TranslationPack.translationJsonPatcher(
-          '{0}: do you want to draw {1} card(s) instead of drawing cards by rule?',
+          "{0}: do you want to draw {1} card(s) instead of drawing cards by rule?",
           this.Name,
-          n,
+          n
         ).extract()
       : TranslationPack.translationJsonPatcher(
-          '{0}: do you want to give up to draw cards by rule?',
-          this.Name,
+          "{0}: do you want to give up to draw cards by rule?",
+          this.Name
         ).extract();
   }
 
@@ -49,33 +65,53 @@ export class LiLu extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = skillUseEvent;
-    const drawCardEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+    const drawCardEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
     drawCardEvent.drawAmount = 0;
 
     const from = room.getPlayerById(fromId);
-    const n = Math.min(from.MaxHp, 5) - from.getCardIds(PlayerCardsArea.HandArea).length;
+    const n =
+      Math.min(from.MaxHp, 5) -
+      from.getCardIds(PlayerCardsArea.HandArea).length;
     if (n > 0) {
-      await room.drawCards(n, fromId, 'top', fromId, this.Name);
+      await room.drawCards(n, fromId, "top", fromId, this.Name);
     }
 
     const hands = from.getCardIds(PlayerCardsArea.HandArea);
     if (hands.length > 0) {
-      const skillUseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForSkillUseEvent>({
-        invokeSkillNames: [LiLuSelect.Name],
-        toId: fromId,
-        conversation: 'lilu: please give a handcard to another player',
-      });
-      room.notify(GameEventIdentifiers.AskForSkillUseEvent, skillUseEvent, fromId);
-      const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForSkillUseEvent, fromId);
+      const skillUseEvent =
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForSkillUseEvent>(
+          {
+            invokeSkillNames: [LiLuSelect.Name],
+            toId: fromId,
+            conversation: "lilu: please give a handcard to another player",
+          }
+        );
+      room.notify(
+        GameEventIdentifiers.AskForSkillUseEvent,
+        skillUseEvent,
+        fromId
+      );
+      const response = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForSkillUseEvent,
+        fromId
+      );
 
       const others = room.getOtherPlayers(fromId);
-      const cardIds = response.cardIds || [hands[Math.floor(Math.random() * hands.length)]];
-      const toIds = response.toIds || [others[Math.floor(Math.random() * others.length)].Id];
+      const cardIds = response.cardIds || [
+        hands[Math.floor(Math.random() * hands.length)],
+      ];
+      const toIds = response.toIds || [
+        others[Math.floor(Math.random() * others.length)].Id,
+      ];
       await room.moveCards({
-        movingCards: cardIds.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+        movingCards: cardIds.map((card) => ({
+          card,
+          fromArea: CardMoveArea.HandArea,
+        })),
         fromId,
         toId: toIds[0],
         toArea: CardMoveArea.HandArea,
@@ -96,7 +132,10 @@ export class LiLu extends TriggerSkill {
         fromId,
         this.Name,
         cardIds.length,
-        TranslationPack.translationJsonPatcher('lilu count: {0}', cardIds.length).toString(),
+        TranslationPack.translationJsonPatcher(
+          "lilu count: {0}",
+          cardIds.length
+        ).toString()
       );
     }
 
@@ -105,7 +144,7 @@ export class LiLu extends TriggerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: 'shadow_lilu', description: 'shadow_lilu_description' })
+@CommonSkill({ name: "shadow_lilu", description: "shadow_lilu_description" })
 export class LiLuSelect extends TriggerSkill {
   public isTriggerable(): boolean {
     return false;
@@ -123,7 +162,11 @@ export class LiLuSelect extends TriggerSkill {
     return cards.length > 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner;
   }
 

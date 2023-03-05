@@ -1,16 +1,27 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'songci', description: 'songci_description' })
+@CommonSkill({ name: "songci", description: "songci_description" })
 export class SongCi extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
-    return (owner.getFlag<PlayerId[]>(this.Name) || []).length < room.AlivePlayers.length;
+    return (
+      (owner.getFlag<PlayerId[]>(this.Name) || []).length <
+      room.AlivePlayers.length
+    );
   }
 
   public numberOfTargets(): number {
@@ -33,28 +44,41 @@ export class SongCi extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { toIds } = event;
     if (!toIds) {
       return false;
     }
 
-    const originalPlayers = room.getFlag<PlayerId[]>(event.fromId, this.Name) || [];
+    const originalPlayers =
+      room.getFlag<PlayerId[]>(event.fromId, this.Name) || [];
     originalPlayers.includes(toIds[0]) || originalPlayers.push(toIds[0]);
     room.setFlag<PlayerId[]>(event.fromId, this.Name, originalPlayers);
 
-    if (room.getPlayerById(toIds[0]).Hp < room.getPlayerById(toIds[0]).getCardIds(PlayerCardsArea.HandArea).length) {
+    if (
+      room.getPlayerById(toIds[0]).Hp <
+      room.getPlayerById(toIds[0]).getCardIds(PlayerCardsArea.HandArea).length
+    ) {
       const { droppedCards } = await room.askForCardDrop(
         toIds[0],
         2,
         [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
         true,
         undefined,
-        this.Name,
+        this.Name
       );
-      await room.dropCards(CardMoveReason.SelfDrop, droppedCards, toIds[0], toIds[0], this.Name);
+      await room.dropCards(
+        CardMoveReason.SelfDrop,
+        droppedCards,
+        toIds[0],
+        toIds[0],
+        this.Name
+      );
     } else {
-      await room.drawCards(2, toIds[0], 'top', toIds[0], this.Name);
+      await room.drawCards(2, toIds[0], "top", toIds[0], this.Name);
     }
 
     return true;
@@ -70,7 +94,7 @@ export class SongCiShadow extends TriggerSkill {
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -78,12 +102,13 @@ export class SongCiShadow extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       event.playerId === owner.Id &&
       event.toStage === PlayerPhaseStages.DropCardStageEnd &&
-      (owner.getFlag<PlayerId[]>(this.GeneralName) || []).length >= room.AlivePlayers.length
+      (owner.getFlag<PlayerId[]>(this.GeneralName) || []).length >=
+        room.AlivePlayers.length
     );
   }
 
@@ -91,8 +116,11 @@ export class SongCiShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    await room.drawCards(1, event.fromId, 'top', event.fromId, this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    await room.drawCards(1, event.fromId, "top", event.fromId, this.Name);
 
     return true;
   }

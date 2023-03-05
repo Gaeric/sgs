@@ -1,34 +1,51 @@
-import { CardType } from 'core/cards/card';
-import { CardChoosingOptions } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PlayerDyingStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'buyi', description: 'buyi_description' })
+@CommonSkill({ name: "buyi", description: "buyi_description" })
 export class BuYi extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PlayerDyingStage.PlayerDying;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
+  ): boolean {
     const dyingPlayer = room.getPlayerById(content.dying);
-    return dyingPlayer.Hp <= 0 && dyingPlayer.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      dyingPlayer.Hp <= 0 &&
+      dyingPlayer.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to reveal a hand card from {1} ?',
+      "{0}: do you want to reveal a hand card from {1} ?",
       this.Name,
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.dying)),
+      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.dying))
     ).extract();
   }
 
@@ -36,16 +53,24 @@ export class BuYi extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const dyingEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const dyingEvent =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>;
     const dyingPlayer = room.getPlayerById(dyingEvent.dying);
 
     const options: CardChoosingOptions = {
-      [PlayerCardsArea.HandArea]: dyingPlayer.getCardIds(PlayerCardsArea.HandArea).length,
+      [PlayerCardsArea.HandArea]: dyingPlayer.getCardIds(
+        PlayerCardsArea.HandArea
+      ).length,
     };
 
     if (event.fromId === dyingEvent.dying) {
-      options[PlayerCardsArea.HandArea] = dyingPlayer.getCardIds(PlayerCardsArea.HandArea);
+      options[PlayerCardsArea.HandArea] = dyingPlayer.getCardIds(
+        PlayerCardsArea.HandArea
+      );
     }
 
     const chooseCardEvent = {
@@ -55,7 +80,12 @@ export class BuYi extends TriggerSkill {
       triggeredBySkills: [this.Name],
     };
 
-    const response = await room.askForChoosingPlayerCard(chooseCardEvent, event.fromId, false, true);
+    const response = await room.askForChoosingPlayerCard(
+      chooseCardEvent,
+      event.fromId,
+      false,
+      true
+    );
     if (!response) {
       return false;
     }
@@ -63,22 +93,25 @@ export class BuYi extends TriggerSkill {
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, {
       displayCards: [response.selectedCard!],
       translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} display hand card {1}',
+        "{0} display hand card {1}",
         TranslationPack.patchPlayerInTranslation(dyingPlayer),
-        TranslationPack.patchCardInTranslation(response.selectedCard!),
+        TranslationPack.patchCardInTranslation(response.selectedCard!)
       ).extract(),
     });
 
     if (
       !Sanguosha.getCardById(response.selectedCard!).is(CardType.Basic) &&
-      !(event.fromId === dyingEvent.dying && !room.canDropCard(event.fromId, response.selectedCard!))
+      !(
+        event.fromId === dyingEvent.dying &&
+        !room.canDropCard(event.fromId, response.selectedCard!)
+      )
     ) {
       await room.dropCards(
         CardMoveReason.SelfDrop,
         [response.selectedCard!],
         dyingEvent.dying,
         dyingEvent.dying,
-        this.Name,
+        this.Name
       );
 
       await room.recover({

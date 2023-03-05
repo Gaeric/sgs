@@ -1,25 +1,35 @@
-import { AiLibrary } from 'core/ai/ai_lib';
-import { ActiveSkillTriggerClass } from 'core/ai/skills/base/active_skill_trigger';
-import type { CardId } from 'core/cards/libs/card_props';
-import type { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import type { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import type { Room } from 'core/room/room';
-import type { QiZhengXiangShengSkill } from 'core/skills';
+import { AiLibrary } from "@/core/ai/ai_lib";
+import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
+import type { CardId } from "@/core/cards/libs/card_props";
+import type {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import type { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import type { Room } from "@/core/room/room";
+import type { QiZhengXiangShengSkill } from "@/core/skills";
 
 export class QiZhengXiangShengSkillTrigger extends ActiveSkillTriggerClass<QiZhengXiangShengSkill> {
   skillTrigger = (
     room: Room,
     ai: Player,
     skill: QiZhengXiangShengSkill,
-    skillInCard?: CardId,
+    skillInCard?: CardId
   ): ClientEventFinder<GameEventIdentifiers.CardUseEvent> | undefined => {
     const enemies = AiLibrary.sortEnemiesByRole(room, ai)
-      .filter(e => room.canUseCardTo(skillInCard!, ai, e))
+      .filter((e) => room.canUseCardTo(skillInCard!, ai, e))
       .sort((a, b) => {
-        if (a.getCardIds(PlayerCardsArea.HandArea).length < b.getCardIds(PlayerCardsArea.HandArea).length) {
+        if (
+          a.getCardIds(PlayerCardsArea.HandArea).length <
+          b.getCardIds(PlayerCardsArea.HandArea).length
+        ) {
           return -1;
-        } else if (a.getCardIds(PlayerCardsArea.HandArea).length === b.getCardIds(PlayerCardsArea.HandArea).length) {
+        } else if (
+          a.getCardIds(PlayerCardsArea.HandArea).length ===
+          b.getCardIds(PlayerCardsArea.HandArea).length
+        ) {
           return 0;
         }
 
@@ -39,7 +49,7 @@ export class QiZhengXiangShengSkillTrigger extends ActiveSkillTriggerClass<QiZhe
 
   onAskForChoosingOptionsEvent(
     content: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent>,
-    room: Room,
+    room: Room
   ) {
     const randomSelect = Math.random() > 0.6;
 

@@ -1,21 +1,32 @@
-import { BeiGeSkillTrigger } from 'core/ai/skills/characters/mountain/beige';
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { AI, CommonSkill, TriggerSkill } from 'core/skills/skill';
+import { BeiGeSkillTrigger } from "@/core/ai/skills/characters/mountain/beige";
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { AI, CommonSkill, TriggerSkill } from "@/core/skills/skill";
 
 @AI(BeiGeSkillTrigger)
-@CommonSkill({ name: 'beige', description: 'beige_description' })
+@CommonSkill({ name: "beige", description: "beige_description" })
 export class BeiGe extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ) {
     return stage === DamageEffectStage.AfterDamagedEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>) {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ) {
     const { cardIds } = content;
     if (cardIds === undefined) {
       return false;
@@ -23,7 +34,7 @@ export class BeiGe extends TriggerSkill {
 
     const card = Sanguosha.getCardById(cardIds[0]);
     return (
-      card.GeneralName === 'slash' &&
+      card.GeneralName === "slash" &&
       content.fromId !== undefined &&
       !room.getPlayerById(content.toId).Dead &&
       !content.isFromChainedDamage
@@ -42,16 +53,20 @@ export class BeiGe extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent } = skillUseEvent;
     await room.dropCards(
       CardMoveReason.SelfDrop,
       skillUseEvent.cardIds!,
       skillUseEvent.fromId,
       skillUseEvent.fromId,
-      this.Name,
+      this.Name
     );
-    const { toId, fromId } = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+    const { toId, fromId } =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
     const judge = await room.judge(toId, undefined, this.Name);
     const judgeCard = Sanguosha.getCardById(judge.judgeCardId);
     const damageFrom = room.getPlayerById(fromId!);
@@ -65,17 +80,22 @@ export class BeiGe extends TriggerSkill {
           [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
           true,
           undefined,
-          this.Name,
+          this.Name
         );
         response.droppedCards.length > 0 &&
-          (await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, fromId));
+          (await room.dropCards(
+            CardMoveReason.SelfDrop,
+            response.droppedCards,
+            fromId
+          ));
       }
     } else if (judgeCard.Suit === CardSuit.Spade) {
       if (!damageFrom.Dead) {
         await room.turnOver(fromId!);
       }
     } else if (judgeCard.Suit === CardSuit.Heart) {
-      const damageEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       await room.recover({
         recoveredHp: damageEvent.damage,
         recoverBy: toId,
@@ -83,7 +103,7 @@ export class BeiGe extends TriggerSkill {
         triggeredBySkills: [this.Name],
       });
     } else if (judgeCard.Suit === CardSuit.Diamond) {
-      await room.drawCards(3, toId, 'top', undefined, this.Name);
+      await room.drawCards(3, toId, "top", undefined, this.Name);
     }
 
     return true;

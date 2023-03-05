@@ -1,39 +1,53 @@
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { PlayerPhase } from 'core/game/stage_processor';
-import { Room } from 'core/room/room';
-import { DangXian } from 'core/skills';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { PlayerPhase } from "@/core/game/stage_processor";
+import { Room } from "@/core/room/room";
+import { DangXian } from "@/core/skills";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CompulsorySkill({ name: 'decade_dangxian', description: 'decade_dangxian_description' })
+@CompulsorySkill({
+  name: "decade_dangxian",
+  description: "decade_dangxian_description",
+})
 export class DecadeDangXian extends DangXian {
   public get RelatedCharacters() {
-    return ['guansuo'];
+    return ["guansuo"];
   }
 
   public audioIndex(characterName?: string): number {
-    return characterName && this.RelatedCharacters.includes(characterName) ? 1 : 2;
+    return characterName && this.RelatedCharacters.includes(characterName)
+      ? 1
+      : 2;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     if (room.getPlayerById(event.fromId).Hp > 0) {
-      const { selectedOption } = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-        GameEventIdentifiers.AskForChoosingOptionsEvent,
-        {
-          toId: event.fromId,
-          options: ['yes', 'no'],
-          conversation: TranslationPack.translationJsonPatcher(
-            '{0}: do you want to lose 1 hp to gain a slash from drop stack?',
-            this.Name,
-          ).extract(),
-        },
-        event.fromId,
-        true,
-      );
+      const { selectedOption } =
+        await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          GameEventIdentifiers.AskForChoosingOptionsEvent,
+          {
+            toId: event.fromId,
+            options: ["yes", "no"],
+            conversation: TranslationPack.translationJsonPatcher(
+              "{0}: do you want to lose 1 hp to gain a slash from drop stack?",
+              this.Name
+            ).extract(),
+          },
+          event.fromId,
+          true
+        );
 
-      if (selectedOption === 'yes') {
+      if (selectedOption === "yes") {
         await room.loseHp(event.fromId, 1);
-        const card = room.getCardsByNameFromStack('slash', 'drop', 1)[0];
+        const card = room.getCardsByNameFromStack("slash", "drop", 1)[0];
 
         if (card) {
           await room.moveCards({

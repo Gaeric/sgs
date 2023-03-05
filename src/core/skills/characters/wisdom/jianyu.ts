@@ -1,10 +1,15 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AimStage, AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AimStage,
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CircleSkill,
@@ -13,11 +18,11 @@ import {
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
 @CircleSkill
-@CommonSkill({ name: 'jianyu', description: 'jianyu_description' })
+@CommonSkill({ name: "jianyu", description: "jianyu_description" })
 export class JianYu extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return !owner.hasUsedSkill(this.Name);
@@ -35,7 +40,12 @@ export class JianYu extends ActiveSkill {
     return cards.length === 0;
   }
 
-  public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId, selectedCards: CardId[]): boolean {
+  public isAvailableCard(
+    owner: PlayerId,
+    room: Room,
+    cardId: CardId,
+    selectedCards: CardId[]
+  ): boolean {
     return false;
   }
 
@@ -43,7 +53,10 @@ export class JianYu extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { toIds } = event;
     if (!toIds || toIds.length !== 2) {
       return false;
@@ -60,9 +73,11 @@ export class JianYu extends ActiveSkill {
       this.Name,
       firstTarget,
       TranslationPack.translationJsonPatcher(
-        'jianyu target: {0}',
-        TranslationPack.patchPlayerInTranslation(...firstTarget.map(playerId => room.getPlayerById(playerId))),
-      ).toString(),
+        "jianyu target: {0}",
+        TranslationPack.patchPlayerInTranslation(
+          ...firstTarget.map((playerId) => room.getPlayerById(playerId))
+        )
+      ).toString()
     );
 
     room.setFlag<PlayerId[]>(
@@ -70,9 +85,11 @@ export class JianYu extends ActiveSkill {
       this.Name,
       secondTarget,
       TranslationPack.translationJsonPatcher(
-        'jianyu target: {0}',
-        TranslationPack.patchPlayerInTranslation(...secondTarget.map(playerId => room.getPlayerById(playerId))),
-      ).toString(),
+        "jianyu target: {0}",
+        TranslationPack.patchPlayerInTranslation(
+          ...secondTarget.map((playerId) => room.getPlayerById(playerId))
+        )
+      ).toString()
     );
 
     return true;
@@ -82,12 +99,15 @@ export class JianYu extends ActiveSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: JianYu.Name, description: JianYu.Description })
-export class JianYuShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class JianYuShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       room.CurrentPlayer.Id === owner &&
@@ -117,25 +137,39 @@ export class JianYuShadow extends TriggerSkill implements OnDefineReleaseTiming 
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.AimEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.AimEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
-    return stage === AimStage.OnAim || stage === PhaseChangeStage.AfterPhaseChanged;
+    return (
+      stage === AimStage.OnAim || stage === PhaseChangeStage.AfterPhaseChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.AimEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    content: ServerEventFinder<
+      GameEventIdentifiers.AimEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(content);
     if (identifier === GameEventIdentifiers.AimEvent) {
-      const aimEvent = content as ServerEventFinder<GameEventIdentifiers.AimEvent>;
-      const targets = room.getFlag<PlayerId[]>(aimEvent.fromId, this.GeneralName);
+      const aimEvent =
+        content as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+      const targets = room.getFlag<PlayerId[]>(
+        aimEvent.fromId,
+        this.GeneralName
+      );
       return targets && targets.includes(aimEvent.toId);
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return phaseChangeEvent.toPlayer === owner.Id && phaseChangeEvent.to === PlayerPhase.PhaseBegin;
+      const phaseChangeEvent =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        phaseChangeEvent.toPlayer === owner.Id &&
+        phaseChangeEvent.to === PlayerPhase.PhaseBegin
+      );
     }
 
     return false;
@@ -147,7 +181,7 @@ export class JianYuShadow extends TriggerSkill implements OnDefineReleaseTiming 
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = skillUseEvent;
     const unknownEvent = triggeredOnEvent as ServerEventFinder<
@@ -156,8 +190,9 @@ export class JianYuShadow extends TriggerSkill implements OnDefineReleaseTiming 
 
     const identifier = EventPacker.getIdentifier(unknownEvent);
     if (identifier === GameEventIdentifiers.AimEvent) {
-      const aimEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
-      await room.drawCards(1, aimEvent.toId, 'top', fromId, this.GeneralName);
+      const aimEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+      await room.drawCards(1, aimEvent.toId, "top", fromId, this.GeneralName);
     } else {
       this.clearFlag(room, fromId);
     }

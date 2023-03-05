@@ -1,7 +1,7 @@
-import { GameCardExtensions } from 'core/game/game_props';
-import { Skill } from 'core/skills/skill';
-import { Card, CardType } from './card';
-import { CardSuit, RealCardId } from './libs/card_props';
+import { GameCardExtensions } from "@/core/game/game_props";
+import { Skill } from "@/core/skills/skill";
+import { Card, CardType } from "./card";
+import { CardSuit, RealCardId } from "./libs/card_props";
 
 export abstract class BasicCard extends Card {
   public get BaseType() {
@@ -19,7 +19,7 @@ export abstract class BasicCard extends Card {
     protected description: string,
     protected fromPackage: GameCardExtensions,
     protected skill: Skill,
-    generalName?: string,
+    generalName?: string
   ) {
     super();
     this.generalName = generalName || this.name;

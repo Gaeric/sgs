@@ -1,25 +1,31 @@
-import { Card, CardType, VirtualCard } from 'core/cards/card';
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
+import { Card, CardType, VirtualCard } from "@/core/cards/card";
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardResponseStage, CardUseStage, PlayerPhase, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { CommonSkill, TriggerSkill, ViewAsSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { ChanYuan } from './chanyuan';
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  CardResponseStage,
+  CardUseStage,
+  PlayerPhase,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { CommonSkill, TriggerSkill, ViewAsSkill } from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { ChanYuan } from "./chanyuan";
 
-@CommonSkill({ name: 'guhuo', description: 'guhuo_description' })
+@CommonSkill({ name: "guhuo", description: "guhuo_description" })
 export class GuHuo extends ViewAsSkill {
   public get RelatedSkills(): string[] {
     return [ChanYuan.Name];
@@ -27,8 +33,9 @@ export class GuHuo extends ViewAsSkill {
 
   public canViewAs(): string[] {
     return Sanguosha.getCardNameByType(
-      types =>
-        (types.includes(CardType.Trick) || types.includes(CardType.Basic)) && !types.includes(CardType.DelayedTrick),
+      (types) =>
+        (types.includes(CardType.Trick) || types.includes(CardType.Basic)) &&
+        !types.includes(CardType.DelayedTrick)
     );
   }
 
@@ -37,14 +44,21 @@ export class GuHuo extends ViewAsSkill {
   }
 
   public canUse(room: Room, owner: Player): boolean {
-    return !owner.hasUsedSkill(this.Name) && owner.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
     return cards.length === 1;
   }
 
-  public isAvailableCard(room: Room, owner: Player, pendingCardId: CardId): boolean {
+  public isAvailableCard(
+    room: Room,
+    owner: Player,
+    pendingCardId: CardId
+  ): boolean {
     return true;
   }
 
@@ -52,8 +66,12 @@ export class GuHuo extends ViewAsSkill {
     return [PlayerCardsArea.HandArea];
   }
 
-  public viewAs(selectedCards: CardId[], owner: Player, viewAs: string): VirtualCard {
-    Precondition.assert(!!viewAs, 'Unknown guhuo card');
+  public viewAs(
+    selectedCards: CardId[],
+    owner: Player,
+    viewAs: string
+  ): VirtualCard {
+    Precondition.assert(!!viewAs, "Unknown guhuo card");
     return VirtualCard.create(
       {
         cardName: viewAs,
@@ -62,7 +80,7 @@ export class GuHuo extends ViewAsSkill {
         cardSuit: CardSuit.NoSuit,
         hideActualCard: true,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
@@ -79,11 +97,14 @@ export class GuHuoShadow extends TriggerSkill {
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent
+    >,
+    stage?: AllStage
   ): boolean {
     return (
-      (stage === CardUseStage.PreCardUse || stage === CardResponseStage.PreCardResponse) &&
+      (stage === CardUseStage.PreCardUse ||
+        stage === CardResponseStage.PreCardResponse) &&
       Card.isVirtualCardId(event.cardId)
     );
   }
@@ -91,19 +112,29 @@ export class GuHuoShadow extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent>,
+    content: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent
+    >
   ): boolean {
     return (
       content.fromId === owner.Id &&
-      Sanguosha.getCardById<VirtualCard>(content.cardId).findByGeneratedSkill(this.GeneralName)
+      Sanguosha.getCardById<VirtualCard>(content.cardId).findByGeneratedSkill(
+        this.GeneralName
+      )
     );
   }
 
-  public async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const cardEvent = event.triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent
     >;
@@ -125,46 +156,62 @@ export class GuHuoShadow extends TriggerSkill {
     }
 
     const chooseOptionEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-        toId: event.fromId,
-        options: ['guhuo:doubt', 'guhuo:no-doubt'],
-        conversation: TranslationPack.translationJsonPatcher(
-          'do you doubt the pre-use of {0} from {1}',
-          TranslationPack.patchCardInTranslation(cardEvent.cardId),
-          TranslationPack.patchPlayerInTranslation(from),
-        ).extract(),
-        ignoreNotifiedStatus: true,
-        triggeredBySkills: [this.Name],
-      });
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        {
+          toId: event.fromId,
+          options: ["guhuo:doubt", "guhuo:no-doubt"],
+          conversation: TranslationPack.translationJsonPatcher(
+            "do you doubt the pre-use of {0} from {1}",
+            TranslationPack.patchCardInTranslation(cardEvent.cardId),
+            TranslationPack.patchPlayerInTranslation(from)
+          ).extract(),
+          ignoreNotifiedStatus: true,
+          triggeredBySkills: [this.Name],
+        }
+      );
 
-    const askingResponses: Promise<ClientEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent>>[] = [];
+    const askingResponses: Promise<
+      ClientEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent>
+    >[] = [];
     const askForPlayers = room
       .getAlivePlayersFrom()
-      .filter(player => !player.hasSkill(ChanYuan.Name) && player.Id !== cardEvent.fromId)
-      .map(player => player.Id);
+      .filter(
+        (player) =>
+          !player.hasSkill(ChanYuan.Name) && player.Id !== cardEvent.fromId
+      )
+      .map((player) => player.Id);
     room.doNotify(askForPlayers);
     for (const playerId of askForPlayers) {
       chooseOptionEvent.toId = playerId;
-      room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, chooseOptionEvent, playerId);
+      room.notify(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        chooseOptionEvent,
+        playerId
+      );
       askingResponses.push(
-        room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, playerId),
+        room.onReceivingAsyncResponseFrom(
+          GameEventIdentifiers.AskForChoosingOptionsEvent,
+          playerId
+        )
       );
     }
 
     const responses = await Promise.all(askingResponses);
-    const messages = responses.map(response =>
+    const messages = responses.map((response) =>
       TranslationPack.translationJsonPatcher(
-        '{0} selected {1}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(response.fromId)),
-        response.selectedOption!,
-      ).toString(),
+        "{0} selected {1}",
+        TranslationPack.patchPlayerInTranslation(
+          room.getPlayerById(response.fromId)
+        ),
+        response.selectedOption!
+      ).toString()
     );
     messages.push(
       TranslationPack.translationJsonPatcher(
-        '{0} displayed guhuo cards {1}',
+        "{0} displayed guhuo cards {1}",
         TranslationPack.patchPlayerInTranslation(from),
-        TranslationPack.patchCardInTranslation(realCard.Id),
-      ).toString(),
+        TranslationPack.patchCardInTranslation(realCard.Id)
+      ).toString()
     );
 
     room.broadcast(GameEventIdentifiers.CustomGameDialog, {
@@ -173,24 +220,34 @@ export class GuHuoShadow extends TriggerSkill {
 
     let success = true;
     const chooseOptions: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-        options: ['guhuo:lose-hp', 'guhuo:drop-card'],
-        toId: '',
-        conversation: 'please choose',
-        triggeredBySkills: [this.Name],
-      });
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        {
+          options: ["guhuo:lose-hp", "guhuo:drop-card"],
+          toId: "",
+          conversation: "please choose",
+          triggeredBySkills: [this.Name],
+        }
+      );
     for (const response of responses) {
       if (preuseCard.Name === realCard.Name) {
-        if (response.selectedOption === 'guhuo:doubt') {
+        if (response.selectedOption === "guhuo:doubt") {
           const player = room.getPlayerById(response.fromId);
-          if (player.getPlayerCards().find(id => room.canDropCard(response.fromId, id))) {
+          if (
+            player
+              .getPlayerCards()
+              .find((id) => room.canDropCard(response.fromId, id))
+          ) {
             chooseOptions.toId = response.fromId;
-            room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, chooseOptions, response.fromId);
+            room.notify(
+              GameEventIdentifiers.AskForChoosingOptionsEvent,
+              chooseOptions,
+              response.fromId
+            );
             const { selectedOption } = await room.onReceivingAsyncResponseFrom(
               GameEventIdentifiers.AskForChoosingOptionsEvent,
-              response.fromId,
+              response.fromId
             );
-            if (selectedOption === 'guhuo:lose-hp') {
+            if (selectedOption === "guhuo:lose-hp") {
               await room.loseHp(response.fromId, 1);
             } else {
               const dropResponse = await room.askForCardDrop(
@@ -199,7 +256,7 @@ export class GuHuoShadow extends TriggerSkill {
                 [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
                 true,
                 undefined,
-                this.Name,
+                this.Name
               );
 
               if (dropResponse.droppedCards.length > 0) {
@@ -208,7 +265,7 @@ export class GuHuoShadow extends TriggerSkill {
                   dropResponse.droppedCards,
                   response.fromId,
                   response.fromId,
-                  this.Name,
+                  this.Name
                 );
               } else {
                 await room.loseHp(response.fromId, 1);
@@ -221,9 +278,15 @@ export class GuHuoShadow extends TriggerSkill {
           room.setFlag(response.fromId, ChanYuan.Name, true, ChanYuan.Name);
         }
       } else {
-        if (response.selectedOption === 'guhuo:doubt') {
+        if (response.selectedOption === "guhuo:doubt") {
           success = false;
-          await room.drawCards(1, response.fromId, undefined, event.fromId, this.GeneralName);
+          await room.drawCards(
+            1,
+            response.fromId,
+            undefined,
+            event.fromId,
+            this.GeneralName
+          );
         }
       }
     }
@@ -231,7 +294,9 @@ export class GuHuoShadow extends TriggerSkill {
     if (!success) {
       EventPacker.terminate(cardEvent);
       await room.moveCards({
-        movingCards: [{ card: realCard.Id, fromArea: CardMoveArea.ProcessingArea }],
+        movingCards: [
+          { card: realCard.Id, fromArea: CardMoveArea.ProcessingArea },
+        ],
         moveReason: CardMoveReason.PlaceToDropStack,
         toArea: CardMoveArea.DropStack,
         hideBroadcast: true,

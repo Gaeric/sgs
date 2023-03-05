@@ -1,45 +1,59 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Duel } from 'core/cards/standard/duel';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Duel } from "@/core/cards/standard/duel";
 import {
   CardDrawReason,
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage, DrawCardStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ShadowSkill, TriggerSkill, ViewAsSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  DamageEffectStage,
+  DrawCardStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  ShadowSkill,
+  TriggerSkill,
+  ViewAsSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'shuangxiong', description: 'shuangxiong_description' })
+@CommonSkill({ name: "shuangxiong", description: "shuangxiong_description" })
 export class ShuangXiong extends ViewAsSkill implements OnDefineReleaseTiming {
-  public static readonly Red = 'shuangxiong_red';
-  public static readonly Black = 'shuangxiong_black';
+  public static readonly Red = "shuangxiong_red";
+  public static readonly Black = "shuangxiong_black";
 
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canViewAs(): string[] {
-    return ['duel'];
+    return ["duel"];
   }
 
   public canUse(room: Room, owner: Player) {
     return (
-      owner.canUseCard(room, new CardMatcher({ name: ['duel'] })) &&
+      owner.canUseCard(room, new CardMatcher({ name: ["duel"] })) &&
       owner.getCardIds(PlayerCardsArea.HandArea).length > 0 &&
       (room.getFlag<boolean>(owner.Id, ShuangXiong.Red) !== undefined ||
         room.getFlag<boolean>(owner.Id, ShuangXiong.Black) !== undefined)
@@ -50,10 +64,16 @@ export class ShuangXiong extends ViewAsSkill implements OnDefineReleaseTiming {
     return cards.length === 1;
   }
 
-  public isAvailableCard(room: Room, owner: Player, pendingCardId: CardId): boolean {
+  public isAvailableCard(
+    room: Room,
+    owner: Player,
+    pendingCardId: CardId
+  ): boolean {
     return (
-      (room.getFlag<boolean>(owner.Id, ShuangXiong.Red) === true && !Sanguosha.getCardById(pendingCardId).isRed()) ||
-      (room.getFlag<boolean>(owner.Id, ShuangXiong.Black) === true && !Sanguosha.getCardById(pendingCardId).isBlack())
+      (room.getFlag<boolean>(owner.Id, ShuangXiong.Red) === true &&
+        !Sanguosha.getCardById(pendingCardId).isRed()) ||
+      (room.getFlag<boolean>(owner.Id, ShuangXiong.Black) === true &&
+        !Sanguosha.getCardById(pendingCardId).isBlack())
     );
   }
 
@@ -64,32 +84,42 @@ export class ShuangXiong extends ViewAsSkill implements OnDefineReleaseTiming {
   public viewAs(selectedCards: CardId[]) {
     return VirtualCard.create<Duel>(
       {
-        cardName: 'duel',
+        cardName: "duel",
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
 
 @ShadowSkill
-@CommonSkill({ name: ShuangXiong.GeneralName, description: ShuangXiong.Description })
+@CommonSkill({
+  name: ShuangXiong.GeneralName,
+  description: ShuangXiong.Description,
+})
 export class ShuangXiongShadow extends TriggerSkill {
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.DamageEvent>,
-    stage: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.DamageEvent
+    >,
+    stage: AllStage
   ): boolean {
     const unknownEvent = EventPacker.getIdentifier(event);
     return (
-      (unknownEvent === GameEventIdentifiers.DrawCardEvent && stage === DrawCardStage.BeforeDrawCardEffect) ||
-      (unknownEvent === GameEventIdentifiers.DamageEvent && stage === DamageEffectStage.AfterDamagedEffect)
+      (unknownEvent === GameEventIdentifiers.DrawCardEvent &&
+        stage === DrawCardStage.BeforeDrawCardEffect) ||
+      (unknownEvent === GameEventIdentifiers.DamageEvent &&
+        stage === DamageEffectStage.AfterDamagedEffect)
     );
   }
 
   private findSlash(room: Room, fromId: string): CardId[] {
     return room.Analytics.getRecordEvents<GameEventIdentifiers.CardResponseEvent>(
       (event: ServerEventFinder<GameEventIdentifiers.CardResponseEvent>) => {
-        if (EventPacker.getIdentifier(event) !== GameEventIdentifiers.CardResponseEvent) {
+        if (
+          EventPacker.getIdentifier(event) !==
+          GameEventIdentifiers.CardResponseEvent
+        ) {
           return false;
         }
         if (event.fromId === fromId) {
@@ -98,10 +128,15 @@ export class ShuangXiongShadow extends TriggerSkill {
 
         const { responseToEvent } = event;
 
-        if (responseToEvent && EventPacker.getIdentifier(responseToEvent) === GameEventIdentifiers.CardEffectEvent) {
-          const cardEffectEvent = responseToEvent as ServerEventFinder<GameEventIdentifiers.CardEffectEvent>;
+        if (
+          responseToEvent &&
+          EventPacker.getIdentifier(responseToEvent) ===
+            GameEventIdentifiers.CardEffectEvent
+        ) {
+          const cardEffectEvent =
+            responseToEvent as ServerEventFinder<GameEventIdentifiers.CardEffectEvent>;
           const card = Sanguosha.getCardById(cardEffectEvent.cardId);
-          if (card.GeneralName === 'duel' && card.isVirtualCard()) {
+          if (card.GeneralName === "duel" && card.isVirtualCard()) {
             const shuangxiongCard = card as VirtualCard;
 
             const responseCard = Sanguosha.getCardById(event.cardId);
@@ -109,31 +144,37 @@ export class ShuangXiongShadow extends TriggerSkill {
               ? (responseCard as VirtualCard).ActualCardIds.length > 0
               : true;
 
-            return hasRealResponseCard && shuangxiongCard.findByGeneratedSkill(this.GeneralName);
+            return (
+              hasRealResponseCard &&
+              shuangxiongCard.findByGeneratedSkill(this.GeneralName)
+            );
           }
         }
 
         return false;
-      },
+      }
     ).reduce<CardId[]>(
       (cards, event) => [
         ...cards,
         ...VirtualCard.getActualCards([event.cardId]).filter(
-          cardId => room.isCardInDropStack(cardId) && !cards.includes(cardId),
+          (cardId) => room.isCardInDropStack(cardId) && !cards.includes(cardId)
         ),
       ],
-      [],
+      []
     );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.DamageEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.DamageEvent
+    >
   ): boolean {
     const unknownEvent = EventPacker.getIdentifier(event);
     if (unknownEvent === GameEventIdentifiers.DrawCardEvent) {
-      const drawEvent = event as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+      const drawEvent =
+        event as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
       return (
         owner.Id === drawEvent.fromId &&
         room.CurrentPlayerPhase === PlayerPhase.DrawCardStage &&
@@ -141,13 +182,16 @@ export class ShuangXiongShadow extends TriggerSkill {
         drawEvent.bySpecialReason === CardDrawReason.GameStage
       );
     } else if (unknownEvent === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       if (
         damageEvent.cardIds &&
         damageEvent.cardIds.length === 1 &&
         Sanguosha.getCardById(damageEvent.cardIds[0]).isVirtualCard()
       ) {
-        const damageCard = Sanguosha.getCardById(damageEvent.cardIds[0]) as VirtualCard;
+        const damageCard = Sanguosha.getCardById(
+          damageEvent.cardIds[0]
+        ) as VirtualCard;
 
         return (
           owner.Id === damageEvent.toId &&
@@ -161,7 +205,11 @@ export class ShuangXiongShadow extends TriggerSkill {
     return false;
   }
 
-  public getSkillLog(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers>) {
+  public getSkillLog(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers>
+  ) {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.DrawCardEvent) {
       return super.getSkillLog(room, owner, event);
@@ -174,28 +222,35 @@ export class ShuangXiongShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.DamageEvent
     >;
     const identifier = EventPacker.getIdentifier(unknownEvent);
 
     if (identifier === GameEventIdentifiers.DrawCardEvent) {
-      const drawEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+      const drawEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
       const { fromId } = drawEvent;
 
       drawEvent.drawAmount = 0;
-      const displayCards = room.getCards(2, 'top');
-      const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-        displayCards,
-        fromId,
-        translationsMessage: TranslationPack.translationJsonPatcher(
-          '{0} used skill {1}, display cards: {2}',
-          TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-          this.Name,
-          TranslationPack.patchCardInTranslation(...displayCards),
-        ).extract(),
-      };
+      const displayCards = room.getCards(2, "top");
+      const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+        {
+          displayCards,
+          fromId,
+          translationsMessage: TranslationPack.translationJsonPatcher(
+            "{0} used skill {1}, display cards: {2}",
+            TranslationPack.patchPlayerInTranslation(
+              room.getPlayerById(fromId)
+            ),
+            this.Name,
+            TranslationPack.patchCardInTranslation(...displayCards)
+          ).extract(),
+        };
       room.broadcast(GameEventIdentifiers.CardDisplayEvent, cardDisplayEvent);
 
       const chooseCardEvent = {
@@ -207,11 +262,16 @@ export class ShuangXiongShadow extends TriggerSkill {
 
       room.notify(
         GameEventIdentifiers.AskForChoosingCardEvent,
-        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardEvent>(chooseCardEvent),
-        fromId,
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardEvent>(
+          chooseCardEvent
+        ),
+        fromId
       );
 
-      const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingCardEvent, fromId);
+      const response = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForChoosingCardEvent,
+        fromId
+      );
 
       if (response.selectedCards === undefined) {
         response.selectedCards = [displayCards[0]];
@@ -219,7 +279,9 @@ export class ShuangXiongShadow extends TriggerSkill {
 
       const chosenOne = response.selectedCards[0];
       await room.moveCards({
-        movingCards: [{ card: chosenOne, fromArea: CardMoveArea.ProcessingArea }],
+        movingCards: [
+          { card: chosenOne, fromArea: CardMoveArea.ProcessingArea },
+        ],
         toId: fromId,
         toArea: CardMoveArea.HandArea,
         moveReason: CardMoveReason.ActivePrey,
@@ -228,25 +290,31 @@ export class ShuangXiongShadow extends TriggerSkill {
       });
 
       const chosenCard = Sanguosha.getCardById(chosenOne);
-      chosenCard.isRed() && room.setFlag<boolean>(fromId, ShuangXiong.Red, true, ShuangXiong.Red);
-      chosenCard.isBlack() && room.setFlag<boolean>(fromId, ShuangXiong.Black, true, ShuangXiong.Red);
+      chosenCard.isRed() &&
+        room.setFlag<boolean>(fromId, ShuangXiong.Red, true, ShuangXiong.Red);
+      chosenCard.isBlack() &&
+        room.setFlag<boolean>(fromId, ShuangXiong.Black, true, ShuangXiong.Red);
       await room.moveCards({
         movingCards: displayCards
-          .filter(id => id !== chosenOne)
-          .map(card => ({ card, fromArea: CardMoveArea.ProcessingArea })),
+          .filter((id) => id !== chosenOne)
+          .map((card) => ({ card, fromArea: CardMoveArea.ProcessingArea })),
         moveReason: CardMoveReason.PlaceToDropStack,
         toArea: CardMoveArea.DropStack,
         hideBroadcast: true,
         movedByReason: this.Name,
       });
     } else if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       const { fromId, toId } = damageEvent;
 
       if (fromId) {
         const toObtain = this.findSlash(room, toId);
         await room.moveCards({
-          movingCards: toObtain.map(card => ({ card, fromArea: CardMoveArea.DropStack })),
+          movingCards: toObtain.map((card) => ({
+            card,
+            fromArea: CardMoveArea.DropStack,
+          })),
           toId,
           moveReason: CardMoveReason.ActivePrey,
           toArea: CardMoveArea.HandArea,
@@ -259,33 +327,53 @@ export class ShuangXiongShadow extends TriggerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: ShuangXiongShadow.Name, description: ShuangXiongShadow.Description })
-export class ShuangXiongRemove extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: ShuangXiongShadow.Name,
+  description: ShuangXiongShadow.Description,
+})
+export class ShuangXiongRemove
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
     return true;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage) {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ) {
     return true;
   }
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
-    stage: PhaseChangeStage,
+    stage: PhaseChangeStage
   ): boolean {
-    return stage === PhaseChangeStage.PhaseChanged && event.from === PlayerPhase.PhaseFinish;
+    return (
+      stage === PhaseChangeStage.PhaseChanged &&
+      event.from === PlayerPhase.PhaseFinish
+    );
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       content.fromPlayer === owner.Id &&
       (room.getFlag<boolean>(owner.Id, ShuangXiong.Red) !== undefined ||
@@ -299,13 +387,18 @@ export class ShuangXiongRemove extends TriggerSkill implements OnDefineReleaseTi
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
-    if (room.getFlag<boolean>(skillUseEvent.fromId, ShuangXiong.Red) !== undefined) {
+    if (
+      room.getFlag<boolean>(skillUseEvent.fromId, ShuangXiong.Red) !== undefined
+    ) {
       room.removeFlag(skillUseEvent.fromId, ShuangXiong.Red);
     }
 
-    if (room.getFlag<boolean>(skillUseEvent.fromId, ShuangXiong.Black) !== undefined) {
+    if (
+      room.getFlag<boolean>(skillUseEvent.fromId, ShuangXiong.Black) !==
+      undefined
+    ) {
       room.removeFlag(skillUseEvent.fromId, ShuangXiong.Black);
     }
 

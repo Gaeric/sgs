@@ -1,20 +1,28 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, FilterSkill, RulesBreakerSkill } from 'core/skills/skill';
-import { CommonSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { DuJiang } from './dujiang';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  FilterSkill,
+  RulesBreakerSkill,
+} from "@/core/skills/skill";
+import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+import { DuJiang } from "./dujiang";
 
 const enum MouKeJiOption {
   Discard,
   LoseHp,
 }
 
-@CommonSkill({ name: 'mou_keji', description: 'mou_keji_description' })
+@CommonSkill({ name: "mou_keji", description: "mou_keji_description" })
 export class MouKeJi extends ActiveSkill {
   public whenRefresh(room: Room, owner: Player): void {
     room.removeFlag(owner.Id, this.Name);
@@ -22,7 +30,9 @@ export class MouKeJi extends ActiveSkill {
 
   public canUse(room: Room, owner: Player) {
     return (
-      (owner.hasUsedSkill(DuJiang.Name) ? !owner.hasUsedSkill(this.Name) : owner.hasUsedSkillTimes(this.Name) < 2) &&
+      (owner.hasUsedSkill(DuJiang.Name)
+        ? !owner.hasUsedSkill(this.Name)
+        : owner.hasUsedSkillTimes(this.Name) < 2) &&
       (owner.Hp > 0 || owner.getPlayerCards().length > 0)
     );
   }
@@ -32,7 +42,8 @@ export class MouKeJi extends ActiveSkill {
     if (optionsChosen.length === 0) {
       return cards.length < 2;
     }
-    return owner.getFlag<MouKeJiOption[]>(this.Name)[0] === MouKeJiOption.Discard
+    return owner.getFlag<MouKeJiOption[]>(this.Name)[0] ===
+      MouKeJiOption.Discard
       ? cards.length === 0
       : cards.length === 1;
   }
@@ -41,7 +52,11 @@ export class MouKeJi extends ActiveSkill {
     return 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return false;
   }
 
@@ -57,10 +72,20 @@ export class MouKeJi extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
-    const optionsChosen = room.getFlag<MouKeJiOption[]>(event.fromId, this.Name) || [];
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
+    const optionsChosen =
+      room.getFlag<MouKeJiOption[]>(event.fromId, this.Name) || [];
     if (event.cardIds) {
-      await room.dropCards(CardMoveReason.SelfDrop, event.cardIds, event.fromId, event.fromId, this.Name);
+      await room.dropCards(
+        CardMoveReason.SelfDrop,
+        event.cardIds,
+        event.fromId,
+        event.fromId,
+        this.Name
+      );
       await room.changeArmor(event.fromId, 1);
 
       optionsChosen.push(MouKeJiOption.Discard);
@@ -86,23 +111,26 @@ export class MouKeJiShadow extends RulesBreakerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: MouKeJiShadow.Name, description: MouKeJiShadow.Description })
+@CommonSkill({
+  name: MouKeJiShadow.Name,
+  description: MouKeJiShadow.Description,
+})
 export class MouKeJiBlocker extends FilterSkill {
   public canUseCard(
     cardId: CardId | CardMatcher,
     room: Room,
     owner: PlayerId,
     onResponse?: ServerEventFinder<GameEventIdentifiers>,
-    isCardResponse?: boolean,
+    isCardResponse?: boolean
   ): boolean {
     if (isCardResponse || room.getPlayerById(owner).Dying) {
       return true;
     }
 
     if (cardId instanceof CardMatcher) {
-      return !cardId.match(new CardMatcher({ name: ['peach'] }));
+      return !cardId.match(new CardMatcher({ name: ["peach"] }));
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName !== 'peach';
+      return Sanguosha.getCardById(cardId).GeneralName !== "peach";
     }
   }
 }

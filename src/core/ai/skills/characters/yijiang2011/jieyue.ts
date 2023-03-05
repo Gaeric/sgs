@@ -1,11 +1,11 @@
-import { AiLibrary } from 'core/ai/ai_lib';
-import { TriggerSkillTriggerClass } from 'core/ai/skills/base/trigger_skill_trigger';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import type { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import type { Room } from 'core/room/room';
-import { JieYue } from 'core/skills';
+import { AiLibrary } from "@/core/ai/ai_lib";
+import { TriggerSkillTriggerClass } from "@/core/ai/skills/base/trigger_skill_trigger";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import type { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import type { Room } from "@/core/room/room";
+import { JieYue } from "@/core/skills";
 
 export class JieYueSkillTrigger extends TriggerSkillTriggerClass<JieYue> {
   public readonly skillTrigger = (room: Room, ai: Player, skill: JieYue) => {
@@ -27,10 +27,13 @@ export class JieYueSkillTrigger extends TriggerSkillTriggerClass<JieYue> {
 
   onAskForChoosingOptionsEvent(
     content: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent>,
-    room: Room,
+    room: Room
   ) {
     const ai = room.getPlayerById(content.toId);
-    if (ai.getCardIds(PlayerCardsArea.HandArea).length >= 4 || ai.getCardIds(PlayerCardsArea.EquipArea).length >= 3) {
+    if (
+      ai.getCardIds(PlayerCardsArea.HandArea).length >= 4 ||
+      ai.getCardIds(PlayerCardsArea.EquipArea).length >= 3
+    ) {
       return {
         fromId: content.toId,
         selectedOption: content.options[1],
@@ -43,10 +46,16 @@ export class JieYueSkillTrigger extends TriggerSkillTriggerClass<JieYue> {
     };
   }
 
-  onAskForCardDropEvent(content: ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent>, room: Room) {
+  onAskForCardDropEvent(
+    content: ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent>,
+    room: Room
+  ) {
     const ai = room.getPlayerById(content.toId);
 
-    const handcards = AiLibrary.sortCardbyValue(ai.getCardIds(PlayerCardsArea.HandArea), false);
+    const handcards = AiLibrary.sortCardbyValue(
+      ai.getCardIds(PlayerCardsArea.HandArea),
+      false
+    );
     return {
       fromId: ai.Id,
       droppedCards: [handcards[0]],
@@ -55,7 +64,7 @@ export class JieYueSkillTrigger extends TriggerSkillTriggerClass<JieYue> {
 
   onAskForChoosingCardWithConditionsEvent(
     content: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardWithConditionsEvent>,
-    room: Room,
+    room: Room
   ) {
     const { customCardFields } = content;
     const handcards = customCardFields![PlayerCardsArea.HandArea] as CardId[];

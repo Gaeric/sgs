@@ -1,35 +1,51 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'mingluan', description: 'mingluan_description' })
+@CommonSkill({ name: "mingluan", description: "mingluan_description" })
 export class MingLuan extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       content.playerId !== owner.Id &&
       content.toStage === PlayerPhaseStages.FinishStageStart &&
       owner.getPlayerCards().length > 0 &&
       room.Analytics.getRecordEvents<GameEventIdentifiers.RecoverEvent>(
-        event => EventPacker.getIdentifier(event) === GameEventIdentifiers.RecoverEvent,
+        (event) =>
+          EventPacker.getIdentifier(event) ===
+          GameEventIdentifiers.RecoverEvent,
         undefined,
-        'round',
+        "round",
         undefined,
-        1,
+        1
       ).length > 0
     );
   }
@@ -44,8 +60,8 @@ export class MingLuan extends TriggerSkill {
 
   public getSkillLog(room: Room): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to discard a card to use this skill?',
-      this.Name,
+      "{0}: do you want to discard a card to use this skill?",
+      this.Name
     ).extract();
   }
 
@@ -53,20 +69,37 @@ export class MingLuan extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     if (!event.cardIds) {
       return false;
     }
 
-    await room.dropCards(CardMoveReason.SelfDrop, event.cardIds, event.fromId, event.fromId, this.Name);
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      event.cardIds,
+      event.fromId,
+      event.fromId,
+      this.Name
+    );
 
     const current = room.CurrentPlayer;
     if (current && !current.Dead) {
       const drawNum =
         Math.min(current.getCardIds(PlayerCardsArea.HandArea).length, 5) -
-        room.getPlayerById(event.fromId).getCardIds(PlayerCardsArea.HandArea).length;
+        room.getPlayerById(event.fromId).getCardIds(PlayerCardsArea.HandArea)
+          .length;
 
-      drawNum > 0 && (await room.drawCards(drawNum, event.fromId, 'top', event.fromId, this.Name));
+      drawNum > 0 &&
+        (await room.drawCards(
+          drawNum,
+          event.fromId,
+          "top",
+          event.fromId,
+          this.Name
+        ));
     }
 
     return true;

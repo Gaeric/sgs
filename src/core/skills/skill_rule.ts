@@ -1,10 +1,10 @@
-import { Card, CardType } from 'core/cards/card';
-import { Player } from 'core/player/player';
-import { QingGangSkill } from './cards/standard/qinggang';
-import { XianZhenNullify } from './characters/yijiang2011/xianzhen';
-import { BenXi } from './characters/yijiang2014/benxi';
-import { Skill, SkillProhibitedSkill } from './skill';
-import { DuJiang, SheQue, YangWei } from '.';
+import { Card, CardType } from "@/core/cards/card";
+import { Player } from "@/core/player/player";
+import { QingGangSkill } from "./cards/standard/qinggang";
+import { XianZhenNullify } from "./characters/yijiang2011/xianzhen";
+import { BenXi } from "./characters/yijiang2014/benxi";
+import { Skill, SkillProhibitedSkill } from "./skill";
+import { DuJiang, SheQue, YangWei } from ".";
 
 export class UniqueSkillRule {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -16,7 +16,7 @@ export class UniqueSkillRule {
       case XianZhenNullify.Name:
       case BenXi.Name:
       case SheQue.Name:
-        return toSkill.Name === 'bazhen' || toSkill.Name === 'linglong';
+        return toSkill.Name === "bazhen" || toSkill.Name === "linglong";
       default:
         return false;
     }
@@ -36,13 +36,18 @@ export class UniqueSkillRule {
     }
   }
 
-  public static isProhibited(skill: Skill, owner: Player, cardContainer?: Card, except: Skill[] = []) {
+  public static isProhibited(
+    skill: Skill,
+    owner: Player,
+    cardContainer?: Card,
+    except: Skill[] = []
+  ) {
     if (skill.isPersistentSkill()) {
       return false;
     }
 
     if (cardContainer) {
-      if (owner.getFlag<boolean>('wuqian')) {
+      if (owner.getFlag<boolean>("wuqian")) {
         return cardContainer.is(CardType.Shield);
       }
     }
@@ -56,14 +61,18 @@ export class UniqueSkillRule {
       copyList.push(...except, pSkill);
       if (
         !this.isProhibited(pSkill, owner, cardContainer, copyList) &&
-        (pSkill as SkillProhibitedSkill).skillFilter(skill, owner, cardContainer)
+        (pSkill as SkillProhibitedSkill).skillFilter(
+          skill,
+          owner,
+          cardContainer
+        )
       ) {
         return true;
       }
     }
 
-    if (owner.getFlag<boolean>('wuqian')) {
-      return skill.Name === 'bazhen' || skill.Name === 'linglong';
+    if (owner.getFlag<boolean>("wuqian")) {
+      return skill.Name === "bazhen" || skill.Name === "linglong";
     }
 
     return false;

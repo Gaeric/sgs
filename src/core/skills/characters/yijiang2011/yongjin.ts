@@ -1,13 +1,24 @@
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill, LimitSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  CommonSkill,
+  LimitSkill,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@LimitSkill({ name: 'yongjin', description: 'yongjin_description' })
+@LimitSkill({ name: "yongjin", description: "yongjin_description" })
 export class YongJin extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return true;
@@ -30,7 +41,7 @@ export class YongJin extends ActiveSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     if (selectedTargets.length === 0) {
       const to = room.getPlayerById(target);
@@ -41,7 +52,10 @@ export class YongJin extends ActiveSkill {
       const from = room.getPlayerById(selectedTargets[0]);
       const fromEquipArea = from.getCardIds(PlayerCardsArea.EquipArea);
 
-      return fromEquipArea.find(id => room.canPlaceCardTo(id, target)) !== undefined;
+      return (
+        fromEquipArea.find((id) => room.canPlaceCardTo(id, target)) !==
+        undefined
+      );
     }
 
     return false;
@@ -51,7 +65,9 @@ export class YongJin extends ActiveSkill {
     return false;
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = event;
 
     return [
@@ -60,13 +76,21 @@ export class YongJin extends ActiveSkill {
     ];
   }
 
-  public async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     event.animation = this.getAnimationSteps(event);
 
     return true;
   }
 
-  private async yongJinMove(room: Room, user: PlayerId, fromId: PlayerId, toId: PlayerId): Promise<CardId> {
+  private async yongJinMove(
+    room: Room,
+    user: PlayerId,
+    fromId: PlayerId,
+    toId: PlayerId
+  ): Promise<CardId> {
     const moveFrom = room.getPlayerById(fromId);
     const moveTo = room.getPlayerById(toId);
     const canMovedEquipCardIds: CardId[] = [];
@@ -74,7 +98,11 @@ export class YongJin extends ActiveSkill {
     const fromEquipArea = moveFrom.getCardIds(PlayerCardsArea.EquipArea);
     const banIds = room.getFlag<CardId[]>(user, this.Name);
     canMovedEquipCardIds.push(
-      ...fromEquipArea.filter(id => room.canPlaceCardTo(id, moveTo.Id) && (banIds ? !banIds.includes(id) : true)),
+      ...fromEquipArea.filter(
+        (id) =>
+          room.canPlaceCardTo(id, moveTo.Id) &&
+          (banIds ? !banIds.includes(id) : true)
+      )
     );
 
     const options: CardChoosingOptions = {
@@ -90,19 +118,23 @@ export class YongJin extends ActiveSkill {
 
     room.notify(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(chooseCardEvent),
-      user,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
+        chooseCardEvent
+      ),
+      user
     );
 
     const response = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      user,
+      user
     );
 
     response.selectedCard = response.selectedCard || canMovedEquipCardIds[0];
 
     await room.moveCards({
-      movingCards: [{ card: response.selectedCard, fromArea: response.fromArea }],
+      movingCards: [
+        { card: response.selectedCard, fromArea: response.fromArea },
+      ],
       moveReason: CardMoveReason.PassiveMove,
       toId: moveTo.Id,
       fromId: moveFrom.Id,
@@ -114,7 +146,10 @@ export class YongJin extends ActiveSkill {
     return response.selectedCard;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
 
     let banId = await this.yongJinMove(room, fromId, toIds![0], toIds![1]);
@@ -125,14 +160,21 @@ export class YongJin extends ActiveSkill {
         invokeSkillNames: [YongJinMove.Name],
         toId: fromId,
         conversation: TranslationPack.translationJsonPatcher(
-          '{0}: please choose two target to move their equipment',
-          this.Name,
+          "{0}: please choose two target to move their equipment",
+          this.Name
         ).extract(),
       };
 
-      room.notify(GameEventIdentifiers.AskForSkillUseEvent, skillUseEvent, fromId);
+      room.notify(
+        GameEventIdentifiers.AskForSkillUseEvent,
+        skillUseEvent,
+        fromId
+      );
 
-      const { toIds } = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForSkillUseEvent, fromId);
+      const { toIds } = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForSkillUseEvent,
+        fromId
+      );
 
       if (!toIds) {
         break;
@@ -152,7 +194,7 @@ export class YongJin extends ActiveSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: 'yongjin_move', description: 'yongjin_move_description' })
+@CommonSkill({ name: "yongjin_move", description: "yongjin_move_description" })
 export class YongJinMove extends TriggerSkill {
   public isTriggerable(): boolean {
     return false;
@@ -171,7 +213,7 @@ export class YongJinMove extends TriggerSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     const banIds = room.getFlag<CardId[]>(owner, YongJin.Name) || [];
 
@@ -179,14 +221,17 @@ export class YongJinMove extends TriggerSkill {
       const to = room.getPlayerById(target);
       const equipCardIds = to.getCardIds(PlayerCardsArea.EquipArea);
 
-      return equipCardIds.filter(id => !banIds.includes(id)).length > 0;
+      return equipCardIds.filter((id) => !banIds.includes(id)).length > 0;
     } else if (selectedTargets.length === 1) {
       const from = room.getPlayerById(selectedTargets[0]);
       const fromEquipArea = from.getCardIds(PlayerCardsArea.EquipArea);
 
       return (
-        fromEquipArea.find(id => room.canPlaceCardTo(id, target) && (banIds ? !banIds.includes(id) : true)) !==
-        undefined
+        fromEquipArea.find(
+          (id) =>
+            room.canPlaceCardTo(id, target) &&
+            (banIds ? !banIds.includes(id) : true)
+        ) !== undefined
       );
     }
 

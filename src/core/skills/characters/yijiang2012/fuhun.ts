@@ -1,30 +1,40 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Slash } from 'core/cards/standard/slash';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, OnDefineReleaseTiming, TriggerSkill, ViewAsSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
-import { PaoXiao } from '../standard/paoxiao';
-import { WuSheng } from '../standard/wusheng';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Slash } from "@/core/cards/standard/slash";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  DamageEffectStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  OnDefineReleaseTiming,
+  TriggerSkill,
+  ViewAsSkill,
+} from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
+import { PaoXiao } from "../standard/paoxiao";
+import { WuSheng } from "../standard/wusheng";
 
-@CommonSkill({ name: 'fuhun', description: 'fuhun_description' })
+@CommonSkill({ name: "fuhun", description: "fuhun_description" })
 export class FuHun extends ViewAsSkill {
   public get RelatedSkills(): string[] {
-    return ['wusheng', 'paoxiao'];
+    return ["wusheng", "paoxiao"];
   }
 
   public canViewAs(): string[] {
-    return ['slash'];
+    return ["slash"];
   }
 
   public canUse(room: Room, owner: Player) {
-    return owner.canUseCard(room, new CardMatcher({ generalName: ['slash'] }));
+    return owner.canUseCard(room, new CardMatcher({ generalName: ["slash"] }));
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -36,7 +46,7 @@ export class FuHun extends ViewAsSkill {
     owner: Player,
     pendingCardId: CardId,
     selectedCards: CardId[],
-    containerCard?: CardId | undefined,
+    containerCard?: CardId | undefined
   ): boolean {
     return pendingCardId !== containerCard;
   }
@@ -48,10 +58,10 @@ export class FuHun extends ViewAsSkill {
   public viewAs(selectedCards: CardId[]) {
     return VirtualCard.create<Slash>(
       {
-        cardName: 'slash',
+        cardName: "slash",
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
@@ -59,18 +69,25 @@ export class FuHun extends ViewAsSkill {
 @ShadowSkill
 @CommonSkill({ name: FuHun.Name, description: FuHun.Description })
 export class FuHunDamage extends TriggerSkill {
-  public static readonly WuSheng = 'fuhun_wusheng';
-  public static readonly PaoXiao = 'fuhun_paoxiao';
+  public static readonly WuSheng = "fuhun_wusheng";
+  public static readonly PaoXiao = "fuhun_paoxiao";
 
   public isAutoTrigger(): boolean {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DamageEffectStage.AfterDamageEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ): boolean {
     if (!content.cardIds) {
       return false;
     }
@@ -94,7 +111,10 @@ export class FuHunDamage extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const from = room.getPlayerById(fromId);
 
@@ -114,14 +134,20 @@ export class FuHunDamage extends TriggerSkill {
 
 @ShadowSkill
 @CommonSkill({ name: FuHunDamage.Name, description: FuHunDamage.Description })
-export class FuHunLoseSkill extends TriggerSkill implements OnDefineReleaseTiming {
+export class FuHunLoseSkill
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public async whenLosingSkill(room: Room, from: Player) {
@@ -148,15 +174,23 @@ export class FuHunLoseSkill extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       event.fromPlayer === owner.Id &&
       event.from === PlayerPhase.PhaseFinish &&
-      (owner.getFlag<boolean>(FuHunDamage.WuSheng) === true || owner.getFlag<boolean>(FuHunDamage.PaoXiao) === true)
+      (owner.getFlag<boolean>(FuHunDamage.WuSheng) === true ||
+        owner.getFlag<boolean>(FuHunDamage.PaoXiao) === true)
     );
   }
 
@@ -164,7 +198,10 @@ export class FuHunLoseSkill extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const from = room.getPlayerById(fromId);
 

@@ -1,27 +1,50 @@
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PlayerDiedStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { CommonSkill, OnDefineReleaseTiming, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PlayerDiedStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import {
+  CommonSkill,
+  OnDefineReleaseTiming,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'zhuide', description: 'zhuide_description' })
+@CommonSkill({ name: "zhuide", description: "zhuide_description" })
 export class ZhuiDe extends TriggerSkill implements OnDefineReleaseTiming {
   public afterDead(room: Room): boolean {
     return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PlayerDiedStage.PlayerDied;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>
+  ): boolean {
     return content.playerId === owner.Id;
   }
 
@@ -29,14 +52,18 @@ export class ZhuiDe extends TriggerSkill implements OnDefineReleaseTiming {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, targetId: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    targetId: PlayerId
+  ): boolean {
     return targetId !== owner;
   }
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to let another player draw 4 defferent basic cards?',
-      this.Name,
+      "{0}: do you want to let another player draw 4 defferent basic cards?",
+      this.Name
     ).extract();
   }
 
@@ -44,12 +71,20 @@ export class ZhuiDe extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
-    const toId = Precondition.exists(event.toIds, 'Unable to get zhuide target')[0];
+    const toId = Precondition.exists(
+      event.toIds,
+      "Unable to get zhuide target"
+    )[0];
 
     const basicNames: { [name: string]: CardId[] } = {};
-    const allBasicCards = room.findCardsByMatcherFrom(new CardMatcher({ type: [CardType.Basic] }));
+    const allBasicCards = room.findCardsByMatcherFrom(
+      new CardMatcher({ type: [CardType.Basic] })
+    );
 
     if (allBasicCards.length === 0) {
       return false;
@@ -71,7 +106,7 @@ export class ZhuiDe extends TriggerSkill implements OnDefineReleaseTiming {
           break;
         }
         const randomName = names[Math.floor(Math.random() * names.length)];
-        const index = names.findIndex(name => name === randomName);
+        const index = names.findIndex((name) => name === randomName);
         names.splice(index, 1);
         zhuiDeNames.push(randomName);
       }
@@ -84,7 +119,10 @@ export class ZhuiDe extends TriggerSkill implements OnDefineReleaseTiming {
     }
 
     await room.moveCards({
-      movingCards: toGain.map(card => ({ card, fromArea: CardMoveArea.DrawStack })),
+      movingCards: toGain.map((card) => ({
+        card,
+        fromArea: CardMoveArea.DrawStack,
+      })),
       toId,
       toArea: CardMoveArea.HandArea,
       moveReason: CardMoveReason.PassiveMove,

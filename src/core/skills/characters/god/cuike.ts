@@ -1,21 +1,39 @@
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { DamageType } from 'core/game/game_props';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { DamageType } from "@/core/game/game_props";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'cuike', description: 'cuike_description' })
+@CommonSkill({ name: "cuike", description: "cuike_description" })
 export class CuiKe extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
-    return content.toStage === PlayerPhaseStages.PlayCardStageStart && content.playerId === owner.Id;
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
+    return (
+      content.toStage === PlayerPhaseStages.PlayCardStageStart &&
+      content.playerId === owner.Id
+    );
   }
 
   public targetFilter(room: Room, owner: Player, targets: PlayerId[]) {
@@ -35,19 +53,24 @@ export class CuiKe extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds } = skillUseEvent;
     const to = room.getPlayerById(toIds![0]);
     if (room.getMark(fromId, MarkEnum.JunLve) % 2 === 0) {
       if (
         to.Id === fromId
-          ? to.getCardIds().filter(id => room.canDropCard(fromId, id)).length > 0
+          ? to.getCardIds().filter((id) => room.canDropCard(fromId, id))
+              .length > 0
           : to.getCardIds().length > 0
       ) {
         const options = {
           [PlayerCardsArea.JudgeArea]: to.getCardIds(PlayerCardsArea.JudgeArea),
           [PlayerCardsArea.EquipArea]: to.getCardIds(PlayerCardsArea.EquipArea),
-          [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea).length,
+          [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea)
+            .length,
         };
 
         const chooseCardEvent = {
@@ -57,7 +80,12 @@ export class CuiKe extends TriggerSkill {
           triggeredBySkills: [this.Name],
         };
 
-        const response = await room.askForChoosingPlayerCard(chooseCardEvent, fromId, true, true);
+        const response = await room.askForChoosingPlayerCard(
+          chooseCardEvent,
+          fromId,
+          true,
+          true
+        );
 
         response &&
           (await room.dropCards(
@@ -65,7 +93,7 @@ export class CuiKe extends TriggerSkill {
             [response.selectedCard!],
             chooseCardEvent.toId,
             chooseCardEvent.fromId,
-            this.Name,
+            this.Name
           ));
       }
 
@@ -84,23 +112,28 @@ export class CuiKe extends TriggerSkill {
 
     const numOfName = room.getMark(fromId, MarkEnum.JunLve);
     if (numOfName > 7) {
-      const askForInvokeSkill: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-        toId: fromId,
-        options: ['yes', 'no'],
-        conversation: TranslationPack.translationJsonPatcher(
-          'cuike: do you wanna to throw {0} marks to do special skill',
-          numOfName,
-        ).extract(),
-        triggeredBySkills: [this.Name],
-      };
+      const askForInvokeSkill: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+        {
+          toId: fromId,
+          options: ["yes", "no"],
+          conversation: TranslationPack.translationJsonPatcher(
+            "cuike: do you wanna to throw {0} marks to do special skill",
+            numOfName
+          ).extract(),
+          triggeredBySkills: [this.Name],
+        };
 
-      room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForInvokeSkill, fromId);
+      room.notify(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        askForInvokeSkill,
+        fromId
+      );
       const { selectedOption } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
-        fromId,
+        fromId
       );
 
-      if (selectedOption === 'yes') {
+      if (selectedOption === "yes") {
         room.addMark(fromId, MarkEnum.JunLve, -numOfName);
         for (const player of room.getOtherPlayers(fromId)) {
           await room.damage({

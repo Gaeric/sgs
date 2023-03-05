@@ -1,8 +1,12 @@
-import { GameCharacterExtensions, GameInfo, TemporaryRoomCreationInfo } from 'core/game/game_props';
-import { PlayerPhase, PlayerPhaseStages } from 'core/game/stage_processor';
-import { PlayerId } from 'core/player/player_props';
-import { RoomId } from 'core/room/room';
-import { GameMode } from './room_props';
+import {
+  GameCharacterExtensions,
+  GameInfo,
+  TemporaryRoomCreationInfo,
+} from "@/core/game/game_props";
+import { PlayerPhase, PlayerPhaseStages } from "@/core/game/stage_processor";
+import { PlayerId } from "@/core/player/player_props";
+import { RoomId } from "@/core/room/room";
+import { GameMode } from "./room_props";
 
 export const enum LobbySocketEvent {
   QueryRoomList,
@@ -16,19 +20,19 @@ export const enum LobbySocketEvent {
 }
 
 export const enum ChatSocketEvent {
-  Chat = 'chat',
+  Chat = "chat",
 }
 
 export const enum RoomSocketEvent {
-  CreateRoom = 'create-room',
-  PlayerReady = 'player-ready',
+  CreateRoom = "create-room",
+  PlayerReady = "player-ready",
 }
 
 export type RoomInfo = {
   name: string;
   activePlayers: number;
   totalPlayers: number;
-  status: 'playing' | 'waiting';
+  status: "playing" | "waiting";
   packages: GameCharacterExtensions[];
   id: RoomId;
   gameMode: GameMode;
@@ -43,7 +47,8 @@ export type RoomShortcutInfo = RoomInfo & {
   currentPlayerPhase: PlayerPhase;
 };
 
-export type LobbySocketEventPicker<E extends LobbySocketEvent> = LobbyEventList[E];
+export type LobbySocketEventPicker<E extends LobbySocketEvent> =
+  LobbyEventList[E];
 
 type LobbyEventUtilities = {
   [K in keyof typeof LobbySocketEvent]: any;

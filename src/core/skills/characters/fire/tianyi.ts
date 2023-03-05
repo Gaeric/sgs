@@ -1,12 +1,16 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_DISTANCE } from 'core/game/game_props';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_DISTANCE } from "@/core/game/game_props";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CommonSkill,
@@ -15,15 +19,18 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
+} from "@/core/skills/skill";
 
-@CommonSkill({ name: 'tianyi', description: 'tianyi_description' })
+@CommonSkill({ name: "tianyi", description: "tianyi_description" })
 export class TianYi extends ActiveSkill {
-  public static readonly Win = 'tianyi_win';
-  public static readonly Lose = 'tianyi_lose';
+  public static readonly Win = "tianyi_win";
+  public static readonly Lose = "tianyi_lose";
 
   public canUse(room: Room, owner: Player) {
-    return !owner.hasUsedSkill(this.Name) && owner.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -34,10 +41,16 @@ export class TianYi extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     const targetPlayer = room.getPlayerById(target);
     return (
-      target !== owner && targetPlayer.getCardIds(PlayerCardsArea.HandArea).length > 0 && room.canPindian(owner, target)
+      target !== owner &&
+      targetPlayer.getCardIds(PlayerCardsArea.HandArea).length > 0 &&
+      room.canPindian(owner, target)
     );
   }
 
@@ -45,11 +58,17 @@ export class TianYi extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { toIds, fromId } = event;
     const { pindianRecord } = await room.pindian(fromId, toIds!, this.Name);
     if (!pindianRecord.length) {
@@ -68,14 +87,20 @@ export class TianYi extends ActiveSkill {
 
 @ShadowSkill
 @CommonSkill({ name: TianYi.Name, description: TianYi.Description })
-export class TianYiRemove extends TriggerSkill implements OnDefineReleaseTiming {
+export class TianYiRemove
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -88,12 +113,19 @@ export class TianYiRemove extends TriggerSkill implements OnDefineReleaseTiming 
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
-    stage: PhaseChangeStage,
+    stage: PhaseChangeStage
   ): boolean {
-    return stage === PhaseChangeStage.PhaseChanged && event.from === PlayerPhase.PhaseFinish;
+    return (
+      stage === PhaseChangeStage.PhaseChanged &&
+      event.from === PlayerPhase.PhaseFinish
+    );
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       content.fromPlayer === owner.Id &&
       (room.getFlag<boolean>(owner.Id, TianYi.Win) !== undefined ||
@@ -107,13 +139,15 @@ export class TianYiRemove extends TriggerSkill implements OnDefineReleaseTiming 
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     if (room.getFlag<boolean>(skillUseEvent.fromId, TianYi.Win) !== undefined) {
       room.removeFlag(skillUseEvent.fromId, TianYi.Win);
     }
 
-    if (room.getFlag<boolean>(skillUseEvent.fromId, TianYi.Lose) !== undefined) {
+    if (
+      room.getFlag<boolean>(skillUseEvent.fromId, TianYi.Lose) !== undefined
+    ) {
       room.removeFlag(skillUseEvent.fromId, TianYi.Lose);
     }
 
@@ -123,38 +157,52 @@ export class TianYiRemove extends TriggerSkill implements OnDefineReleaseTiming 
 
 @ShadowSkill
 @CommonSkill({ name: TianYiRemove.Name, description: TianYiRemove.Description })
-export class TianYiExtra extends RulesBreakerSkill implements OnDefineReleaseTiming {
+export class TianYiExtra
+  extends RulesBreakerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public breakCardUsableTargets(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableTargets(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (!room.getFlag<boolean>(owner.Id, TianYi.Win)) {
       return 0;
     }
 
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ generalName: ['slash'] })) ? 1 : 0;
+      return cardId.match(new CardMatcher({ generalName: ["slash"] })) ? 1 : 0;
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName === 'slash' ? 1 : 0;
+      return Sanguosha.getCardById(cardId).GeneralName === "slash" ? 1 : 0;
     }
   }
 
-  public breakCardUsableDistance(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableDistance(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (!room.getFlag<boolean>(owner.Id, TianYi.Win)) {
       return 0;
     }
 
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ generalName: ['slash'] }));
+      match = cardId.match(new CardMatcher({ generalName: ["slash"] }));
     } else {
-      match = Sanguosha.getCardById(cardId).GeneralName === 'slash';
+      match = Sanguosha.getCardById(cardId).GeneralName === "slash";
     }
 
     if (match) {
@@ -164,16 +212,20 @@ export class TianYiExtra extends RulesBreakerSkill implements OnDefineReleaseTim
     }
   }
 
-  public breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (!room.getFlag<boolean>(owner.Id, TianYi.Win)) {
       return 0;
     }
 
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ generalName: ['slash'] }));
+      match = cardId.match(new CardMatcher({ generalName: ["slash"] }));
     } else {
-      match = Sanguosha.getCardById(cardId).GeneralName === 'slash';
+      match = Sanguosha.getCardById(cardId).GeneralName === "slash";
     }
 
     if (match) {
@@ -191,9 +243,12 @@ export class TianYiBlock extends FilterSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canUseCard(
@@ -201,14 +256,14 @@ export class TianYiBlock extends FilterSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     onResponse?: ServerEventFinder<GameEventIdentifiers>,
-    isCardResponse?: boolean,
+    isCardResponse?: boolean
   ): boolean {
     if (!room.getFlag<boolean>(owner, TianYi.Lose) || isCardResponse) {
       return true;
     }
 
     return cardId instanceof CardMatcher
-      ? !cardId.match(new CardMatcher({ generalName: ['slash'] }))
-      : Sanguosha.getCardById(cardId).GeneralName !== 'slash';
+      ? !cardId.match(new CardMatcher({ generalName: ["slash"] }))
+      : Sanguosha.getCardById(cardId).GeneralName !== "slash";
   }
 }

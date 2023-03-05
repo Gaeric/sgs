@@ -1,20 +1,30 @@
-import { CardType, VirtualCard } from 'core/cards/card';
-import { CardColor, CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { CommonSkill, TriggerSkill, ViewAsSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardType, VirtualCard } from "@/core/cards/card";
+import { CardColor, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  CardMoveStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { CommonSkill, TriggerSkill, ViewAsSkill } from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'miaoxian', description: 'miaoxian_description' })
+@CommonSkill({ name: "miaoxian", description: "miaoxian_description" })
 export class MiaoXian extends ViewAsSkill {
   public canViewAs(): string[] {
     return Sanguosha.getCardNameByType(
-      types => types.includes(CardType.Trick) && !types.includes(CardType.DelayedTrick),
+      (types) =>
+        types.includes(CardType.Trick) && !types.includes(CardType.DelayedTrick)
     );
   }
 
@@ -25,7 +35,9 @@ export class MiaoXian extends ViewAsSkill {
   public canUse(room: Room, owner: Player): boolean {
     return (
       !owner.hasUsedSkill(this.Name) &&
-      owner.getCardIds(PlayerCardsArea.HandArea).filter(card => Sanguosha.getCardById(card).Color === CardColor.Black)
+      owner
+        .getCardIds(PlayerCardsArea.HandArea)
+        .filter((card) => Sanguosha.getCardById(card).Color === CardColor.Black)
         .length === 1
     );
   }
@@ -34,7 +46,11 @@ export class MiaoXian extends ViewAsSkill {
     return cards.length === 1;
   }
 
-  public isAvailableCard(room: Room, owner: Player, pendingCardId: CardId): boolean {
+  public isAvailableCard(
+    room: Room,
+    owner: Player,
+    pendingCardId: CardId
+  ): boolean {
     return (
       Sanguosha.getCardById(pendingCardId).Color === CardColor.Black &&
       owner.getCardIds(PlayerCardsArea.HandArea).includes(pendingCardId)
@@ -45,14 +61,18 @@ export class MiaoXian extends ViewAsSkill {
     return [PlayerCardsArea.HandArea];
   }
 
-  public viewAs(selectedCards: CardId[], owner: Player, viewAs: string): VirtualCard {
-    Precondition.assert(!!viewAs, 'Unknown guhuo card');
+  public viewAs(
+    selectedCards: CardId[],
+    owner: Player,
+    viewAs: string
+  ): VirtualCard {
+    Precondition.assert(!!viewAs, "Unknown guhuo card");
     return VirtualCard.create(
       {
         cardName: viewAs,
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
@@ -64,24 +84,33 @@ export class MiaoXianShadow extends TriggerSkill {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     return (
       content.infos.find(
-        info =>
+        (info) =>
           info.fromId === owner.Id &&
           info.moveReason === CardMoveReason.CardUse &&
           info.movingCards.filter(
-            card =>
+            (card) =>
               !Sanguosha.isVirtualCardId(card.card) &&
               Sanguosha.getCardById(card.card).Color === CardColor.Red &&
-              card.fromArea === CardMoveArea.HandArea,
-          ).length === 1,
+              card.fromArea === CardMoveArea.HandArea
+          ).length === 1
       ) !== undefined &&
-      owner.getCardIds(PlayerCardsArea.HandArea).find(card => Sanguosha.getCardById(card).Color === CardColor.Red) ===
+      owner
+        .getCardIds(PlayerCardsArea.HandArea)
+        .find((card) => Sanguosha.getCardById(card).Color === CardColor.Red) ===
         undefined
     );
   }
@@ -90,8 +119,11 @@ export class MiaoXianShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    await room.drawCards(1, event.fromId, 'top', event.fromId, this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    await room.drawCards(1, event.fromId, "top", event.fromId, this.Name);
 
     return true;
   }

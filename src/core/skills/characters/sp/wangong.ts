@@ -1,33 +1,52 @@
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_DISTANCE, INFINITE_TRIGGERING_TIMES } from 'core/game/game_props';
-import { AllStage, CardUseStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { RulesBreakerSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CompulsorySkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  INFINITE_DISTANCE,
+  INFINITE_TRIGGERING_TIMES,
+} from "@/core/game/game_props";
+import {
+  AllStage,
+  CardUseStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { RulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CompulsorySkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'wangong', description: 'wangong_description' })
+@CompulsorySkill({ name: "wangong", description: "wangong_description" })
 export class WanGong extends TriggerSkill implements OnDefineReleaseTiming {
   public async whenLosingSkill(room: Room, owner: Player) {
     room.removeFlag(owner.Id, this.Name);
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.BeforeCardUseEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ): boolean {
     return (
       content.fromId === owner.Id &&
       !content.extraUse &&
       owner.getFlag<boolean>(this.Name) &&
-      Sanguosha.getCardById(content.cardId).GeneralName === 'slash'
+      Sanguosha.getCardById(content.cardId).GeneralName === "slash"
     );
   }
 
@@ -35,14 +54,22 @@ export class WanGong extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const cardUseEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const cardUseEvent =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
 
     cardUseEvent.extraUse = true;
     room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
       room.CurrentPhasePlayer === room.getPlayerById(event.fromId) &&
-      room.syncGameCommonRules(event.fromId, user => {
-        room.CommonRules.addCardUsableTimes(new CardMatcher({ generalName: ['slash'] }), 1, user);
+      room.syncGameCommonRules(event.fromId, (user) => {
+        room.CommonRules.addCardUsableTimes(
+          new CardMatcher({ generalName: ["slash"] }),
+          1,
+          user
+        );
         user.addInvisibleMark(this.Name, 1);
       });
     cardUseEvent.additionalDamage = cardUseEvent.additionalDamage || 0;
@@ -55,11 +82,18 @@ export class WanGong extends TriggerSkill implements OnDefineReleaseTiming {
 @ShadowSkill
 @CompulsorySkill({ name: WanGong.Name, description: WanGong.Description })
 export class WanGongShadow extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.CardUseFinishedEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ): boolean {
     return (
       content.fromId === owner.Id &&
       (owner.getFlag<boolean>(this.GeneralName)
@@ -72,12 +106,22 @@ export class WanGongShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const cardId = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>).cardId;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const cardId = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+    ).cardId;
     const card = Sanguosha.getCardById(cardId);
 
     if (card.is(CardType.Basic)) {
-      room.setFlag<boolean>(event.fromId, this.GeneralName, true, this.GeneralName);
+      room.setFlag<boolean>(
+        event.fromId,
+        this.GeneralName,
+        true,
+        this.GeneralName
+      );
     } else {
       room.removeFlag(event.fromId, this.GeneralName);
     }
@@ -87,44 +131,72 @@ export class WanGongShadow extends TriggerSkill {
 }
 
 @ShadowSkill
-@CompulsorySkill({ name: WanGongShadow.Name, description: WanGongShadow.Description })
+@CompulsorySkill({
+  name: WanGongShadow.Name,
+  description: WanGongShadow.Description,
+})
 export class WanGongBuff extends RulesBreakerSkill {
-  public breakCardUsableDistance(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableDistance(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (!owner.getFlag<boolean>(this.GeneralName)) {
       return 0;
     }
 
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ generalName: ['slash'] })) ? INFINITE_DISTANCE : 0;
+      return cardId.match(new CardMatcher({ generalName: ["slash"] }))
+        ? INFINITE_DISTANCE
+        : 0;
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName === 'slash' ? INFINITE_DISTANCE : 0;
+      return Sanguosha.getCardById(cardId).GeneralName === "slash"
+        ? INFINITE_DISTANCE
+        : 0;
     }
   }
 
-  public breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player) {
+  public breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ) {
     if (!owner.getFlag<boolean>(this.GeneralName)) {
       return 0;
     }
 
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ generalName: ['slash'] })) ? INFINITE_TRIGGERING_TIMES : 0;
+      return cardId.match(new CardMatcher({ generalName: ["slash"] }))
+        ? INFINITE_TRIGGERING_TIMES
+        : 0;
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName === 'slash' ? INFINITE_TRIGGERING_TIMES : 0;
+      return Sanguosha.getCardById(cardId).GeneralName === "slash"
+        ? INFINITE_TRIGGERING_TIMES
+        : 0;
     }
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CompulsorySkill({ name: WanGongBuff.Name, description: WanGongBuff.Description })
-export class WanGongClear extends TriggerSkill implements OnDefineReleaseTiming {
+@CompulsorySkill({
+  name: WanGongBuff.Name,
+  description: WanGongBuff.Description,
+})
+export class WanGongClear
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   private clearWanGongHistory(room: Room, from: Player) {
@@ -133,8 +205,12 @@ export class WanGongClear extends TriggerSkill implements OnDefineReleaseTiming 
       return;
     }
 
-    room.syncGameCommonRules(from.Id, user => {
-      room.CommonRules.addCardUsableTimes(new CardMatcher({ generalName: ['slash'] }), -extraUse, user);
+    room.syncGameCommonRules(from.Id, (user) => {
+      room.CommonRules.addCardUsableTimes(
+        new CardMatcher({ generalName: ["slash"] }),
+        -extraUse,
+        user
+      );
       from.removeInvisibleMark(this.GeneralName);
     });
   }
@@ -143,11 +219,18 @@ export class WanGongClear extends TriggerSkill implements OnDefineReleaseTiming 
     this.clearWanGongHistory(room, player);
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       content.fromPlayer === owner.Id &&
       content.from === PlayerPhase.PlayCardStage &&
@@ -159,7 +242,10 @@ export class WanGongClear extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     this.clearWanGongHistory(room, room.getPlayerById(event.fromId));
 
     return true;

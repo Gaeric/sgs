@@ -1,17 +1,27 @@
-import { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { ClientSocket } from './socket.client';
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { ClientSocket } from "./socket.client";
 
 export class ClientOfflineSocket extends ClientSocket {
   constructor(roomId: string) {
-    super('', roomId);
+    super("", roomId);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected init() {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public notify<I extends GameEventIdentifiers>(type: I, content: ClientEventFinder<I>) {}
+  public notify<I extends GameEventIdentifiers>(
+    type: I,
+    content: ClientEventFinder<I>
+  ) {}
 
-  public on<T extends GameEventIdentifiers>(type: T, receiver: (event: ServerEventFinder<T>) => void): ClientSocket {
+  public on<T extends GameEventIdentifiers>(
+    type: T,
+    receiver: (event: ServerEventFinder<T>) => void
+  ): ClientSocket {
     return this;
   }
 

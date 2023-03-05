@@ -1,5 +1,9 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CharacterEquipSections, CharacterId, CharacterNationality } from 'core/characters/character';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CharacterEquipSections,
+  CharacterId,
+  CharacterNationality,
+} from "@/core/characters/character";
 
 export type PlayerId = string;
 
@@ -8,7 +12,10 @@ export type PlayerCardsOutside = {
 };
 
 export type PlayerCards = {
-  [K in Extract<PlayerCardsArea, Exclude<PlayerCardsArea, PlayerCardsArea.OutsideArea>>]: CardId[];
+  [K in Extract<
+    PlayerCardsArea,
+    Exclude<PlayerCardsArea, PlayerCardsArea.OutsideArea>
+  >]: CardId[];
 };
 
 export const enum PlayerRole {
@@ -27,11 +34,11 @@ export const enum PlayerCardsArea {
 }
 
 export const enum PlayerStatus {
-  Online = 'online',
-  Offline = 'offline',
-  Quit = 'quit',
-  Trusted = 'trusted',
-  SmartAI = 'smart-ai',
+  Online = "online",
+  Offline = "offline",
+  Quit = "quit",
+  Trusted = "trusted",
+  SmartAI = "smart-ai",
 }
 
 export interface PlayerInfo {
@@ -53,9 +60,9 @@ export type PlayerShortcutInfo = PlayerInfo & {
   chainLocked: boolean;
   turnedOver: boolean;
   equipSectionsStatus: {
-    [K in CharacterEquipSections]: 'enabled' | 'disabled';
+    [K in CharacterEquipSections]: "enabled" | "disabled";
   };
-  judgeAreaStatus: 'enabled' | 'disabled';
+  judgeAreaStatus: "enabled" | "disabled";
   drunk: number;
   playerCards: PlayerCards;
   playerOutsideCards: PlayerCardsOutside;

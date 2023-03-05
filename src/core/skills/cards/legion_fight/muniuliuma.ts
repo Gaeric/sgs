@@ -1,22 +1,33 @@
-import { CardType } from 'core/cards/card';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { PlayerPhase } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'muniuliuma', description: 'muniuliuma_description' })
-export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTiming {
+@CommonSkill({ name: "muniuliuma", description: "muniuliuma_description" })
+export class MuNiuLiuMaSkill
+  extends ActiveSkill
+  implements OnDefineReleaseTiming
+{
   get Muted() {
     return true;
   }
 
   public canUse(room: Room, owner: Player) {
-    return !owner.hasUsedSkill(this.Name) && owner.getCardIds(PlayerCardsArea.OutsideArea, this.Name).length < 5;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getCardIds(PlayerCardsArea.OutsideArea, this.Name).length < 5
+    );
   }
 
   public isRefreshAt(room: Room, owner: Player, stage: PlayerPhase) {
@@ -42,10 +53,16 @@ export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTimin
   }
 
   public async whenLosingSkill(room: Room, player: Player) {
-    const cards = player.getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName);
+    const cards = player.getCardIds(
+      PlayerCardsArea.OutsideArea,
+      this.GeneralName
+    );
 
     await room.moveCards({
-      movingCards: cards.map(card => ({ card, fromArea: PlayerCardsArea.OutsideArea })),
+      movingCards: cards.map((card) => ({
+        card,
+        fromArea: PlayerCardsArea.OutsideArea,
+      })),
       toArea: CardMoveArea.DropStack,
       fromId: player.Id,
       moveReason: CardMoveReason.PlaceToDropStack,
@@ -54,11 +71,17 @@ export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTimin
     });
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, cardIds } = event;
     const from = room.getPlayerById(fromId);
     await room.moveCards({
@@ -73,34 +96,41 @@ export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTimin
       proposer: fromId,
       engagedPlayerIds: [fromId],
       translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} move cards {1} onto the top of {2} character card',
+        "{0} move cards {1} onto the top of {2} character card",
         TranslationPack.patchPlayerInTranslation(from),
         TranslationPack.patchCardInTranslation(...cardIds!),
-        TranslationPack.patchPlayerInTranslation(from),
+        TranslationPack.patchPlayerInTranslation(from)
       ).extract(),
       unengagedMessage: TranslationPack.translationJsonPatcher(
-        '{0} move {1} cards onto the top of {2} character card',
+        "{0} move {1} cards onto the top of {2} character card",
         TranslationPack.patchPlayerInTranslation(from),
         cardIds!.length,
-        TranslationPack.patchPlayerInTranslation(from),
+        TranslationPack.patchPlayerInTranslation(from)
       ).extract(),
     });
 
-    const askForDeliverTo: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> = {
-      players: room
-        .getOtherPlayers(fromId)
-        .filter(player => player.getEquipment(CardType.Precious) === undefined)
-        .map(p => p.Id),
-      toId: fromId,
-      conversation: 'do you wish to deliver muniuliuma to another player?',
-      requiredAmount: 1,
-      triggeredBySkills: [this.Name],
-    };
+    const askForDeliverTo: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> =
+      {
+        players: room
+          .getOtherPlayers(fromId)
+          .filter(
+            (player) => player.getEquipment(CardType.Precious) === undefined
+          )
+          .map((p) => p.Id),
+        toId: fromId,
+        conversation: "do you wish to deliver muniuliuma to another player?",
+        requiredAmount: 1,
+        triggeredBySkills: [this.Name],
+      };
 
-    room.notify(GameEventIdentifiers.AskForChoosingPlayerEvent, askForDeliverTo, fromId);
+    room.notify(
+      GameEventIdentifiers.AskForChoosingPlayerEvent,
+      askForDeliverTo,
+      fromId
+    );
     const { selectedPlayers } = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingPlayerEvent,
-      fromId,
+      fromId
     );
 
     if (selectedPlayers !== undefined && selectedPlayers.length > 0) {
@@ -108,7 +138,12 @@ export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTimin
       const to = room.getPlayerById(toId);
       await room.moveCards(
         {
-          movingCards: [{ card: from.getEquipment(CardType.Precious)!, fromArea: PlayerCardsArea.EquipArea }],
+          movingCards: [
+            {
+              card: from.getEquipment(CardType.Precious)!,
+              fromArea: PlayerCardsArea.EquipArea,
+            },
+          ],
           toArea: PlayerCardsArea.EquipArea,
           toId,
           fromId,
@@ -116,17 +151,17 @@ export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTimin
           movedByReason: this.Name,
           proposer: fromId,
           translationsMessage: TranslationPack.translationJsonPatcher(
-            '{0} place card {1} from {2} into equip area of {3}',
+            "{0} place card {1} from {2} into equip area of {3}",
             TranslationPack.patchPlayerInTranslation(from),
             TranslationPack.patchCardInTranslation(...cardIds!),
             TranslationPack.patchPlayerInTranslation(from),
-            TranslationPack.patchPlayerInTranslation(to),
+            TranslationPack.patchPlayerInTranslation(to)
           ).extract(),
         },
         {
           movingCards: from
             .getCardIds(PlayerCardsArea.OutsideArea, this.Name)
-            .map(card => ({ card, fromArea: PlayerCardsArea.OutsideArea })),
+            .map((card) => ({ card, fromArea: PlayerCardsArea.OutsideArea })),
           fromId,
           toId,
           toArea: CardMoveArea.OutsideArea,
@@ -137,18 +172,18 @@ export class MuNiuLiuMaSkill extends ActiveSkill implements OnDefineReleaseTimin
           movedByReason: this.Name,
           proposer: fromId,
           translationsMessage: TranslationPack.translationJsonPatcher(
-            '{0} move cards {1} onto the top of {2} character card',
+            "{0} move cards {1} onto the top of {2} character card",
             TranslationPack.patchPlayerInTranslation(from),
             TranslationPack.patchCardInTranslation(...cardIds!),
-            TranslationPack.patchPlayerInTranslation(to),
+            TranslationPack.patchPlayerInTranslation(to)
           ).extract(),
           unengagedMessage: TranslationPack.translationJsonPatcher(
-            '{0} move {1} cards onto the top of {2} character card',
+            "{0} move {1} cards onto the top of {2} character card",
             TranslationPack.patchPlayerInTranslation(from),
             cardIds!.length,
-            TranslationPack.patchPlayerInTranslation(to),
+            TranslationPack.patchPlayerInTranslation(to)
           ).extract(),
-        },
+        }
       );
     }
     return true;

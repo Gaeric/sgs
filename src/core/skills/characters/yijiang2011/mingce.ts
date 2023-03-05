@@ -1,16 +1,21 @@
-import { CardType, VirtualCard } from 'core/cards/card';
-import { CardId } from 'core/cards/libs/card_props';
-import { Slash } from 'core/cards/standard/slash';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType, VirtualCard } from "@/core/cards/card";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Slash } from "@/core/cards/standard/slash";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'mingce', description: 'mingce_description' })
+@CommonSkill({ name: "mingce", description: "mingce_description" })
 export class MingCe extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return !owner.hasUsedSkill(this.Name);
@@ -27,7 +32,11 @@ export class MingCe extends ActiveSkill {
 
       canSlash = room
         .getOtherPlayers(targets[0])
-        .find(player => room.canAttack(first, player) && room.withinAttackDistance(first, player))
+        .find(
+          (player) =>
+            room.canAttack(first, player) &&
+            room.withinAttackDistance(first, player)
+        )
         ? true
         : false;
     }
@@ -44,13 +53,16 @@ export class MingCe extends ActiveSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     if (selectedTargets.length === 1) {
       const first = room.getPlayerById(selectedTargets[0]);
       const second = room.getPlayerById(target);
 
-      return room.canAttack(first, second) && room.withinAttackDistance(first, second);
+      return (
+        room.canAttack(first, second) &&
+        room.withinAttackDistance(first, second)
+      );
     }
 
     return owner !== target;
@@ -58,10 +70,12 @@ export class MingCe extends ActiveSkill {
 
   public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId): boolean {
     const card = Sanguosha.getCardById(cardId);
-    return card.GeneralName === 'slash' || card.is(CardType.Equip);
+    return card.GeneralName === "slash" || card.is(CardType.Equip);
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = event;
     if (event.toIds?.length === 2) {
       return [
@@ -77,7 +91,10 @@ export class MingCe extends ActiveSkill {
     return false;
   }
 
-  async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     event.animation = this.getAnimationSteps(event);
 
     return true;
@@ -85,14 +102,17 @@ export class MingCe extends ActiveSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { fromId, toIds, cardIds } = skillUseEvent;
     const first = toIds![0];
     const second = toIds![1];
 
     await room.moveCards({
-      movingCards: cardIds!.map(card => ({ card, fromArea: room.getPlayerById(fromId).cardFrom(card) })),
+      movingCards: cardIds!.map((card) => ({
+        card,
+        fromArea: room.getPlayerById(fromId).cardFrom(card),
+      })),
       fromId: skillUseEvent.fromId,
       toId: first,
       toArea: CardMoveArea.HandArea,
@@ -100,31 +120,49 @@ export class MingCe extends ActiveSkill {
       proposer: fromId,
     });
 
-    const options = ['mingce:draw'];
-    if (second && room.canAttack(room.getPlayerById(first), room.getPlayerById(second))) {
-      options.unshift('mingce:slash');
+    const options = ["mingce:draw"];
+    if (
+      second &&
+      room.canAttack(room.getPlayerById(first), room.getPlayerById(second))
+    ) {
+      options.unshift("mingce:slash");
     }
 
-    const askForChooseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-      options,
-      conversation: second
-        ? TranslationPack.translationJsonPatcher(
-            'please choose mingce options:{0}',
-            TranslationPack.patchPlayerInTranslation(room.getPlayerById(second)),
-          ).extract()
-        : TranslationPack.translationJsonPatcher('{0}: please choose', this.Name).extract(),
-      toId: first,
-      triggeredBySkills: [this.Name],
-    });
+    const askForChooseEvent =
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        {
+          options,
+          conversation: second
+            ? TranslationPack.translationJsonPatcher(
+                "please choose mingce options:{0}",
+                TranslationPack.patchPlayerInTranslation(
+                  room.getPlayerById(second)
+                )
+              ).extract()
+            : TranslationPack.translationJsonPatcher(
+                "{0}: please choose",
+                this.Name
+              ).extract(),
+          toId: first,
+          triggeredBySkills: [this.Name],
+        }
+      );
 
-    room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForChooseEvent, first);
+    room.notify(
+      GameEventIdentifiers.AskForChoosingOptionsEvent,
+      askForChooseEvent,
+      first
+    );
 
-    const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, first);
-    response.selectedOption = response.selectedOption || 'mingce:draw';
+    const response = await room.onReceivingAsyncResponseFrom(
+      GameEventIdentifiers.AskForChoosingOptionsEvent,
+      first
+    );
+    response.selectedOption = response.selectedOption || "mingce:draw";
 
-    if (response.selectedOption === 'mingce:slash') {
+    if (response.selectedOption === "mingce:slash") {
       const slash = VirtualCard.create<Slash>({
-        cardName: 'slash',
+        cardName: "slash",
         bySkill: this.Name,
       }).Id;
 
@@ -136,7 +174,7 @@ export class MingCe extends ActiveSkill {
 
       await room.useCard(slashUseEvent);
     } else {
-      await room.drawCards(1, first, 'top', first, this.Name);
+      await room.drawCards(1, first, "top", first, this.Name);
     }
 
     return true;

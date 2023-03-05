@@ -1,14 +1,24 @@
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { MovingCardProps } from 'core/event/event.server';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { MovingCardProps } from "@/core/event/event.server";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  DamageEffectStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CommonSkill,
@@ -16,12 +26,15 @@ import {
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
+} from "@/core/skills/skill";
 
-@CommonSkill({ name: 'chuhai', description: 'chuhai_description' })
+@CommonSkill({ name: "chuhai", description: "chuhai_description" })
 export class ChuHai extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
-    return !owner.hasUsedSkill(this.Name) && owner.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -32,7 +45,11 @@ export class ChuHai extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return room.canPindian(owner, target);
   }
 
@@ -40,16 +57,22 @@ export class ChuHai extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
     }
 
-    await room.drawCards(1, fromId, 'top', fromId, this.Name);
+    await room.drawCards(1, fromId, "top", fromId, this.Name);
 
     const { pindianRecord } = await room.pindian(fromId, toIds, this.Name);
     if (!pindianRecord.length) {
@@ -57,7 +80,9 @@ export class ChuHai extends ActiveSkill {
     }
 
     if (pindianRecord[0].winner === fromId) {
-      const opponentsHands = room.getPlayerById(toIds[0]).getCardIds(PlayerCardsArea.HandArea);
+      const opponentsHands = room
+        .getPlayerById(toIds[0])
+        .getCardIds(PlayerCardsArea.HandArea);
       if (opponentsHands.length > 0) {
         room.displayCards(toIds[0], opponentsHands, [fromId]);
 
@@ -74,9 +99,16 @@ export class ChuHai extends ActiveSkill {
 
         const toGain: MovingCardProps[] = [];
         for (const type of result) {
-          let cardIds = room.findCardsByMatcherFrom(new CardMatcher({ type: [type] }));
+          let cardIds = room.findCardsByMatcherFrom(
+            new CardMatcher({ type: [type] })
+          );
           const length = cardIds.length;
-          cardIds = cardIds.concat(room.findCardsByMatcherFrom(new CardMatcher({ type: [type] }), false));
+          cardIds = cardIds.concat(
+            room.findCardsByMatcherFrom(
+              new CardMatcher({ type: [type] }),
+              false
+            )
+          );
           if (cardIds.length === 0) {
             continue;
           }
@@ -84,7 +116,10 @@ export class ChuHai extends ActiveSkill {
           const randomIndex = Math.floor(Math.random() * cardIds.length);
           toGain.push({
             card: cardIds[randomIndex],
-            fromArea: randomIndex < length ? CardMoveArea.DrawStack : CardMoveArea.DropStack,
+            fromArea:
+              randomIndex < length
+                ? CardMoveArea.DrawStack
+                : CardMoveArea.DropStack,
           });
         }
 
@@ -110,14 +145,20 @@ export class ChuHai extends ActiveSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: ChuHai.Name, description: ChuHai.Description })
-export class ChuHaiShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class ChuHaiShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -129,16 +170,23 @@ export class ChuHaiShadow extends TriggerSkill implements OnDefineReleaseTiming 
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
-    return stage === DamageEffectStage.AfterDamageEffect || stage === PhaseChangeStage.PhaseChanged;
+    return (
+      stage === DamageEffectStage.AfterDamageEffect ||
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): boolean {
     if (!owner.getFlag<PlayerId>(this.GeneralName)) {
       return false;
@@ -146,15 +194,20 @@ export class ChuHaiShadow extends TriggerSkill implements OnDefineReleaseTiming 
 
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       return (
         damageEvent.fromId === owner.Id &&
         damageEvent.toId === owner.getFlag<PlayerId>(this.GeneralName) &&
         owner.getEmptyEquipSections().length > 0
       );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return phaseChangeEvent.fromPlayer === owner.Id && phaseChangeEvent.from === PlayerPhase.PlayCardStage;
+      const phaseChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        phaseChangeEvent.fromPlayer === owner.Id &&
+        phaseChangeEvent.from === PlayerPhase.PlayCardStage
+      );
     }
 
     return false;
@@ -164,7 +217,10 @@ export class ChuHaiShadow extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = event;
     const unknownEvent = triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent
@@ -173,16 +229,23 @@ export class ChuHaiShadow extends TriggerSkill implements OnDefineReleaseTiming 
 
     if (identifier === GameEventIdentifiers.DamageEvent) {
       const types = room.getPlayerById(fromId).getEmptyEquipSections();
-      let cardIds = room.findCardsByMatcherFrom(new CardMatcher({ type: types }));
+      let cardIds = room.findCardsByMatcherFrom(
+        new CardMatcher({ type: types })
+      );
       const length = cardIds.length;
-      cardIds = cardIds.concat(room.findCardsByMatcherFrom(new CardMatcher({ type: types }), false));
+      cardIds = cardIds.concat(
+        room.findCardsByMatcherFrom(new CardMatcher({ type: types }), false)
+      );
 
       if (cardIds.length > 0) {
         const randomIndex = Math.floor(Math.random() * cardIds.length);
         const movingCards = [
           {
             card: cardIds[randomIndex],
-            fromArea: randomIndex < length ? CardMoveArea.DrawStack : CardMoveArea.DropStack,
+            fromArea:
+              randomIndex < length
+                ? CardMoveArea.DrawStack
+                : CardMoveArea.DropStack,
           },
         ];
 

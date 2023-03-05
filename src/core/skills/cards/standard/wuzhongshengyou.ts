@@ -1,19 +1,28 @@
-import { WuZhongShengYouSkillTrigger } from 'core/ai/skills/cards/wuzhongshengyou';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { ActiveSkill, CommonSkill, SelfTargetSkill } from 'core/skills/skill';
-import { AI } from 'core/skills/skill_wrappers';
-import { ExtralCardSkillProperty } from '../interface/extral_property';
+import { WuZhongShengYouSkillTrigger } from "@/core/ai/skills/cards/wuzhongshengyou";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { ActiveSkill, CommonSkill, SelfTargetSkill } from "@/core/skills/skill";
+import { AI } from "@/core/skills/skill_wrappers";
+import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(WuZhongShengYouSkillTrigger)
-@CommonSkill({ name: 'wuzhongshengyou', description: 'wuzhongshengyou_description' })
+@CommonSkill({
+  name: "wuzhongshengyou",
+  description: "wuzhongshengyou_description",
+})
 @SelfTargetSkill
-export class WuZhongShengYouSkill extends ActiveSkill implements ExtralCardSkillProperty {
+export class WuZhongShengYouSkill
+  extends ActiveSkill
+  implements ExtralCardSkillProperty
+{
   public canUse(room: Room, owner: Player, containerCard?: CardId) {
-    return containerCard !== undefined && owner.canUseCardTo(room, containerCard, owner.Id);
+    return (
+      containerCard !== undefined &&
+      owner.canUseCardTo(room, containerCard, owner.Id)
+    );
   }
 
   public numberOfTargets() {
@@ -35,13 +44,22 @@ export class WuZhongShengYouSkill extends ActiveSkill implements ExtralCardSkill
   public isAvailableTarget(): boolean {
     return false;
   }
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ) {
     event.targetGroup = [[event.fromId]];
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
-    const toId = Precondition.exists(event.toIds, 'Unknown targets in wuzhongshengyou')[0];
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
+    const toId = Precondition.exists(
+      event.toIds,
+      "Unknown targets in wuzhongshengyou"
+    )[0];
     await room.drawCards(2, toId, undefined, toId, this.Name);
     return true;
   }

@@ -1,21 +1,35 @@
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, PlayerDiedStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { AllStage, PlayerDiedStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'xingshang', description: 'xingshang_description' })
+@CommonSkill({ name: "xingshang", description: "xingshang_description" })
 export class XingShang extends TriggerSkill {
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>,
+    stage?: AllStage
+  ) {
     return stage === PlayerDiedStage.PlayerDied;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>
+  ) {
     const to = room.getPlayerById(content.playerId);
     return (
-      !owner.Dead && owner.Id !== content.playerId && !(owner.Hp >= owner.MaxHp && to.getPlayerCards().length <= 0)
+      !owner.Dead &&
+      owner.Id !== content.playerId &&
+      !(owner.Hp >= owner.MaxHp && to.getPlayerCards().length <= 0)
     );
   }
 
@@ -23,9 +37,13 @@ export class XingShang extends TriggerSkill {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent } = skillUseEvent;
-    const { playerId } = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>;
+    const { playerId } =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>;
     const fromId = skillUseEvent.fromId;
     const dead = room.getPlayerById(playerId);
     const caopi = room.getPlayerById(fromId);
@@ -39,7 +57,10 @@ export class XingShang extends TriggerSkill {
     } else if (caopi.Hp >= caopi.MaxHp) {
       const heritage = dead.getPlayerCards();
       await room.moveCards({
-        movingCards: heritage.map(cardId => ({ card: cardId, fromArea: dead.cardFrom(cardId) })),
+        movingCards: heritage.map((cardId) => ({
+          card: cardId,
+          fromArea: dead.cardFrom(cardId),
+        })),
         fromId: playerId,
         moveReason: CardMoveReason.ActivePrey,
         toId: fromId,
@@ -48,22 +69,28 @@ export class XingShang extends TriggerSkill {
         movedByReason: this.Name,
       });
     } else {
-      const askForOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-        options: ['xingshang:recover', 'xingshang:pickup'],
-        conversation: 'please choose',
-        toId: fromId,
-        triggeredBySkills: [this.Name],
-      };
+      const askForOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+        {
+          options: ["xingshang:recover", "xingshang:pickup"],
+          conversation: "please choose",
+          toId: fromId,
+          triggeredBySkills: [this.Name],
+        };
 
       room.notify(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
-        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(askForOptionsEvent),
-        fromId,
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          askForOptionsEvent
+        ),
+        fromId
       );
 
-      const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, fromId);
-      response.selectedOption = response.selectedOption || 'xingshang:pickup';
-      if (response.selectedOption === 'xingshang:recover') {
+      const response = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        fromId
+      );
+      response.selectedOption = response.selectedOption || "xingshang:pickup";
+      if (response.selectedOption === "xingshang:recover") {
         await room.recover({
           recoveredHp: 1,
           toId: fromId,
@@ -72,7 +99,10 @@ export class XingShang extends TriggerSkill {
       } else {
         const heritage = dead.getPlayerCards();
         await room.moveCards({
-          movingCards: heritage.map(cardId => ({ card: cardId, fromArea: dead.cardFrom(cardId) })),
+          movingCards: heritage.map((cardId) => ({
+            card: cardId,
+            fromArea: dead.cardFrom(cardId),
+          })),
           fromId: playerId,
           moveReason: CardMoveReason.ActivePrey,
           toId: fromId,

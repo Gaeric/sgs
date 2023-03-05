@@ -1,8 +1,8 @@
-import { GameCardExtensions } from 'core/game/game_props';
-import { SkillLoader } from 'core/game/package_loader/loader.skills';
-import { RenWangDunSkill } from 'core/skills/cards/standard/renwangdun';
-import { ArmorCard } from '../equip_card';
-import { CardSuit } from '../libs/card_props';
+import { GameCardExtensions } from "@/core/game/game_props";
+import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { RenWangDunSkill } from "@/core/skills/cards/standard/renwangdun";
+import { ArmorCard } from "../equip_card";
+import { CardSuit } from "../libs/card_props";
 
 export class RenWangDun extends ArmorCard {
   constructor(id: number, cardNumber: number, suit: CardSuit) {
@@ -10,10 +10,10 @@ export class RenWangDun extends ArmorCard {
       id,
       cardNumber,
       suit,
-      'renwangdun',
-      'renwangdun_description',
+      "renwangdun",
+      "renwangdun_description",
       GameCardExtensions.Standard,
-      SkillLoader.getInstance().getSkillByName('renwangdun'),
+      SkillLoader.getInstance().getSkillByName("renwangdun")
     );
   }
 

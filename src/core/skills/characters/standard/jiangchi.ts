@@ -1,19 +1,23 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_DISTANCE } from 'core/game/game_props';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_DISTANCE } from "@/core/game/game_props";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   CommonSkill,
   FilterSkill,
@@ -22,19 +26,29 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
+} from "@/core/skills/skill";
 
-@CommonSkill({ name: 'jiangchi', description: 'jiangchi_description' })
+@CommonSkill({ name: "jiangchi", description: "jiangchi_description" })
 export class JiangChi extends TriggerSkill {
-  public static readonly ExtraFlag = 'jiangchi_extra';
-  public static readonly BlockFlag = 'jiangchi_block';
+  public static readonly ExtraFlag = "jiangchi_extra";
+  public static readonly BlockFlag = "jiangchi_block";
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
-    return owner.Id === content.playerId && PlayerPhaseStages.PlayCardStageStart === content.toStage;
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
+    return (
+      owner.Id === content.playerId &&
+      PlayerPhaseStages.PlayCardStageStart === content.toStage
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
@@ -43,43 +57,58 @@ export class JiangChi extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
-    const options = ['jiangchi:draw2', 'jiangchi:draw1', 'jiangchi:drop'];
+    const options = ["jiangchi:draw2", "jiangchi:draw1", "jiangchi:drop"];
     if (
       room
         .getPlayerById(skillUseEvent.fromId)
         .getPlayerCards()
-        .filter(id => room.canDropCard(skillUseEvent.fromId, id)).length === 0
+        .filter((id) => room.canDropCard(skillUseEvent.fromId, id)).length === 0
     ) {
       options.pop();
     }
 
-    const askForChooseOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-      options,
-      toId: skillUseEvent.fromId,
-      conversation: 'please choose jiangchi options',
-      triggeredBySkills: [this.Name],
-    };
+    const askForChooseOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+      {
+        options,
+        toId: skillUseEvent.fromId,
+        conversation: "please choose jiangchi options",
+        triggeredBySkills: [this.Name],
+      };
 
     room.notify(
       GameEventIdentifiers.AskForChoosingOptionsEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(askForChooseOptionsEvent),
-      skillUseEvent.fromId,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        askForChooseOptionsEvent
+      ),
+      skillUseEvent.fromId
     );
 
     const response = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingOptionsEvent,
-      skillUseEvent.fromId,
+      skillUseEvent.fromId
     );
 
     response.selectedOption = response.selectedOption || options[1];
 
     if (response.selectedOption === options[0]) {
-      await room.drawCards(2, skillUseEvent.fromId, 'top', skillUseEvent.fromId, this.Name);
+      await room.drawCards(
+        2,
+        skillUseEvent.fromId,
+        "top",
+        skillUseEvent.fromId,
+        this.Name
+      );
       room.setFlag<string>(skillUseEvent.fromId, this.Name, JiangChi.BlockFlag);
     } else if (response.selectedOption === options[1]) {
-      await room.drawCards(1, skillUseEvent.fromId, 'top', skillUseEvent.fromId, this.Name);
+      await room.drawCards(
+        1,
+        skillUseEvent.fromId,
+        "top",
+        skillUseEvent.fromId,
+        this.Name
+      );
     } else {
       const response = await room.askForCardDrop(
         skillUseEvent.fromId,
@@ -87,7 +116,7 @@ export class JiangChi extends TriggerSkill {
         [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
         true,
         undefined,
-        this.Name,
+        this.Name
       );
 
       if (response.droppedCards.length > 0) {
@@ -96,10 +125,14 @@ export class JiangChi extends TriggerSkill {
           response.droppedCards,
           skillUseEvent.fromId,
           skillUseEvent.fromId,
-          this.Name,
+          this.Name
         );
 
-        room.setFlag<string>(skillUseEvent.fromId, this.Name, JiangChi.ExtraFlag);
+        room.setFlag<string>(
+          skillUseEvent.fromId,
+          this.Name,
+          JiangChi.ExtraFlag
+        );
       }
     }
 
@@ -110,26 +143,38 @@ export class JiangChi extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: JiangChi.Name, description: JiangChi.Description })
-export class JiangChiExtra extends RulesBreakerSkill implements OnDefineReleaseTiming {
+export class JiangChiExtra
+  extends RulesBreakerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public breakCardUsableDistance(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
-    if (room.getFlag<string>(owner.Id, this.GeneralName) !== JiangChi.ExtraFlag) {
+  public breakCardUsableDistance(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
+    if (
+      room.getFlag<string>(owner.Id, this.GeneralName) !== JiangChi.ExtraFlag
+    ) {
       return 0;
     }
 
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ generalName: ['slash'] }));
+      match = cardId.match(new CardMatcher({ generalName: ["slash"] }));
     } else {
-      match = Sanguosha.getCardById(cardId).GeneralName === 'slash';
+      match = Sanguosha.getCardById(cardId).GeneralName === "slash";
     }
 
     if (match) {
@@ -139,16 +184,22 @@ export class JiangChiExtra extends RulesBreakerSkill implements OnDefineReleaseT
     }
   }
 
-  public breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
-    if (room.getFlag<string>(owner.Id, this.GeneralName) !== JiangChi.ExtraFlag) {
+  public breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
+    if (
+      room.getFlag<string>(owner.Id, this.GeneralName) !== JiangChi.ExtraFlag
+    ) {
       return 0;
     }
 
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ generalName: ['slash'] }));
+      match = cardId.match(new CardMatcher({ generalName: ["slash"] }));
     } else {
-      match = Sanguosha.getCardById(cardId).GeneralName === 'slash';
+      match = Sanguosha.getCardById(cardId).GeneralName === "slash";
     }
 
     if (match) {
@@ -161,39 +212,61 @@ export class JiangChiExtra extends RulesBreakerSkill implements OnDefineReleaseT
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: JiangChiExtra.Name, description: JiangChiExtra.Description })
-export class JiangChiBlock extends FilterSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: JiangChiExtra.Name,
+  description: JiangChiExtra.Description,
+})
+export class JiangChiBlock
+  extends FilterSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public canUseCard(cardId: CardId | CardMatcher, room: Room, owner: PlayerId): boolean {
+  public canUseCard(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: PlayerId
+  ): boolean {
     if (room.getFlag<string>(owner, this.GeneralName) !== JiangChi.BlockFlag) {
       return true;
     }
 
     return cardId instanceof CardMatcher
-      ? !cardId.match(new CardMatcher({ generalName: ['slash'] }))
-      : Sanguosha.getCardById(cardId).GeneralName !== 'slash';
+      ? !cardId.match(new CardMatcher({ generalName: ["slash"] }))
+      : Sanguosha.getCardById(cardId).GeneralName !== "slash";
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: JiangChiBlock.Name, description: JiangChiBlock.Description })
-export class JiangChiRemove extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: JiangChiBlock.Name,
+  description: JiangChiBlock.Description,
+})
+export class JiangChiRemove
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -204,11 +277,18 @@ export class JiangChiRemove extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       owner.Id === event.fromPlayer &&
       event.from === PlayerPhase.PlayCardStage &&
@@ -220,7 +300,10 @@ export class JiangChiRemove extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     room.removeFlag(event.fromId, this.GeneralName);
 
     return true;

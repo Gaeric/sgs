@@ -1,12 +1,19 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, DrawCardStage, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { CompulsorySkill, TriggerSkill } from 'core/skills/skill';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  AllStage,
+  DrawCardStage,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { CompulsorySkill, TriggerSkill } from "@/core/skills/skill";
 
-@CompulsorySkill({ name: 'cunmu', description: 'cunmu_description' })
+@CompulsorySkill({ name: "cunmu", description: "cunmu_description" })
 export class CunMu extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DrawCardStage.BeforeDrawCardEffect;
   }
 
@@ -14,7 +21,11 @@ export class CunMu extends TriggerSkill {
     return StagePriority.High;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>
+  ): boolean {
     return owner.Id === content.fromId;
   }
 
@@ -22,9 +33,13 @@ export class CunMu extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const drawCardEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
-    drawCardEvent.from = 'bottom';
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const drawCardEvent =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+    drawCardEvent.from = "bottom";
 
     return true;
   }

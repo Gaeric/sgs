@@ -1,30 +1,47 @@
-import { CardType } from 'core/cards/card';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AimStage, AllStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { AimGroupUtil } from 'core/shares/libs/utils/aim_group';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AimStage, AllStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { AimGroupUtil } from "@/core/shares/libs/utils/aim_group";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'congjian', description: 'congjian_description' })
+@CommonSkill({ name: "congjian", description: "congjian_description" })
 export class CongJian extends TriggerSkill {
   public get RelatedCharacters(): string[] {
-    return ['tongyuan_c'];
+    return ["tongyuan_c"];
   }
 
   public audioIndex(characterName?: string): number {
-    return characterName && this.RelatedCharacters.includes(characterName) ? 1 : 2;
+    return characterName && this.RelatedCharacters.includes(characterName)
+      ? 1
+      : 2;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.AimEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === AimStage.AfterAimmed;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.AimEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.AimEvent>
+  ): boolean {
     const allTargets = AimGroupUtil.getAllTargets(content.allTargets);
     if (
       content.toId === owner.Id &&
@@ -36,7 +53,7 @@ export class CongJian extends TriggerSkill {
       room.setFlag<PlayerId[]>(
         owner.Id,
         this.Name,
-        allTargets.filter(target => target !== owner.Id),
+        allTargets.filter((target) => target !== owner.Id)
       );
       return true;
     }
@@ -56,14 +73,18 @@ export class CongJian extends TriggerSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return room.getFlag<PlayerId[]>(owner, this.Name).includes(target);
   }
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to give a card to another target?',
-      this.Name,
+      "{0}: do you want to give a card to another target?",
+      this.Name
     ).extract();
   }
 
@@ -71,7 +92,10 @@ export class CongJian extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds, cardIds } = event;
     if (!toIds || !cardIds) {
       return false;
@@ -79,7 +103,12 @@ export class CongJian extends TriggerSkill {
 
     const type = Sanguosha.getCardById(cardIds[0]).BaseType;
     await room.moveCards({
-      movingCards: [{ card: cardIds[0], fromArea: room.getPlayerById(fromId).cardFrom(cardIds[0]) }],
+      movingCards: [
+        {
+          card: cardIds[0],
+          fromArea: room.getPlayerById(fromId).cardFrom(cardIds[0]),
+        },
+      ],
       fromId,
       toId: toIds[0],
       toArea: CardMoveArea.HandArea,
@@ -89,9 +118,9 @@ export class CongJian extends TriggerSkill {
     });
 
     if (type === CardType.Equip) {
-      await room.drawCards(2, fromId, 'top', fromId, this.Name);
+      await room.drawCards(2, fromId, "top", fromId, this.Name);
     } else {
-      await room.drawCards(1, fromId, 'top', fromId, this.Name);
+      await room.drawCards(1, fromId, "top", fromId, this.Name);
     }
 
     return true;

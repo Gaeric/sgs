@@ -1,9 +1,9 @@
-import { Card } from 'core/cards/card';
-import { SkillsGeneratedCardPackage } from 'core/cards/character_skills';
-import { LegionFightCardPackage } from 'core/cards/legion_fight';
-import { StandardCardPackage } from 'core/cards/standard';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { GameCardExtensions } from '../game_props';
+import { Card } from "@/core/cards/card";
+import { SkillsGeneratedCardPackage } from "@/core/cards/character_skills";
+import { LegionFightCardPackage } from "@/core/cards/legion_fight";
+import { StandardCardPackage } from "@/core/cards/standard";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { GameCardExtensions } from "../game_props";
 
 export type CardPackages = {
   [K in GameCardExtensions]: Card[];
@@ -37,7 +37,10 @@ export class CardLoader {
         if (!card.isUniqueCard()) {
           this.cards[packageName].push(card);
         } else {
-          const bySkill = Precondition.exists(card.generatedBySkill(), `unknown unique card generator: ${card.Name}`);
+          const bySkill = Precondition.exists(
+            card.generatedBySkill(),
+            `unknown unique card generator: ${card.Name}`
+          );
           const cardSet = this.uniquCards.get(bySkill);
           if (cardSet) {
             cardSet.push(card);
@@ -60,11 +63,17 @@ export class CardLoader {
   }
 
   public getAllCards() {
-    return Object.values(this.cards).reduce<Card[]>((addedCards, cards) => addedCards.concat(cards), []);
+    return Object.values(this.cards).reduce<Card[]>(
+      (addedCards, cards) => addedCards.concat(cards),
+      []
+    );
   }
 
   public getPackages(...extensions: GameCardExtensions[]): Card[] {
-    return extensions.reduce<Card[]>((addedCards, extension) => addedCards.concat(this.cards[extension]), []);
+    return extensions.reduce<Card[]>(
+      (addedCards, extension) => addedCards.concat(this.cards[extension]),
+      []
+    );
   }
 
   public getUniquCards() {

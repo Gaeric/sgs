@@ -1,19 +1,27 @@
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'jushou', description: 'jushou_description' })
+@CommonSkill({ name: "jushou", description: "jushou_description" })
 export class JuShou extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -21,9 +29,12 @@ export class JuShou extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    return owner.Id === content.playerId && PlayerPhaseStages.FinishStageStart === content.toStage;
+    return (
+      owner.Id === content.playerId &&
+      PlayerPhaseStages.FinishStageStart === content.toStage
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
@@ -32,18 +43,18 @@ export class JuShou extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     await room.turnOver(skillUseEvent.fromId);
-    await room.drawCards(4, skillUseEvent.fromId, 'top', undefined, this.Name);
+    await room.drawCards(4, skillUseEvent.fromId, "top", undefined, this.Name);
 
     const player = room.getPlayerById(skillUseEvent.fromId);
     const handCards = player
       .getCardIds(PlayerCardsArea.HandArea)
-      .filter(id =>
+      .filter((id) =>
         Sanguosha.getCardById(id).is(CardType.Equip)
           ? player.canUseCardTo(room, id, skillUseEvent.fromId)
-          : room.canDropCard(skillUseEvent.fromId, id),
+          : room.canDropCard(skillUseEvent.fromId, id)
       );
     if (handCards.length === 0) {
       return false;
@@ -56,15 +67,15 @@ export class JuShou extends TriggerSkill {
         toId: skillUseEvent.fromId,
         reason: this.Name,
         conversation: TranslationPack.translationJsonPatcher(
-          '{0}: please choose a hand card, if it’s equipment, use it, otherwise drop it',
-          this.Name,
+          "{0}: please choose a hand card, if it’s equipment, use it, otherwise drop it",
+          this.Name
         ).extract(),
         fromArea: [PlayerCardsArea.HandArea],
         cardMatcher: new CardMatcher({ cards: handCards }).toSocketPassenger(),
         triggeredBySkills: [this.Name],
       },
       skillUseEvent.fromId,
-      true,
+      true
     );
 
     const card = Sanguosha.getCardById(selectedCards![0]);
@@ -80,7 +91,7 @@ export class JuShou extends TriggerSkill {
         selectedCards!,
         skillUseEvent.fromId,
         skillUseEvent.fromId,
-        this.Name,
+        this.Name
       );
     }
 

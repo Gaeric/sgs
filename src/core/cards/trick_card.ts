@@ -1,7 +1,7 @@
-import { GameCardExtensions } from 'core/game/game_props';
-import { Skill } from 'core/skills/skill';
-import { Card, CardType } from './card';
-import { CardSuit, RealCardId } from './libs/card_props';
+import { GameCardExtensions } from "@/core/game/game_props";
+import { Skill } from "@/core/skills/skill";
+import { Card, CardType } from "./card";
+import { CardSuit, RealCardId } from "./libs/card_props";
 
 export function DelayedTrick<T extends TrickCard>(
   constructor: new (
@@ -13,8 +13,8 @@ export function DelayedTrick<T extends TrickCard>(
     description: string,
     fromPackage: GameCardExtensions,
     skill: Skill,
-    generalName?: string,
-  ) => any,
+    generalName?: string
+  ) => any
 ): any {
   return class extends constructor {
     protected cardType: CardType[] = [CardType.Trick, CardType.DelayedTrick];
@@ -34,7 +34,7 @@ export abstract class TrickCard extends Card {
     protected description: string,
     protected fromPackage: GameCardExtensions,
     protected skill: Skill,
-    generalName?: string,
+    generalName?: string
   ) {
     super();
     this.generalName = generalName || this.name;

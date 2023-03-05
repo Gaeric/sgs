@@ -1,15 +1,22 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, RulesBreakerSkill } from 'core/skills/skill';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, RulesBreakerSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'fangtianhuaji', description: 'fangtianhuaji_description' })
+@CommonSkill({
+  name: "fangtianhuaji",
+  description: "fangtianhuaji_description",
+})
 export class FangTianHuaJiSkill extends RulesBreakerSkill {
-  breakCardUsableTargets(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  breakCardUsableTargets(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (cardId instanceof CardMatcher) {
       return 0;
     }
@@ -20,8 +27,9 @@ export class FangTianHuaJiSkill extends RulesBreakerSkill {
     }
 
     const realCards = VirtualCard.getActualCards([cardId]);
-    const isSlash = realCards.length === 1 ? realCards[0] === handCards[0] : false;
-    if (isSlash && Sanguosha.getCardById(cardId).GeneralName === 'slash') {
+    const isSlash =
+      realCards.length === 1 ? realCards[0] === handCards[0] : false;
+    if (isSlash && Sanguosha.getCardById(cardId).GeneralName === "slash") {
       return 2;
     }
 

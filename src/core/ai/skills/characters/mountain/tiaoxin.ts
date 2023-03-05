@@ -1,13 +1,13 @@
-import { AiLibrary } from 'core/ai/ai_lib';
-import { ActiveSkillTriggerClass } from 'core/ai/skills/base/active_skill_trigger';
-import type { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import type { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import type { Room } from 'core/room/room';
-import type { TiaoXin } from 'core/skills';
-import { ActiveSkill } from 'core/skills/skill';
+import { AiLibrary } from "@/core/ai/ai_lib";
+import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
+import type { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import type { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import type { Room } from "@/core/room/room";
+import type { TiaoXin } from "@/core/skills";
+import { ActiveSkill } from "@/core/skills/skill";
 
 export class TiaoXinSkillTrigger extends ActiveSkillTriggerClass<TiaoXin> {
   skillTrigger = (room: Room, ai: Player, skill: TiaoXin) => {
@@ -15,7 +15,7 @@ export class TiaoXinSkillTrigger extends ActiveSkillTriggerClass<TiaoXin> {
       return;
     }
     const enemies = AiLibrary.sortEnemiesByRole(room, ai);
-    const outOfRange = enemies.filter(enemy => !room.canAttack(enemy, ai));
+    const outOfRange = enemies.filter((enemy) => !room.canAttack(enemy, ai));
 
     if (outOfRange.length > 0) {
       return {
@@ -25,9 +25,15 @@ export class TiaoXinSkillTrigger extends ActiveSkillTriggerClass<TiaoXin> {
       };
     }
 
-    if (ai.getCardIds(PlayerCardsArea.HandArea).find(cardId => Sanguosha.getCardById(cardId).Name === 'jink')) {
+    if (
+      ai
+        .getCardIds(PlayerCardsArea.HandArea)
+        .find((cardId) => Sanguosha.getCardById(cardId).Name === "jink")
+    ) {
       enemies.sort(
-        (a, b) => a.getCardIds(PlayerCardsArea.HandArea).length - b.getCardIds(PlayerCardsArea.HandArea).length,
+        (a, b) =>
+          a.getCardIds(PlayerCardsArea.HandArea).length -
+          b.getCardIds(PlayerCardsArea.HandArea).length
       );
       return {
         fromId: ai.Id,
@@ -41,11 +47,16 @@ export class TiaoXinSkillTrigger extends ActiveSkillTriggerClass<TiaoXin> {
     room: Room,
     ai: Player,
     skill: TiaoXin,
-    sortedActions: (ActiveSkill | CardId)[],
+    sortedActions: (ActiveSkill | CardId)[]
   ) {
-    const highPriorityCards = ['wuzhongshengyou', 'shunshouqianyang', 'guohechaiqiao', 'zhiheng'];
+    const highPriorityCards = [
+      "wuzhongshengyou",
+      "shunshouqianyang",
+      "guohechaiqiao",
+      "zhiheng",
+    ];
 
-    const index = sortedActions.findIndex(item => item === skill);
+    const index = sortedActions.findIndex((item) => item === skill);
     let lasthighPriorityCardIndex = -1;
 
     for (let i = 0; i < sortedActions.length; i++) {
@@ -70,13 +81,15 @@ export class TiaoXinSkillTrigger extends ActiveSkillTriggerClass<TiaoXin> {
   public onAskForCardUseEvent(
     content: ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>,
     room: Room,
-    availableCards: CardId[],
+    availableCards: CardId[]
   ) {
     const { scopedTargets, toId } = content;
     const jiangwei = room.getPlayerById(scopedTargets![0]);
     const ai = room.getPlayerById(toId);
 
-    const filteredAvailableCards = availableCards.filter(card => room.canUseCardTo(card, ai, jiangwei));
+    const filteredAvailableCards = availableCards.filter((card) =>
+      room.canUseCardTo(card, ai, jiangwei)
+    );
 
     if (filteredAvailableCards.length > 0) {
       return {

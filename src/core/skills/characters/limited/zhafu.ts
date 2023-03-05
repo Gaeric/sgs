@@ -1,16 +1,30 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, LimitSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  LimitSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@LimitSkill({ name: 'zhafu', description: 'zhafu_description' })
+@LimitSkill({ name: "zhafu", description: "zhafu_description" })
 export class ZhaFu extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return true;
@@ -20,7 +34,11 @@ export class ZhaFu extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner;
   }
 
@@ -36,7 +54,10 @@ export class ZhaFu extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
@@ -55,13 +76,16 @@ export class ZhaFu extends ActiveSkill {
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: 's_zhafu_debuff', description: 's_zhafu_debuff_description' })
+@CommonSkill({
+  name: "s_zhafu_debuff",
+  description: "s_zhafu_debuff_description",
+})
 export class ZhaFuDebuff extends TriggerSkill implements OnDefineReleaseTiming {
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       content.playerId === owner &&
@@ -81,7 +105,7 @@ export class ZhaFuDebuff extends TriggerSkill implements OnDefineReleaseTiming {
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -89,16 +113,22 @@ export class ZhaFuDebuff extends TriggerSkill implements OnDefineReleaseTiming {
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    return event.playerId === owner.Id && event.toStage === PlayerPhaseStages.DropCardStageStart;
+    return (
+      event.playerId === owner.Id &&
+      event.toStage === PlayerPhaseStages.DropCardStageStart
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const players = room.getFlag<PlayerId[]>(event.fromId, ZhaFu.Name).slice();
     if (players) {
       room.removeFlag(event.fromId, ZhaFu.Name);
@@ -106,7 +136,9 @@ export class ZhaFuDebuff extends TriggerSkill implements OnDefineReleaseTiming {
       if (players.length > 0) {
         room.sortPlayersByPosition(players);
         for (const player of players) {
-          const handCards = room.getPlayerById(event.fromId).getCardIds(PlayerCardsArea.HandArea);
+          const handCards = room
+            .getPlayerById(event.fromId)
+            .getCardIds(PlayerCardsArea.HandArea);
           if (handCards.length < 2) {
             break;
           }
@@ -115,23 +147,31 @@ export class ZhaFuDebuff extends TriggerSkill implements OnDefineReleaseTiming {
             continue;
           }
 
-          const response = await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
-            GameEventIdentifiers.AskForCardEvent,
-            EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardEvent>({
-              cardAmount: 1,
-              toId: event.fromId,
-              reason: this.Name,
-              conversation: TranslationPack.translationJsonPatcher(
-                '{0}: please choose a hand card, give the other cards to {1}',
-                this.Name,
-                TranslationPack.patchPlayerInTranslation(room.getPlayerById(player)),
-              ).extract(),
-              fromArea: [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
-              triggeredBySkills: [this.Name],
-            }),
-            event.fromId,
-            true,
-          );
+          const response =
+            await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
+              GameEventIdentifiers.AskForCardEvent,
+              EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardEvent>(
+                {
+                  cardAmount: 1,
+                  toId: event.fromId,
+                  reason: this.Name,
+                  conversation: TranslationPack.translationJsonPatcher(
+                    "{0}: please choose a hand card, give the other cards to {1}",
+                    this.Name,
+                    TranslationPack.patchPlayerInTranslation(
+                      room.getPlayerById(player)
+                    )
+                  ).extract(),
+                  fromArea: [
+                    PlayerCardsArea.HandArea,
+                    PlayerCardsArea.EquipArea,
+                  ],
+                  triggeredBySkills: [this.Name],
+                }
+              ),
+              event.fromId,
+              true
+            );
 
           response.selectedCards =
             response.selectedCards.length > 0
@@ -140,8 +180,8 @@ export class ZhaFuDebuff extends TriggerSkill implements OnDefineReleaseTiming {
 
           await room.moveCards({
             movingCards: handCards
-              .filter(id => id !== response.selectedCards[0])
-              .map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+              .filter((id) => id !== response.selectedCards[0])
+              .map((card) => ({ card, fromArea: CardMoveArea.HandArea })),
             fromId: event.fromId,
             toId: player,
             toArea: CardMoveArea.HandArea,

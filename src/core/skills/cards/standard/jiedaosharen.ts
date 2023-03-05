@@ -1,23 +1,35 @@
-import { JieDaoShaRenSkillTrigger } from 'core/ai/skills/cards/jiedaosharen';
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { TargetGroupUtil } from 'core/shares/libs/utils/target_group';
-import { ActiveSkill, AI, CommonSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { ExtralCardSkillProperty } from '../interface/extral_property';
+import { JieDaoShaRenSkillTrigger } from "@/core/ai/skills/cards/jiedaosharen";
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
+import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(JieDaoShaRenSkillTrigger)
-@CommonSkill({ name: 'jiedaosharen', description: 'ljiedaosharen_description' })
-export class JieDaoShaRenSkill extends ActiveSkill implements ExtralCardSkillProperty {
+@CommonSkill({ name: "jiedaosharen", description: "ljiedaosharen_description" })
+export class JieDaoShaRenSkill
+  extends ActiveSkill
+  implements ExtralCardSkillProperty
+{
   public canUse(room: Room, owner: Player) {
     return (
-      room.getOtherPlayers(owner.Id).find(player => player.getEquipment(CardType.Weapon) !== undefined) !== undefined
+      room
+        .getOtherPlayers(owner.Id)
+        .find(
+          (player) => player.getEquipment(CardType.Weapon) !== undefined
+        ) !== undefined
     );
   }
 
@@ -38,12 +50,18 @@ export class JieDaoShaRenSkill extends ActiveSkill implements ExtralCardSkillPro
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard: CardId,
+    containerCard: CardId
   ): boolean {
     if (selectedTargets.length === 0) {
-      return owner !== target && room.getPlayerById(target).getEquipment(CardType.Weapon) !== undefined;
+      return (
+        owner !== target &&
+        room.getPlayerById(target).getEquipment(CardType.Weapon) !== undefined
+      );
     } else {
-      return room.canAttack(room.getPlayerById(selectedTargets[0]), room.getPlayerById(target));
+      return room.canAttack(
+        room.getPlayerById(selectedTargets[0]),
+        room.getPlayerById(target)
+      );
     }
   }
 
@@ -53,12 +71,21 @@ export class JieDaoShaRenSkill extends ActiveSkill implements ExtralCardSkillPro
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard: CardId,
+    containerCard: CardId
   ): boolean {
-    return this.isCardAvailableTarget(owner, room, target, selectedCards, selectedTargets, containerCard);
+    return this.isCardAvailableTarget(
+      owner,
+      room,
+      target,
+      selectedCards,
+      selectedTargets,
+      containerCard
+    );
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ) {
     const toIds = event.targetGroup![0];
     const { fromId } = event;
     return [
@@ -71,26 +98,37 @@ export class JieDaoShaRenSkill extends ActiveSkill implements ExtralCardSkillPro
     return [targets];
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ) {
     const targets = TargetGroupUtil.getAllTargets(event.targetGroup)![0];
     event.translationsMessage = TranslationPack.translationJsonPatcher(
-      '{0} used card {1} to {2} and announced {3} as pending target',
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.fromId)),
+      "{0} used card {1} to {2} and announced {3} as pending target",
+      TranslationPack.patchPlayerInTranslation(
+        room.getPlayerById(event.fromId)
+      ),
       TranslationPack.patchCardInTranslation(event.cardId),
       TranslationPack.patchPlayerInTranslation(room.getPlayerById(targets[0])),
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(targets[1])),
+      TranslationPack.patchPlayerInTranslation(room.getPlayerById(targets[1]))
     ).extract();
     event.animation = this.getAnimationSteps(event);
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
     const { toIds, cardId } = event;
     if (toIds === undefined || toIds.length < 2) {
       // attacker or target maybe dead before effect
       return false;
     }
-    const [attacker, target] = Precondition.exists(toIds, 'Unknown targets in jiedaosharen');
+    const [attacker, target] = Precondition.exists(
+      toIds,
+      "Unknown targets in jiedaosharen"
+    );
 
     const response = await room.askForCardUse(
       {
@@ -98,18 +136,20 @@ export class JieDaoShaRenSkill extends ActiveSkill implements ExtralCardSkillPro
         byCardId: cardId,
         cardUserId: event.fromId,
         scopedTargets: [target],
-        cardMatcher: new CardMatcher({ generalName: ['slash'] }).toSocketPassenger(),
+        cardMatcher: new CardMatcher({
+          generalName: ["slash"],
+        }).toSocketPassenger(),
         extraUse: true,
         commonUse: true,
         conversation: TranslationPack.translationJsonPatcher(
-          'please use a {0} to player {1} to response {2}',
-          'slash',
+          "please use a {0} to player {1} to response {2}",
+          "slash",
           TranslationPack.patchPlayerInTranslation(room.getPlayerById(target)),
-          TranslationPack.patchCardInTranslation(cardId),
+          TranslationPack.patchCardInTranslation(cardId)
         ).extract(),
         triggeredBySkills: [this.Name],
       },
-      attacker,
+      attacker
     );
 
     if (response.cardId !== undefined) {
@@ -117,7 +157,9 @@ export class JieDaoShaRenSkill extends ActiveSkill implements ExtralCardSkillPro
         fromId: response.fromId,
         cardId: response.cardId,
         targetGroup: response.toIds && [response.toIds],
-        triggeredBySkills: event.triggeredBySkills ? [...event.triggeredBySkills, this.Name] : [this.Name],
+        triggeredBySkills: event.triggeredBySkills
+          ? [...event.triggeredBySkills, this.Name]
+          : [this.Name],
       };
 
       await room.useCard(cardUseEvent, true);

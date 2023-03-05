@@ -1,6 +1,6 @@
-import { GameEventIdentifiers } from 'core/event/event';
-import { Logger } from 'core/shares/libs/logger/logger';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
+import { GameEventIdentifiers } from "@/core/event/event";
+import { Logger } from "@/core/shares/libs/logger/logger";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
 
 export const enum PlayerPhaseStages {
   PhaseBeginStart,
@@ -101,166 +101,166 @@ const playerStagesList: {
 };
 
 export const enum PhaseChangeStage {
-  BeforePhaseChange = 'BeforePhaseChange',
-  PhaseChanged = 'PhaseChanged',
-  AfterPhaseChanged = 'AfterPhaseChanged',
+  BeforePhaseChange = "BeforePhaseChange",
+  PhaseChanged = "PhaseChanged",
+  AfterPhaseChanged = "AfterPhaseChanged",
 }
 
 export const enum PhaseStageChangeStage {
-  BeforeStageChange = 'BeforeStageChange',
-  StageChanged = 'StageChanged',
-  AfterStageChanged = 'AfterStageChanged',
+  BeforeStageChange = "BeforeStageChange",
+  StageChanged = "StageChanged",
+  AfterStageChanged = "AfterStageChanged",
 }
 
 export const enum GameStartStage {
-  BeforeGameStart = 'BeforeGameStart',
-  GameStarting = 'GameStarting',
-  AfterGameStarted = 'AfterGameStarted',
+  BeforeGameStart = "BeforeGameStart",
+  GameStarting = "GameStarting",
+  AfterGameStarted = "AfterGameStarted",
 }
 
 export const enum GameBeginStage {
-  BeforeGameBegin = 'BeforeGameBegin',
-  GameBeginning = 'GameBeginning',
-  AfterGameBegan = 'AfterGameBegan',
+  BeforeGameBegin = "BeforeGameBegin",
+  GameBeginning = "GameBeginning",
+  AfterGameBegan = "AfterGameBegan",
 }
 
 export const enum CircleStartStage {
-  BeforeCircleStart = 'BeforeCircleStart',
-  CircleStarting = 'CircleStarting',
-  AfterCircleStarted = 'AfterCircleStarted',
+  BeforeCircleStart = "BeforeCircleStart",
+  CircleStarting = "CircleStarting",
+  AfterCircleStarted = "AfterCircleStarted",
 }
 
 export const enum AimStage {
-  OnAim = 'OnAim',
-  OnAimmed = 'OnAimmed',
-  AfterAim = 'AfterAim',
-  AfterAimmed = 'AfterAimmed',
+  OnAim = "OnAim",
+  OnAimmed = "OnAimmed",
+  AfterAim = "AfterAim",
+  AfterAimmed = "AfterAimmed",
 }
 
 export const enum CardUseStage {
-  PreCardUse = 'PreCardUse',
-  BeforeCardUseEffect = 'BeforeCardUseEffect',
-  AfterCardUseDeclared = 'AfterCardUseDeclared',
-  AfterCardTargetDeclared = 'AfterCardTargetDeclared',
-  CardUsing = 'CardUsing',
-  AfterCardUseEffect = 'AfterCardUseEffect',
-  CardUseFinishedEffect = 'CardUseFinishedEffect',
+  PreCardUse = "PreCardUse",
+  BeforeCardUseEffect = "BeforeCardUseEffect",
+  AfterCardUseDeclared = "AfterCardUseDeclared",
+  AfterCardTargetDeclared = "AfterCardTargetDeclared",
+  CardUsing = "CardUsing",
+  AfterCardUseEffect = "AfterCardUseEffect",
+  CardUseFinishedEffect = "CardUseFinishedEffect",
 }
 
 export const enum CardEffectStage {
-  PreCardEffect = 'PreCardEffect',
-  BeforeCardEffect = 'BeforeCardEffect',
-  CardEffecting = 'CardEffecting',
-  AfterCardEffect = 'AfterCardEffect',
-  CardEffectCancelledOut = 'CardEffectCancelledOut',
+  PreCardEffect = "PreCardEffect",
+  BeforeCardEffect = "BeforeCardEffect",
+  CardEffecting = "CardEffecting",
+  AfterCardEffect = "AfterCardEffect",
+  CardEffectCancelledOut = "CardEffectCancelledOut",
 }
 
 export const enum CardResponseStage {
-  PreCardResponse = 'PreCardResponse',
-  BeforeCardResponseEffect = 'BeforeCardResponseEffect',
-  CardResponsing = 'CardResponsing',
-  AfterCardResponseEffect = 'AfterCardResponseEffect',
+  PreCardResponse = "PreCardResponse",
+  BeforeCardResponseEffect = "BeforeCardResponseEffect",
+  CardResponsing = "CardResponsing",
+  AfterCardResponseEffect = "AfterCardResponseEffect",
 }
 
 export const enum DrawCardStage {
-  BeforeDrawCardEffect = 'BeforeDrawCardEffect',
-  CardDrawing = 'CardDrawing',
-  AfterDrawCardEffect = 'AfterDrawCardEffect',
+  BeforeDrawCardEffect = "BeforeDrawCardEffect",
+  CardDrawing = "CardDrawing",
+  AfterDrawCardEffect = "AfterDrawCardEffect",
 }
 
 export const enum DamageEffectStage {
-  OnDamageConfirmed = 'OnDamageConfirmed',
-  DamageStart = 'DamageStart',
-  DamageEffect = 'DamageEffect',
-  DamagedEffect = 'DamagedEffect',
-  DamageDone = 'DamageDone',
-  AfterDamageEffect = 'AfterDamageEffect',
-  AfterDamagedEffect = 'AfterDamagedEffect',
-  DamageFinishedEffect = 'DamageFinishedEffect',
-  DamageReduced = 'DamageReduced',
-  DamageTerminated = 'DamageTerminated',
+  OnDamageConfirmed = "OnDamageConfirmed",
+  DamageStart = "DamageStart",
+  DamageEffect = "DamageEffect",
+  DamagedEffect = "DamagedEffect",
+  DamageDone = "DamageDone",
+  AfterDamageEffect = "AfterDamageEffect",
+  AfterDamagedEffect = "AfterDamagedEffect",
+  DamageFinishedEffect = "DamageFinishedEffect",
+  DamageReduced = "DamageReduced",
+  DamageTerminated = "DamageTerminated",
 }
 
 export const enum JudgeEffectStage {
-  BeforeJudge = 'beforeJudge',
-  OnJudge = 'OnJudge',
-  BeforeJudgeEffect = 'BeforeJudgeEffect',
-  JudgeEffect = 'JudgeEffect',
-  AfterJudgeEffect = 'AfterJudgeEffect',
+  BeforeJudge = "beforeJudge",
+  OnJudge = "OnJudge",
+  BeforeJudgeEffect = "BeforeJudgeEffect",
+  JudgeEffect = "JudgeEffect",
+  AfterJudgeEffect = "AfterJudgeEffect",
 }
 
 export const enum PinDianStage {
-  BeforePinDianEffect = 'BeforePinDianEffect',
-  PinDianEffect = 'PinDianEffect',
-  PinDianResultConfirmed = 'PinDianConfirmed', // only used for trigger(), don't put it into stage list;
-  AfterPinDianEffect = 'AfterPinDianEffect',
+  BeforePinDianEffect = "BeforePinDianEffect",
+  PinDianEffect = "PinDianEffect",
+  PinDianResultConfirmed = "PinDianConfirmed", // only used for trigger(), don't put it into stage list;
+  AfterPinDianEffect = "AfterPinDianEffect",
 }
 
 export const enum PlayerDyingStage {
-  PlayerDying = 'PlayerDying',
-  RequestRescue = 'RequestRescue',
-  AfterPlayerDying = 'AfterPlayerDying',
+  PlayerDying = "PlayerDying",
+  RequestRescue = "RequestRescue",
+  AfterPlayerDying = "AfterPlayerDying",
 }
 export const enum PlayerDiedStage {
-  PrePlayerDied = 'PrePlayerDie',
-  PlayerDied = 'PlayerDied',
-  AfterPlayerDied = 'AfterPlayerDied',
+  PrePlayerDied = "PrePlayerDie",
+  PlayerDied = "PlayerDied",
+  AfterPlayerDied = "AfterPlayerDied",
 }
 
 export const enum SkillUseStage {
-  BeforeSkillUse = 'BeforeSkillUse',
-  SkillUsing = 'SkillUsing',
-  AfterSkillUsed = 'AfterSkillUsed',
+  BeforeSkillUse = "BeforeSkillUse",
+  SkillUsing = "SkillUsing",
+  AfterSkillUsed = "AfterSkillUsed",
 }
 export const enum SkillEffectStage {
-  BeforeSkillEffect = 'BeforeSkillEffect',
-  SkillEffecting = 'SkillEffecting',
-  AfterSkillEffected = 'AfterSkillEffected',
+  BeforeSkillEffect = "BeforeSkillEffect",
+  SkillEffecting = "SkillEffecting",
+  AfterSkillEffected = "AfterSkillEffected",
 }
 
 export const enum RecoverEffectStage {
-  BeforeRecoverEffect = 'BeforeRecoverEffect',
-  RecoverEffecting = 'RecoverEffecting',
-  AfterRecoverEffect = 'AfterRecoverEffect',
+  BeforeRecoverEffect = "BeforeRecoverEffect",
+  RecoverEffecting = "RecoverEffecting",
+  AfterRecoverEffect = "AfterRecoverEffect",
 }
 
 export const enum CardMoveStage {
-  BeforeCardMoving = 'BeforeCardMoving',
-  CardMoving = 'CardMoving',
-  AfterCardMoved = 'AfterCardMoved',
+  BeforeCardMoving = "BeforeCardMoving",
+  CardMoving = "CardMoving",
+  AfterCardMoved = "AfterCardMoved",
 }
 
 export const enum TurnOverStage {
-  TurningOver = 'TurningOver',
-  TurnedOver = 'TurnedOver',
+  TurningOver = "TurningOver",
+  TurnedOver = "TurnedOver",
 }
 
 export const enum ChainLockStage {
-  BeforeChainingOn = 'BeforeChainingOn',
-  Chaining = 'Chaining',
-  AfterChainedOn = 'AfterChainedOn',
+  BeforeChainingOn = "BeforeChainingOn",
+  Chaining = "Chaining",
+  AfterChainedOn = "AfterChainedOn",
 }
 
 export const enum LoseHpStage {
-  BeforeLoseHp = 'BeforeLoseHp',
-  LosingHp = 'LosingHp',
-  AfterLostHp = 'AfterLostHp',
+  BeforeLoseHp = "BeforeLoseHp",
+  LosingHp = "LosingHp",
+  AfterLostHp = "AfterLostHp",
 }
 
 export const enum HpChangeStage {
-  BeforeHpChange = 'BeforeHpChange',
-  HpChanging = 'HpChanging',
-  AfterHpChange = 'AfterHpChange',
+  BeforeHpChange = "BeforeHpChange",
+  HpChanging = "HpChanging",
+  AfterHpChange = "AfterHpChange",
 }
 
 export const enum LevelBeginStage {
-  LevelBegining = 'LevelBegining',
+  LevelBegining = "LevelBegining",
 }
 
 export const enum ArmorChangeStage {
-  BeforeArmorChange = 'BeforeArmorChange',
-  ArmorChanging = 'ArmorChanging',
-  AfterArmorChange = 'AfterArmorChange',
+  BeforeArmorChange = "BeforeArmorChange",
+  ArmorChanging = "ArmorChanging",
+  AfterArmorChange = "AfterArmorChange",
 }
 
 export type GameEventStage =
@@ -350,7 +350,10 @@ const gameEventStageList: {
     JudgeEffectStage.JudgeEffect,
     JudgeEffectStage.AfterJudgeEffect,
   ],
-  [GameEventIdentifiers.PlayerDyingEvent]: [PlayerDyingStage.PlayerDying, PlayerDyingStage.AfterPlayerDying],
+  [GameEventIdentifiers.PlayerDyingEvent]: [
+    PlayerDyingStage.PlayerDying,
+    PlayerDyingStage.AfterPlayerDying,
+  ],
   [GameEventIdentifiers.PlayerDiedEvent]: [
     PlayerDiedStage.PrePlayerDied,
     PlayerDiedStage.PlayerDied,
@@ -381,7 +384,12 @@ const gameEventStageList: {
     PinDianStage.PinDianEffect,
     PinDianStage.AfterPinDianEffect,
   ],
-  [GameEventIdentifiers.AimEvent]: [AimStage.OnAim, AimStage.OnAimmed, AimStage.AfterAim, AimStage.AfterAimmed],
+  [GameEventIdentifiers.AimEvent]: [
+    AimStage.OnAim,
+    AimStage.OnAimmed,
+    AimStage.AfterAim,
+    AimStage.AfterAimmed,
+  ],
   [GameEventIdentifiers.PhaseChangeEvent]: [
     PhaseChangeStage.BeforePhaseChange,
     PhaseChangeStage.PhaseChanged,
@@ -412,8 +420,15 @@ const gameEventStageList: {
     ChainLockStage.Chaining,
     ChainLockStage.AfterChainedOn,
   ],
-  [GameEventIdentifiers.LoseHpEvent]: [LoseHpStage.BeforeLoseHp, LoseHpStage.LosingHp, LoseHpStage.AfterLostHp],
-  [GameEventIdentifiers.PlayerTurnOverEvent]: [TurnOverStage.TurningOver, TurnOverStage.TurnedOver],
+  [GameEventIdentifiers.LoseHpEvent]: [
+    LoseHpStage.BeforeLoseHp,
+    LoseHpStage.LosingHp,
+    LoseHpStage.AfterLostHp,
+  ],
+  [GameEventIdentifiers.PlayerTurnOverEvent]: [
+    TurnOverStage.TurningOver,
+    TurnOverStage.TurnedOver,
+  ],
 };
 
 export class StageProcessor {
@@ -422,7 +437,10 @@ export class StageProcessor {
   constructor(private logger: Logger) {}
 
   public involve(identifier: GameEventIdentifiers) {
-    const stageList = Precondition.exists(gameEventStageList[identifier], `Unable to get game event of ${identifier}`);
+    const stageList = Precondition.exists(
+      gameEventStageList[identifier],
+      `Unable to get game event of ${identifier}`
+    );
 
     this.gameEventStageList.unshift(stageList.slice());
 
@@ -435,7 +453,7 @@ export class StageProcessor {
   public getNextStage(): GameEventStage | undefined {
     Precondition.assert(
       this.gameEventStageList.length > 0,
-      'stage_processor.ts >> getNextStage() >> error: getting in empty gameEventStageList',
+      "stage_processor.ts >> getNextStage() >> error: getting in empty gameEventStageList"
     );
 
     if (this.gameEventStageList[0].length === 0) {
@@ -469,12 +487,18 @@ export class StageProcessor {
     this.gameEventStageList.shift();
   }
 
-  public isInsideEvent(identifier: GameEventIdentifiers, stage?: GameEventStage) {
+  public isInsideEvent(
+    identifier: GameEventIdentifiers,
+    stage?: GameEventStage
+  ) {
     if (stage === undefined) {
       return false;
     }
 
-    const stageList = Precondition.exists(gameEventStageList[identifier], `Can't find stage events of ${identifier}`);
+    const stageList = Precondition.exists(
+      gameEventStageList[identifier],
+      `Can't find stage events of ${identifier}`
+    );
     return stageList.includes(stage);
   }
 
@@ -506,11 +530,15 @@ export class StageProcessor {
     return playerStagesList[phase].includes(stage);
   }
 
-  public getInsidePlayerPhase(specificStage: PlayerPhaseStages | undefined): PlayerPhase {
+  public getInsidePlayerPhase(
+    specificStage: PlayerPhaseStages | undefined
+  ): PlayerPhase {
     if (specificStage === undefined) {
       return PlayerPhase.PhaseBegin;
     }
-    for (const [stage, stageList] of Object.entries(playerStagesList) as unknown as [string, PlayerPhaseStages[]][]) {
+    for (const [stage, stageList] of Object.entries(
+      playerStagesList
+    ) as unknown as [string, PlayerPhaseStages[]][]) {
       if (stageList.includes(specificStage)) {
         return parseInt(stage, 10) as PlayerPhase;
       }

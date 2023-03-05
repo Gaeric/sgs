@@ -1,7 +1,11 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { DamageType } from 'core/game/game_props';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { DamageType } from "@/core/game/game_props";
 import {
   AllStage,
   DamageEffectStage,
@@ -9,17 +13,17 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { OnDefineReleaseTiming, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { QiXing } from './qixing';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { OnDefineReleaseTiming, TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { QiXing } from "./qixing";
 
-@CommonSkill({ name: 'kuangfeng', description: 'kuangfeng_description' })
+@CommonSkill({ name: "kuangfeng", description: "kuangfeng_description" })
 export class KuangFeng extends TriggerSkill implements OnDefineReleaseTiming {
   public async whenLosingSkill(room: Room, player: Player) {
     for (const other of room.getOtherPlayers(player.Id)) {
@@ -41,11 +45,18 @@ export class KuangFeng extends TriggerSkill implements OnDefineReleaseTiming {
     }
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
     return (
       content.toStage === PlayerPhaseStages.FinishStageStart &&
       content.playerId === owner.Id &&
@@ -62,7 +73,10 @@ export class KuangFeng extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   public isAvailableCard(owner: PlayerId, room: Room, pendingCardId: CardId) {
-    return room.getPlayerById(owner).getCardIds(PlayerCardsArea.OutsideArea, QiXing.Name).includes(pendingCardId);
+    return room
+      .getPlayerById(owner)
+      .getCardIds(PlayerCardsArea.OutsideArea, QiXing.Name)
+      .includes(pendingCardId);
   }
 
   public numberOfTargets() {
@@ -77,13 +91,16 @@ export class KuangFeng extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     await room.dropCards(
       CardMoveReason.PlaceToDropStack,
       skillUseEvent.cardIds!,
       skillUseEvent.fromId,
       skillUseEvent.fromId,
-      this.Name,
+      this.Name
     );
     room.addMark(skillUseEvent.toIds![0], MarkEnum.KuangFeng, 1);
     return true;
@@ -92,17 +109,27 @@ export class KuangFeng extends TriggerSkill implements OnDefineReleaseTiming {
 
 @ShadowSkill
 @CommonSkill({ name: KuangFeng.Name, description: KuangFeng.Description })
-export class KuangFengShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class KuangFengShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseBegin && stage === PhaseChangeStage.AfterPhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseBegin &&
+      stage === PhaseChangeStage.AfterPhaseChanged
+    );
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage !== DamageEffectStage.DamagedEffect;
   }
 
@@ -110,21 +137,38 @@ export class KuangFengShadow extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
-    return stage === DamageEffectStage.DamagedEffect || stage === PhaseChangeStage.AfterPhaseChanged;
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
+    return (
+      stage === DamageEffectStage.DamagedEffect ||
+      stage === PhaseChangeStage.AfterPhaseChanged
+    );
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers>
+  ): boolean {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
-      return damageEvent.damageType === DamageType.Fire && room.getMark(damageEvent.toId, MarkEnum.KuangFeng) > 0;
+      const damageEvent =
+        event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      return (
+        damageEvent.damageType === DamageType.Fire &&
+        room.getMark(damageEvent.toId, MarkEnum.KuangFeng) > 0
+      );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      const phaseChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
       return (
         phaseChangeEvent.to === PlayerPhase.PhaseBegin &&
         phaseChangeEvent.toPlayer === owner.Id &&
-        !!room.getAlivePlayersFrom().find(player => player.getMark(MarkEnum.KuangFeng) > 0)
+        !!room
+          .getAlivePlayersFrom()
+          .find((player) => player.getMark(MarkEnum.KuangFeng) > 0)
       );
     }
     return false;
@@ -132,30 +176,37 @@ export class KuangFengShadow extends TriggerSkill implements OnDefineReleaseTimi
 
   public async onTrigger(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
   ): Promise<boolean> {
-    const unknownEvent = skillUseEvent.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers>;
+    const unknownEvent =
+      skillUseEvent.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers>;
     const identifier = EventPacker.getIdentifier(unknownEvent);
     if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
-      skillUseEvent.translationsMessage = TranslationPack.translationJsonPatcher(
-        '{0} used skill {1}, damage increases to {2}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(skillUseEvent.fromId)),
-        this.GeneralName,
-        damageEvent.damage + 1,
-      ).extract();
+      const damageEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      skillUseEvent.translationsMessage =
+        TranslationPack.translationJsonPatcher(
+          "{0} used skill {1}, damage increases to {2}",
+          TranslationPack.patchPlayerInTranslation(
+            room.getPlayerById(skillUseEvent.fromId)
+          ),
+          this.GeneralName,
+          damageEvent.damage + 1
+        ).extract();
     }
     return true;
   }
 
   public async onEffect(
     room: Room,
-    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
-    const unknownEvent = skillEffectEvent.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers>;
+    const unknownEvent =
+      skillEffectEvent.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers>;
     const identifier = EventPacker.getIdentifier(unknownEvent);
     if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       damageEvent.damage++;
     } else {
       for (const player of room.getAlivePlayersFrom()) {

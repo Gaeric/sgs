@@ -1,18 +1,26 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, DamageEffectStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'junlve', description: 'junlve_description' })
+@CompulsorySkill({ name: "junlve", description: "junlve_description" })
 export class JunLve extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage) {
-    return stage === DamageEffectStage.AfterDamageEffect || stage === DamageEffectStage.AfterDamagedEffect;
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ) {
+    return (
+      stage === DamageEffectStage.AfterDamageEffect ||
+      stage === DamageEffectStage.AfterDamagedEffect
+    );
   }
 
-  public triggerableTimes(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>) {
+  public triggerableTimes(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ) {
     return event.damage;
   }
 
@@ -20,11 +28,13 @@ export class JunLve extends TriggerSkill {
     room: Room,
     owner: Player,
     content: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ) {
     return (
-      (content.fromId === owner.Id && stage === DamageEffectStage.AfterDamageEffect) ||
-      (content.toId === owner.Id && stage === DamageEffectStage.AfterDamagedEffect)
+      (content.fromId === owner.Id &&
+        stage === DamageEffectStage.AfterDamageEffect) ||
+      (content.toId === owner.Id &&
+        stage === DamageEffectStage.AfterDamagedEffect)
     );
   }
 
@@ -32,7 +42,10 @@ export class JunLve extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     room.addMark(skillUseEvent.fromId, MarkEnum.JunLve, 1);
     return true;
   }

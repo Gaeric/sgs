@@ -1,62 +1,90 @@
-import { CardChoosingOptions } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'yajiao', description: 'yajiao_description' })
+@CommonSkill({ name: "yajiao", description: "yajiao_description" })
 export class YaJiao extends TriggerSkill {
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ) {
     return (
       stage === CardMoveStage.AfterCardMoved &&
       event.infos.find(
-        info =>
-          info.movingCards.find(cardInfo => cardInfo.fromArea === CardMoveArea.HandArea) !== undefined &&
-          [CardMoveReason.CardResponse, CardMoveReason.CardUse].includes(info.moveReason),
+        (info) =>
+          info.movingCards.find(
+            (cardInfo) => cardInfo.fromArea === CardMoveArea.HandArea
+          ) !== undefined &&
+          [CardMoveReason.CardResponse, CardMoveReason.CardUse].includes(
+            info.moveReason
+          )
       ) !== undefined
     );
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>) {
-    return content.infos.find(info => owner.Id === info.fromId) !== undefined && room.CurrentPlayer.Id !== owner.Id;
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ) {
+    return (
+      content.infos.find((info) => owner.Id === info.fromId) !== undefined &&
+      room.CurrentPlayer.Id !== owner.Id
+    );
   }
 
   async onTrigger() {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, triggeredOnEvent } = skillUseEvent;
-    const cardUseOrResponseEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
-    const card = room.getCards(1, 'top');
-    const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-      fromId,
-      displayCards: card,
-      translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} displayed cards {1} from top of draw stack',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-        TranslationPack.patchCardInTranslation(...card),
-      ).extract(),
-    };
+    const cardUseOrResponseEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
+    const card = room.getCards(1, "top");
+    const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+      {
+        fromId,
+        displayCards: card,
+        translationsMessage: TranslationPack.translationJsonPatcher(
+          "{0} displayed cards {1} from top of draw stack",
+          TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+          TranslationPack.patchCardInTranslation(...card)
+        ).extract(),
+      };
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, cardDisplayEvent);
 
-    const lostCard = Sanguosha.getCardById(cardUseOrResponseEvent.infos[0].movingCards[0].card);
+    const lostCard = Sanguosha.getCardById(
+      cardUseOrResponseEvent.infos[0].movingCards[0].card
+    );
     const obtainedCard = Sanguosha.getCardById(card[0]);
     const sameType = lostCard.BaseType === obtainedCard.BaseType;
 
     const from = room.getPlayerById(fromId);
     const targets = room.AlivePlayers.filter(
-      player => room.withinAttackDistance(player, from) && player.getCardIds().length > 0,
-    ).map(p => p.Id);
+      (player) =>
+        room.withinAttackDistance(player, from) &&
+        player.getCardIds().length > 0
+    ).map((p) => p.Id);
 
     if (!sameType && targets.length < 1) {
       await room.moveCards({
-        movingCards: card.map(card => ({ card })),
+        movingCards: card.map((card) => ({ card })),
         moveReason: CardMoveReason.PlaceToDropStack,
         toArea: CardMoveArea.DropStack,
         hideBroadcast: true,
@@ -66,35 +94,45 @@ export class YaJiao extends TriggerSkill {
       return false;
     }
 
-    const choosePlayerEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> = {
-      players: sameType ? room.AlivePlayers.map(p => p.Id) : targets,
-      requiredAmount: 1,
-      conversation: sameType
-        ? TranslationPack.translationJsonPatcher(
-            '{0}: please choose a player to obtain {1}',
-            this.Name,
-            TranslationPack.patchCardInTranslation(card[0]),
-          ).extract()
-        : TranslationPack.translationJsonPatcher('{0}: please choose a player to drop', this.Name).extract(),
-      toId: fromId,
-      triggeredBySkills: [this.Name],
-    };
+    const choosePlayerEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> =
+      {
+        players: sameType ? room.AlivePlayers.map((p) => p.Id) : targets,
+        requiredAmount: 1,
+        conversation: sameType
+          ? TranslationPack.translationJsonPatcher(
+              "{0}: please choose a player to obtain {1}",
+              this.Name,
+              TranslationPack.patchCardInTranslation(card[0])
+            ).extract()
+          : TranslationPack.translationJsonPatcher(
+              "{0}: please choose a player to drop",
+              this.Name
+            ).extract(),
+        toId: fromId,
+        triggeredBySkills: [this.Name],
+      };
 
     room.notify(
       GameEventIdentifiers.AskForChoosingPlayerEvent,
-      EventPacker.createIdentifierEvent(GameEventIdentifiers.AskForChoosingPlayerEvent, choosePlayerEvent),
-      fromId,
+      EventPacker.createIdentifierEvent(
+        GameEventIdentifiers.AskForChoosingPlayerEvent,
+        choosePlayerEvent
+      ),
+      fromId
     );
 
     const { selectedPlayers } = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingPlayerEvent,
-      fromId,
+      fromId
     );
 
     if (selectedPlayers && selectedPlayers.length === 1) {
       if (sameType) {
         await room.moveCards({
-          movingCards: card.map(cardId => ({ card: cardId, fromArea: CardMoveArea.ProcessingArea })),
+          movingCards: card.map((cardId) => ({
+            card: cardId,
+            fromArea: CardMoveArea.ProcessingArea,
+          })),
           proposer: fromId,
           toId: selectedPlayers[0],
           toArea: CardMoveArea.HandArea,
@@ -110,7 +148,8 @@ export class YaJiao extends TriggerSkill {
         const options: CardChoosingOptions = {
           [PlayerCardsArea.JudgeArea]: to.getCardIds(PlayerCardsArea.JudgeArea),
           [PlayerCardsArea.EquipArea]: to.getCardIds(PlayerCardsArea.EquipArea),
-          [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea).length,
+          [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea)
+            .length,
         };
 
         const chooseCardEvent = {
@@ -122,18 +161,21 @@ export class YaJiao extends TriggerSkill {
 
         room.notify(
           GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-          EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(chooseCardEvent),
-          fromId,
+          EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
+            chooseCardEvent
+          ),
+          fromId
         );
 
         const response = await room.onReceivingAsyncResponseFrom(
           GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-          fromId,
+          fromId
         );
 
         if (response.selectedCard === undefined) {
           const cardIds = to.getCardIds(PlayerCardsArea.HandArea);
-          response.selectedCard = cardIds[Math.floor(Math.random() * cardIds.length)];
+          response.selectedCard =
+            cardIds[Math.floor(Math.random() * cardIds.length)];
         }
 
         await room.dropCards(
@@ -141,11 +183,11 @@ export class YaJiao extends TriggerSkill {
           [response.selectedCard],
           chooseCardEvent.toId,
           chooseCardEvent.fromId,
-          this.Name,
+          this.Name
         );
 
         await room.moveCards({
-          movingCards: card.map(card => ({ card })),
+          movingCards: card.map((card) => ({ card })),
           moveReason: CardMoveReason.PlaceToDropStack,
           toArea: CardMoveArea.DropStack,
           hideBroadcast: true,
@@ -154,7 +196,7 @@ export class YaJiao extends TriggerSkill {
       }
     } else {
       await room.moveCards({
-        movingCards: card.map(card => ({ card })),
+        movingCards: card.map((card) => ({ card })),
         moveReason: CardMoveReason.PlaceToDropStack,
         toArea: CardMoveArea.DropStack,
         hideBroadcast: true,

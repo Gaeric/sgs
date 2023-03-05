@@ -1,19 +1,29 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'huituo', description: 'huituo_description' })
+@CommonSkill({ name: "huituo", description: "huituo_description" })
 export class HuiTuo extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DamageEffectStage.AfterDamagedEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ): boolean {
     return content.toId === owner.Id;
   }
 
@@ -28,16 +38,18 @@ export class HuiTuo extends TriggerSkill {
   public getSkillLog(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to choose a target to judge? if the result is red, he recover, otherwise he draw {1} cards',
+      "{0}: do you want to choose a target to judge? if the result is red, he recover, otherwise he draw {1} cards",
       this.Name,
-      content.damage,
+      content.damage
     ).extract();
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return event.toIds ? [{ from: event.fromId, tos: event.toIds }] : [];
   }
 
@@ -45,7 +57,10 @@ export class HuiTuo extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { toIds } = event;
     if (!toIds) {
       return false;
@@ -60,11 +75,13 @@ export class HuiTuo extends TriggerSkill {
       });
     } else if (Sanguosha.getCardById(judgeEvent.judgeCardId).isBlack()) {
       await room.drawCards(
-        (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>).damage,
+        (
+          event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>
+        ).damage,
         toIds[0],
-        'top',
+        "top",
         toIds[0],
-        this.Name,
+        this.Name
       );
     }
 

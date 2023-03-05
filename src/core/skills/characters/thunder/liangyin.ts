@@ -1,12 +1,20 @@
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, CardMoveStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ShadowSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'liangyin', description: 'liangyin_description' })
+@CommonSkill({ name: "liangyin", description: "liangyin_description" })
 export class LiangYin extends TriggerSkill {
   public static readonly LiangYinAreas = [
     CardMoveArea.DrawStack,
@@ -17,21 +25,29 @@ export class LiangYin extends TriggerSkill {
     CardMoveArea.ProcessingArea,
   ];
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     return (
       content.infos.find(
-        info =>
+        (info) =>
           !LiangYin.LiangYinAreas.includes(info.toArea as CardMoveArea) &&
           room
             .getOtherPlayers(owner.Id)
             .find(
-              player =>
-                owner.getCardIds(PlayerCardsArea.HandArea).length < player.getCardIds(PlayerCardsArea.HandArea).length,
-            ) !== undefined,
+              (player) =>
+                owner.getCardIds(PlayerCardsArea.HandArea).length <
+                player.getCardIds(PlayerCardsArea.HandArea).length
+            ) !== undefined
       ) !== undefined
     );
   }
@@ -40,7 +56,11 @@ export class LiangYin extends TriggerSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return (
       room.getPlayerById(owner).getCardIds(PlayerCardsArea.HandArea).length <
       room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length
@@ -49,8 +69,8 @@ export class LiangYin extends TriggerSkill {
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to choose a liangyin target to draw 1 card?',
-      this.Name,
+      "{0}: do you want to choose a liangyin target to draw 1 card?",
+      this.Name
     ).extract();
   }
 
@@ -58,13 +78,16 @@ export class LiangYin extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
     }
 
-    await room.drawCards(1, toIds[0], 'top', fromId, this.Name);
+    await room.drawCards(1, toIds[0], "top", fromId, this.Name);
 
     return true;
   }
@@ -73,26 +96,36 @@ export class LiangYin extends TriggerSkill {
 @ShadowSkill
 @CommonSkill({ name: LiangYin.Name, description: LiangYin.Description })
 export class LiangYinShadow extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     return (
       content.infos.find(
-        info =>
+        (info) =>
           info.movingCards &&
           info.movingCards.find(
-            card => card.fromArea && !LiangYin.LiangYinAreas.includes(card.fromArea as CardMoveArea),
+            (card) =>
+              card.fromArea &&
+              !LiangYin.LiangYinAreas.includes(card.fromArea as CardMoveArea)
           ) !== undefined &&
           info.toArea === CardMoveArea.HandArea &&
           room
             .getOtherPlayers(owner.Id)
             .find(
-              player =>
+              (player) =>
                 owner.getCardIds(PlayerCardsArea.HandArea).length >
-                  player.getCardIds(PlayerCardsArea.HandArea).length && player.getPlayerCards().length > 0,
-            ) !== undefined,
+                  player.getCardIds(PlayerCardsArea.HandArea).length &&
+                player.getPlayerCards().length > 0
+            ) !== undefined
       ) !== undefined
     );
   }
@@ -101,18 +134,23 @@ export class LiangYinShadow extends TriggerSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     const to = room.getPlayerById(target);
     return (
       room.getPlayerById(owner).getCardIds(PlayerCardsArea.HandArea).length >
-        to.getCardIds(PlayerCardsArea.HandArea).length && to.getPlayerCards().length > 0
+        to.getCardIds(PlayerCardsArea.HandArea).length &&
+      to.getPlayerCards().length > 0
     );
   }
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to choose a liangyin target to drop 1 card?',
-      this.GeneralName,
+      "{0}: do you want to choose a liangyin target to drop 1 card?",
+      this.GeneralName
     ).extract();
   }
 
@@ -120,7 +158,10 @@ export class LiangYinShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { toIds } = event;
     if (!toIds) {
       return false;
@@ -132,11 +173,17 @@ export class LiangYinShadow extends TriggerSkill {
       [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
       true,
       undefined,
-      this.Name,
+      this.Name
     );
 
     response.droppedCards.length > 0 &&
-      (await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, toIds[0], toIds[0], this.Name));
+      (await room.dropCards(
+        CardMoveReason.SelfDrop,
+        response.droppedCards,
+        toIds[0],
+        toIds[0],
+        this.Name
+      ));
 
     return true;
   }

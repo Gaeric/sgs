@@ -1,48 +1,80 @@
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AimStage, AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, OnDefineReleaseTiming, RulesBreakerSkill, TriggerSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AimStage,
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  OnDefineReleaseTiming,
+  RulesBreakerSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'jianchu', description: 'jianchu_description' })
+@CommonSkill({ name: "jianchu", description: "jianchu_description" })
 export class Jianchu extends TriggerSkill {
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.AimEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>,
+    stage?: AllStage
+  ) {
     return (
       stage === AimStage.AfterAim &&
       event.byCardId !== undefined &&
-      Sanguosha.getCardById(event.byCardId).GeneralName === 'slash'
+      Sanguosha.getCardById(event.byCardId).GeneralName === "slash"
     );
   }
-  canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.AimEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>
+  ) {
     if (!event) {
       return false;
     }
     const { fromId, toId } = event;
     const target = room.getPlayerById(toId);
 
-    return fromId === owner.Id && !target.Dead && target.getPlayerCards().length > 0;
+    return (
+      fromId === owner.Id && !target.Dead && target.getPlayerCards().length > 0
+    );
   }
 
-  async onTrigger(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onTrigger(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent } = skillUseEvent;
-    const aimEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+    const aimEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
 
     const to = room.getPlayerById(aimEvent.toId);
 
     const options: CardChoosingOptions = {
       [PlayerCardsArea.EquipArea]: to.getCardIds(PlayerCardsArea.EquipArea),
-      [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea).length,
+      [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea)
+        .length,
     };
 
     const chooseCardEvent = {
@@ -52,7 +84,12 @@ export class Jianchu extends TriggerSkill {
       triggeredBySkills: [this.Name],
     };
 
-    const response = await room.askForChoosingPlayerCard(chooseCardEvent, skillUseEvent.fromId, true, true);
+    const response = await room.askForChoosingPlayerCard(
+      chooseCardEvent,
+      skillUseEvent.fromId,
+      true,
+      true
+    );
 
     if (!response) {
       return false;
@@ -63,16 +100,26 @@ export class Jianchu extends TriggerSkill {
       [response.selectedCard!],
       chooseCardEvent.toId,
       chooseCardEvent.fromId,
-      this.Name,
+      this.Name
     );
 
     if (!Sanguosha.getCardById(response.selectedCard!).is(CardType.Basic)) {
       EventPacker.setDisresponsiveEvent(aimEvent);
-      const additionalTimes = room.getFlag<number>(skillUseEvent.fromId, this.Name) || 0;
-      room.setFlag<number>(skillUseEvent.fromId, this.Name, additionalTimes + 1);
-    } else if (aimEvent.byCardId && room.getCardOwnerId(aimEvent.byCardId) === undefined) {
+      const additionalTimes =
+        room.getFlag<number>(skillUseEvent.fromId, this.Name) || 0;
+      room.setFlag<number>(
+        skillUseEvent.fromId,
+        this.Name,
+        additionalTimes + 1
+      );
+    } else if (
+      aimEvent.byCardId &&
+      room.getCardOwnerId(aimEvent.byCardId) === undefined
+    ) {
       await room.moveCards({
-        movingCards: [{ card: aimEvent.byCardId, fromArea: CardMoveArea.ProcessingArea }],
+        movingCards: [
+          { card: aimEvent.byCardId, fromArea: CardMoveArea.ProcessingArea },
+        ],
         moveReason: CardMoveReason.ActivePrey,
         toArea: CardMoveArea.HandArea,
         toId: to.Id,
@@ -86,12 +133,16 @@ export class Jianchu extends TriggerSkill {
 @ShadowSkill
 @CommonSkill({ name: Jianchu.Name, description: Jianchu.Description })
 export class JianChuShadow extends RulesBreakerSkill {
-  public breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player) {
+  public breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ) {
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ generalName: ['slash'] }));
+      match = cardId.match(new CardMatcher({ generalName: ["slash"] }));
     } else {
-      match = Sanguosha.getCardById(cardId).GeneralName === 'slash';
+      match = Sanguosha.getCardById(cardId).GeneralName === "slash";
     }
 
     const additionalTimes = room.getFlag<number>(owner.Id, this.GeneralName);
@@ -104,15 +155,24 @@ export class JianChuShadow extends RulesBreakerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: JianChuShadow.Name, description: JianChuShadow.Description })
-export class JianchuRemove extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: JianChuShadow.Name,
+  description: JianChuShadow.Description,
+})
+export class JianchuRemove
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -125,13 +185,23 @@ export class JianchuRemove extends TriggerSkill implements OnDefineReleaseTiming
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
-    stage: PhaseChangeStage,
+    stage: PhaseChangeStage
   ): boolean {
-    return stage === PhaseChangeStage.PhaseChanged && event.from === PlayerPhase.PhaseFinish;
+    return (
+      stage === PhaseChangeStage.PhaseChanged &&
+      event.from === PlayerPhase.PhaseFinish
+    );
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
-    return content.fromPlayer === owner.Id && room.getFlag<number>(owner.Id, this.GeneralName) !== undefined;
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
+    return (
+      content.fromPlayer === owner.Id &&
+      room.getFlag<number>(owner.Id, this.GeneralName) !== undefined
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
@@ -140,7 +210,7 @@ export class JianchuRemove extends TriggerSkill implements OnDefineReleaseTiming
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     room.removeFlag(skillUseEvent.fromId, this.GeneralName);
 

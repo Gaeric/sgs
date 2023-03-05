@@ -1,8 +1,13 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardDrawReason, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardDrawReason,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
 import {
   AllStage,
   DrawCardStage,
@@ -10,16 +15,16 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { RulesBreakerSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { RulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'jieying', description: 'jieying_description' })
+@CommonSkill({ name: "jieying", description: "jieying_description" })
 export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
   async whenLosingSkill(room: Room, player: Player) {
     for (const other of room.getOtherPlayers(player.Id)) {
@@ -45,13 +50,20 @@ export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
   public isAutoTrigger(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.PhaseStageChangeEvent>,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.PhaseChangeEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
+    >
   ): boolean {
     if (
-      (EventPacker.getIdentifier(event) === GameEventIdentifiers.PhaseChangeEvent &&
-        (event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>).to === PlayerPhase.PhaseBegin) ||
-      (EventPacker.getIdentifier(event) === GameEventIdentifiers.PhaseStageChangeEvent &&
-        (event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>).playerId !== owner.Id)
+      (EventPacker.getIdentifier(event) ===
+        GameEventIdentifiers.PhaseChangeEvent &&
+        (event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>)
+          .to === PlayerPhase.PhaseBegin) ||
+      (EventPacker.getIdentifier(event) ===
+        GameEventIdentifiers.PhaseStageChangeEvent &&
+        (event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>)
+          .playerId !== owner.Id)
     ) {
       return true;
     }
@@ -59,32 +71,43 @@ export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.PhaseChangeEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
     return (
       stage === PhaseChangeStage.BeforePhaseChange ||
       (stage === PhaseStageChangeStage.StageChanged &&
-        (event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>).toStage ===
-          PlayerPhaseStages.PhaseFinish)
+        (event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>)
+          .toStage === PlayerPhaseStages.PhaseFinish)
     );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.PhaseStageChangeEvent>,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.PhaseChangeEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
+    >
   ) {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
       return (
-        room.AlivePlayers.find(player => player.getMark(MarkEnum.Ying) > 0) === undefined &&
-        room.CurrentPlayer.Id === owner.Id
+        room.AlivePlayers.find(
+          (player) => player.getMark(MarkEnum.Ying) > 0
+        ) === undefined && room.CurrentPlayer.Id === owner.Id
       );
     } else if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {
       return (
         room
-          .getPlayerById((event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>).playerId)
+          .getPlayerById(
+            (
+              event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+            ).playerId
+          )
           .getMark(MarkEnum.Ying) > 0
       );
     }
@@ -97,12 +120,18 @@ export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard?: CardId,
+    containerCard?: CardId
   ) {
     return !room.getPlayerById(target).getFlag<boolean>(this.jieYingTarget);
   }
 
-  targetFilter(room: Room, owner: Player, targets: PlayerId[], selectedCards: CardId[], cardId?: CardId) {
+  targetFilter(
+    room: Room,
+    owner: Player,
+    targets: PlayerId[],
+    selectedCards: CardId[],
+    cardId?: CardId
+  ) {
     return targets.length === 1;
   }
 
@@ -110,11 +139,11 @@ export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  private readonly jieYingTarget = 'jieyingTarget';
+  private readonly jieYingTarget = "jieyingTarget";
 
   public async onEffect(
     room: Room,
-    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { triggeredOnEvent, fromId, toIds } = skillEffectEvent;
     const identifier = EventPacker.getIdentifier(triggeredOnEvent!);
@@ -137,7 +166,8 @@ export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
         await room.loseSkill(fromId, JieYingEffect.Name);
         await room.obtainSkill(toId, JieYingEffect.Name);
       } else {
-        const event = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
+        const event =
+          triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
         room.removeMark(event.playerId, MarkEnum.Ying);
 
         await room.moveCards({
@@ -145,7 +175,7 @@ export class JieYing extends TriggerSkill implements OnDefineReleaseTiming {
           movingCards: room
             .getPlayerById(event.playerId)
             .getCardIds(PlayerCardsArea.HandArea)
-            .map(card => ({ card, fromArea: PlayerCardsArea.HandArea })),
+            .map((card) => ({ card, fromArea: PlayerCardsArea.HandArea })),
           moveReason: CardMoveReason.PassiveMove,
           movedByReason: this.Name,
           toArea: PlayerCardsArea.HandArea,
@@ -165,11 +195,18 @@ export class JieYingDraw extends TriggerSkill {
     return true;
   }
 
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>,
+    stage?: AllStage
+  ) {
     return stage === DrawCardStage.CardDrawing;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>
+  ) {
     return (
       room.getPlayerById(content.fromId).getMark(MarkEnum.Ying) > 0 &&
       room.CurrentPlayerPhase === PlayerPhase.DrawCardStage &&
@@ -177,14 +214,21 @@ export class JieYingDraw extends TriggerSkill {
     );
   }
 
-  async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     event.translationsMessage = undefined;
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent } = skillUseEvent;
-    const drawCardEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+    const drawCardEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
     drawCardEvent.drawAmount += 1;
 
     return true;
@@ -194,16 +238,20 @@ export class JieYingDraw extends TriggerSkill {
 @ShadowSkill
 @CommonSkill({ name: JieYingDraw.Name, description: JieYingDraw.Description })
 export class JieYingEffect extends RulesBreakerSkill {
-  public breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (room.getMark(owner.Id, MarkEnum.Ying) === 0) {
       return 0;
     }
 
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ generalName: ['slash'] }));
+      match = cardId.match(new CardMatcher({ generalName: ["slash"] }));
     } else {
-      match = Sanguosha.getCardById(cardId).GeneralName === 'slash';
+      match = Sanguosha.getCardById(cardId).GeneralName === "slash";
     }
 
     if (match) {

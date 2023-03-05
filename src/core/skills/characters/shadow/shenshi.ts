@@ -1,36 +1,66 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { DamageType } from 'core/game/game_props';
-import { AllStage, DamageEffectStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill, SwitchSkillState, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { PersistentSkill, ShadowSkill, SwitchSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { DamageType } from "@/core/game/game_props";
+import {
+  AllStage,
+  DamageEffectStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  CommonSkill,
+  SwitchSkillState,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  PersistentSkill,
+  ShadowSkill,
+  SwitchSkill,
+} from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
 @SwitchSkill()
-@CommonSkill({ name: 'shenshi', description: 'shenshi_description' })
+@CommonSkill({ name: "shenshi", description: "shenshi_description" })
 export class ShenShi extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
-    return !owner.hasUsedSkill(this.Name) && owner.getSwitchSkillState(this.Name, true) === SwitchSkillState.Yang;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getSwitchSkillState(this.Name, true) === SwitchSkillState.Yang
+    );
   }
 
   public numberOfTargets(): number {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return (
       owner !== target &&
       room
         .getOtherPlayers(owner)
         .find(
-          player =>
+          (player) =>
             player.getCardIds(PlayerCardsArea.HandArea).length >
-            room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length,
+            room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea)
+              .length
         ) === undefined
     );
   }
@@ -39,7 +69,12 @@ export class ShenShi extends ActiveSkill {
     return cards.length === 1;
   }
 
-  public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId, selectedCards: CardId[]): boolean {
+  public isAvailableCard(
+    owner: PlayerId,
+    room: Room,
+    cardId: CardId,
+    selectedCards: CardId[]
+  ): boolean {
     return true;
   }
 
@@ -47,14 +82,22 @@ export class ShenShi extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds, cardIds } = event;
     if (!toIds || !cardIds) {
       return false;
     }
 
     await room.moveCards({
-      movingCards: [{ card: cardIds[0], fromArea: room.getPlayerById(fromId).cardFrom(cardIds[0]) }],
+      movingCards: [
+        {
+          card: cardIds[0],
+          fromArea: room.getPlayerById(fromId).cardFrom(cardIds[0]),
+        },
+      ],
       fromId,
       toId: toIds[0],
       toArea: CardMoveArea.HandArea,
@@ -73,28 +116,34 @@ export class ShenShi extends ActiveSkill {
     if (room.getPlayerById(toIds[0]).Dead) {
       const targets = room
         .getAlivePlayersFrom()
-        .filter(player => player.getCardIds(PlayerCardsArea.HandArea).length < 4)
-        .map(player => player.Id);
-      const resp = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
-        GameEventIdentifiers.AskForChoosingPlayerEvent,
-        {
-          players: targets,
-          toId: fromId,
-          requiredAmount: 1,
-          conversation: 'shenshi: do you want to choose a target to draw cards?',
-          triggeredBySkills: [this.Name],
-        },
-        fromId,
-      );
+        .filter(
+          (player) => player.getCardIds(PlayerCardsArea.HandArea).length < 4
+        )
+        .map((player) => player.Id);
+      const resp =
+        await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+          GameEventIdentifiers.AskForChoosingPlayerEvent,
+          {
+            players: targets,
+            toId: fromId,
+            requiredAmount: 1,
+            conversation:
+              "shenshi: do you want to choose a target to draw cards?",
+            triggeredBySkills: [this.Name],
+          },
+          fromId
+        );
 
       if (resp.selectedPlayers && resp.selectedPlayers.length > 0) {
         const targetId = resp.selectedPlayers[0];
         await room.drawCards(
-          4 - room.getPlayerById(targetId).getCardIds(PlayerCardsArea.HandArea).length,
+          4 -
+            room.getPlayerById(targetId).getCardIds(PlayerCardsArea.HandArea)
+              .length,
           targetId,
-          'top',
+          "top",
           fromId,
-          this.Name,
+          this.Name
         );
       }
     }
@@ -107,30 +156,41 @@ export class ShenShi extends ActiveSkill {
 @SwitchSkill()
 @CommonSkill({ name: ShenShi.Name, description: ShenShi.Description })
 export class ShenShiYin extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DamageEffectStage.AfterDamagedEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ): boolean {
     return (
       content.toId === owner.Id &&
-      owner.getSwitchSkillState(this.GeneralName, true) === SwitchSkillState.Yin &&
+      owner.getSwitchSkillState(this.GeneralName, true) ===
+        SwitchSkillState.Yin &&
       content.fromId !== undefined &&
       content.fromId !== owner.Id &&
       !room.getPlayerById(content.fromId).Dead &&
-      room.getPlayerById(content.fromId).getCardIds(PlayerCardsArea.HandArea).length > 0
+      room.getPlayerById(content.fromId).getCardIds(PlayerCardsArea.HandArea)
+        .length > 0
     );
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to view {1}’s hand cards?',
+      "{0}: do you want to view {1}’s hand cards?",
       this.GeneralName,
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.fromId!)),
+      TranslationPack.patchPlayerInTranslation(
+        room.getPlayerById(event.fromId!)
+      )
     ).extract();
   }
 
@@ -138,35 +198,52 @@ export class ShenShiYin extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, triggeredOnEvent } = event;
     const from = room.getPlayerById(fromId);
-    const source = (triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>).fromId!;
+    const source = (
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>
+    ).fromId!;
 
-    room.displayCards(source, room.getPlayerById(source).getCardIds(PlayerCardsArea.HandArea), [fromId]);
+    room.displayCards(
+      source,
+      room.getPlayerById(source).getCardIds(PlayerCardsArea.HandArea),
+      [fromId]
+    );
 
     if (from.getCardIds(PlayerCardsArea.HandArea).length > 0) {
-      const response = await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
-        GameEventIdentifiers.AskForCardEvent,
-        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardEvent>({
-          cardAmount: 1,
-          toId: fromId,
-          reason: this.GeneralName,
-          conversation: TranslationPack.translationJsonPatcher(
-            '{0}: you need to give a handcard to {1}',
-            this.GeneralName,
-            TranslationPack.patchPlayerInTranslation(room.getPlayerById(source)),
-          ).extract(),
-          fromArea: [PlayerCardsArea.HandArea],
-          triggeredBySkills: [this.GeneralName],
-        }),
-        fromId,
-      );
+      const response =
+        await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
+          GameEventIdentifiers.AskForCardEvent,
+          EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardEvent>(
+            {
+              cardAmount: 1,
+              toId: fromId,
+              reason: this.GeneralName,
+              conversation: TranslationPack.translationJsonPatcher(
+                "{0}: you need to give a handcard to {1}",
+                this.GeneralName,
+                TranslationPack.patchPlayerInTranslation(
+                  room.getPlayerById(source)
+                )
+              ).extract(),
+              fromArea: [PlayerCardsArea.HandArea],
+              triggeredBySkills: [this.GeneralName],
+            }
+          ),
+          fromId
+        );
 
-      response.selectedCards = response.selectedCards || from.getCardIds(PlayerCardsArea.HandArea)[0];
+      response.selectedCards =
+        response.selectedCards || from.getCardIds(PlayerCardsArea.HandArea)[0];
 
       await room.moveCards({
-        movingCards: [{ card: response.selectedCards[0], fromArea: CardMoveArea.HandArea }],
+        movingCards: [
+          { card: response.selectedCards[0], fromArea: CardMoveArea.HandArea },
+        ],
         fromId,
         toId: source,
         toArea: CardMoveArea.HandArea,
@@ -186,14 +263,20 @@ export class ShenShiYin extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: ShenShiYin.Name, description: ShenShiYin.Description })
-export class ShenShiShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class ShenShiShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -204,11 +287,18 @@ export class ShenShiShadow extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     const shenshiIds = owner.getFlag<CardId[]>(this.GeneralName);
     return (
       content.fromPlayer !== undefined &&
@@ -218,7 +308,7 @@ export class ShenShiShadow extends TriggerSkill implements OnDefineReleaseTiming
       room
         .getPlayerById(content.fromPlayer)
         .getPlayerCards()
-        .find(id => shenshiIds.includes(id)) !== undefined
+        .find((id) => shenshiIds.includes(id)) !== undefined
     );
   }
 
@@ -226,13 +316,22 @@ export class ShenShiShadow extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const from = room.getPlayerById(event.fromId);
 
     from.removeFlag(this.GeneralName);
     const n = 4 - from.getCardIds(PlayerCardsArea.HandArea).length;
     if (n > 0) {
-      await room.drawCards(n, event.fromId, 'top', event.fromId, this.GeneralName);
+      await room.drawCards(
+        n,
+        event.fromId,
+        "top",
+        event.fromId,
+        this.GeneralName
+      );
     }
 
     return true;

@@ -1,18 +1,29 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { DamageType } from 'core/game/game_props';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { JudgeMatcher, JudgeMatcherEnum } from 'core/shares/libs/judge_matchers';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { ActiveSkill, CommonSkill, SelfTargetSkill } from 'core/skills/skill';
-import { ExtralCardSkillProperty } from '../interface/extral_property';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { DamageType } from "@/core/game/game_props";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  JudgeMatcher,
+  JudgeMatcherEnum,
+} from "@/core/shares/libs/judge_matchers";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { ActiveSkill, CommonSkill, SelfTargetSkill } from "@/core/skills/skill";
+import { ExtralCardSkillProperty } from "../interface/extral_property";
 
-@CommonSkill({ name: 'lightning', description: 'lightning_description' })
+@CommonSkill({ name: "lightning", description: "lightning_description" })
 @SelfTargetSkill
-export class LightningSkill extends ActiveSkill implements ExtralCardSkillProperty {
+export class LightningSkill
+  extends ActiveSkill
+  implements ExtralCardSkillProperty
+{
   public canUse(room: Room, owner: Player, containerCard?: CardId) {
     let canUseTo = true;
     if (containerCard) {
@@ -22,7 +33,9 @@ export class LightningSkill extends ActiveSkill implements ExtralCardSkillProper
     return (
       owner
         .getCardIds(PlayerCardsArea.JudgeArea)
-        .find(cardId => Sanguosha.getCardById(cardId).GeneralName === 'lightning') === undefined && canUseTo
+        .find(
+          (cardId) => Sanguosha.getCardById(cardId).GeneralName === "lightning"
+        ) === undefined && canUseTo
     );
   }
 
@@ -43,33 +56,44 @@ export class LightningSkill extends ActiveSkill implements ExtralCardSkillProper
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard: CardId,
+    containerCard: CardId
   ): boolean {
     return (
       room.getPlayerById(owner).canUseCardTo(room, containerCard, target) &&
       room
         .getPlayerById(target)
         .getCardIds(PlayerCardsArea.JudgeArea)
-        .find(cardId => Sanguosha.getCardById(cardId).GeneralName === 'lightning') === undefined
+        .find(
+          (cardId) => Sanguosha.getCardById(cardId).GeneralName === "lightning"
+        ) === undefined
     );
   }
 
   public isAvailableTarget(): boolean {
     return false;
   }
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ) {
     event.targetGroup = [[event.fromId]];
 
     return true;
   }
 
-  public async moveToNextPlayer(room: Room, cardId: CardId, currentPlayer: PlayerId) {
+  public async moveToNextPlayer(
+    room: Room,
+    cardId: CardId,
+    currentPlayer: PlayerId
+  ) {
     let player: Player | undefined;
     while (true) {
       player = room.getNextAlivePlayer(player ? player.Id : currentPlayer);
       if (player.Id === currentPlayer) {
         await room.moveCards({
-          movingCards: [{ card: cardId, fromArea: CardMoveArea.ProcessingArea }],
+          movingCards: [
+            { card: cardId, fromArea: CardMoveArea.ProcessingArea },
+          ],
           toArea: CardMoveArea.JudgeArea,
           toId: currentPlayer,
           moveReason: CardMoveReason.PassiveMove,
@@ -81,7 +105,9 @@ export class LightningSkill extends ActiveSkill implements ExtralCardSkillProper
         !room.canUseCardTo(cardId, player, player) ||
         player
           .getCardIds(PlayerCardsArea.JudgeArea)
-          .find(cardId => Sanguosha.getCardById(cardId).GeneralName === this.Name) !== undefined;
+          .find(
+            (cardId) => Sanguosha.getCardById(cardId).GeneralName === this.Name
+          ) !== undefined;
 
       if (skip) {
         continue;
@@ -98,14 +124,17 @@ export class LightningSkill extends ActiveSkill implements ExtralCardSkillProper
     }
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
     const { toIds, cardId } = event;
 
     const judgeEvent = await room.judge(
-      Precondition.exists(toIds, 'Unknown targets in lightning')[0],
+      Precondition.exists(toIds, "Unknown targets in lightning")[0],
       cardId,
       this.Name,
-      JudgeMatcherEnum.Lightning,
+      JudgeMatcherEnum.Lightning
     );
 
     const card = Sanguosha.getCardById(judgeEvent.judgeCardId);
@@ -115,7 +144,9 @@ export class LightningSkill extends ActiveSkill implements ExtralCardSkillProper
         damage: 3,
         toId: judgeEvent.toId,
         cardIds: [event.cardId],
-        triggeredBySkills: event.triggeredBySkills ? [...event.triggeredBySkills, this.Name] : [this.Name],
+        triggeredBySkills: event.triggeredBySkills
+          ? [...event.triggeredBySkills, this.Name]
+          : [this.Name],
       };
 
       await room.damage(damageEvent);
@@ -125,7 +156,10 @@ export class LightningSkill extends ActiveSkill implements ExtralCardSkillProper
     return true;
   }
 
-  public async onEffectRejected(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
+  public async onEffectRejected(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
     await this.moveToNextPlayer(room, event.cardId, event.toIds![0]);
   }
 }

@@ -1,52 +1,71 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { GlobalFilterSkill, GlobalRulesBreakerSkill, OnDefineReleaseTiming, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  GlobalFilterSkill,
+  GlobalRulesBreakerSkill,
+  OnDefineReleaseTiming,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'zhuikong', description: 'zhuikong_description' })
+@CommonSkill({ name: "zhuikong", description: "zhuikong_description" })
 export class ZhuiKong extends TriggerSkill implements OnDefineReleaseTiming {
-  public static Filter: string = 'qiuyuan_filter';
-  public static DistanceBreak: string = 'distance_break';
+  public static Filter: string = "qiuyuan_filter";
+  public static DistanceBreak: string = "distance_break";
 
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isRefreshAt(room: Room, owner: Player, phase: PlayerPhase): boolean {
-    return room.CurrentPhasePlayer === owner && phase === PlayerPhase.FinishStage;
+    return (
+      room.CurrentPhasePlayer === owner && phase === PlayerPhase.FinishStage
+    );
   }
 
   public whenRefresh(room: Room, owner: Player): void {
     for (const player of room.getOtherPlayers(owner.Id)) {
-      player.getFlag<boolean>(ZhuiKong.Filter) && room.removeFlag(player.Id, ZhuiKong.Filter);
-      player.getFlag<boolean>(ZhuiKong.DistanceBreak) && room.removeFlag(player.Id, ZhuiKong.DistanceBreak);
+      player.getFlag<boolean>(ZhuiKong.Filter) &&
+        room.removeFlag(player.Id, ZhuiKong.Filter);
+      player.getFlag<boolean>(ZhuiKong.DistanceBreak) &&
+        room.removeFlag(player.Id, ZhuiKong.DistanceBreak);
     }
   }
 
-  public isTriggerable(_: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    _: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       event.toStage === PlayerPhaseStages.PrepareStageStart &&
@@ -61,10 +80,11 @@ export class ZhuiKong extends TriggerSkill implements OnDefineReleaseTiming {
 
   public async onEffect(
     room: Room,
-    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = skillEffectEvent;
-    const { playerId } = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
+    const { playerId } =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
     const to = room.getPlayerById(playerId);
 
     const { pindianRecord } = await room.pindian(fromId, [playerId], this.Name);
@@ -86,16 +106,32 @@ export class ZhuiKong extends TriggerSkill implements OnDefineReleaseTiming {
 @PersistentSkill()
 @CommonSkill({ name: ZhuiKong.Name, description: ZhuiKong.Description })
 export class ZhuiKongFilter extends GlobalFilterSkill {
-  public canUseCardTo(_: CardId | CardMatcher, __: Room, ___: Player, from: Player, to: Player): boolean {
+  public canUseCardTo(
+    _: CardId | CardMatcher,
+    __: Room,
+    ___: Player,
+    from: Player,
+    to: Player
+  ): boolean {
     return !from.getFlag<boolean>(ZhuiKong.Filter) || to.Id === from.Id;
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: ZhuiKongFilter.Name, description: ZhuiKongFilter.Description })
+@CommonSkill({
+  name: ZhuiKongFilter.Name,
+  description: ZhuiKongFilter.Description,
+})
 export class ZhuiKongDistance extends GlobalRulesBreakerSkill {
-  public breakDistance(_: Room, owner: Player, from: Player, to: Player): number {
-    return from.getFlag<boolean>(ZhuiKong.DistanceBreak) && to.Id === owner.Id ? 1 : 0;
+  public breakDistance(
+    _: Room,
+    owner: Player,
+    from: Player,
+    to: Player
+  ): number {
+    return from.getFlag<boolean>(ZhuiKong.DistanceBreak) && to.Id === owner.Id
+      ? 1
+      : 0;
   }
 }

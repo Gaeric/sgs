@@ -1,21 +1,38 @@
-import { CardType } from 'core/cards/card';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardEffectStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardType } from "@/core/cards/card";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  CardEffectStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ShadowSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'qianxun', description: 'qianxun_description' })
+@CommonSkill({ name: "qianxun", description: "qianxun_description" })
 export class QianXun extends TriggerSkill {
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>,
+    stage?: AllStage
+  ) {
     return stage === CardEffectStage.CardEffecting;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
     if (
       Sanguosha.getCardById(content.cardId).BaseType !== CardType.Trick ||
       owner.getCardIds(PlayerCardsArea.HandArea).length === 0
@@ -31,22 +48,32 @@ export class QianXun extends TriggerSkill {
     );
   }
 
-  async onTrigger(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onTrigger(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     skillUseEvent.messages = skillUseEvent.messages || [];
     skillUseEvent.messages.push(
       TranslationPack.translationJsonPatcher(
-        '{0} moved all hand cards out of the game',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(skillUseEvent.fromId)),
-      ).toString(),
+        "{0} moved all hand cards out of the game",
+        TranslationPack.patchPlayerInTranslation(
+          room.getPlayerById(skillUseEvent.fromId)
+        )
+      ).toString()
     );
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId } = skillUseEvent;
     const from = room.getPlayerById(fromId);
     await room.moveCards({
-      movingCards: from.getCardIds(PlayerCardsArea.HandArea).map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+      movingCards: from
+        .getCardIds(PlayerCardsArea.HandArea)
+        .map((card) => ({ card, fromArea: CardMoveArea.HandArea })),
       fromId,
       toId: fromId,
       toArea: PlayerCardsArea.OutsideArea,
@@ -62,38 +89,64 @@ export class QianXun extends TriggerSkill {
 
 @ShadowSkill
 @CommonSkill({ name: QianXun.GeneralName, description: QianXun.Description })
-export class QianXunShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class QianXunShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   isAutoTrigger() {
     return true;
   }
 
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage) {
-    return stage === PhaseChangeStage.PhaseChanged && event.from === PlayerPhase.PhaseFinish;
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ) {
+    return (
+      stage === PhaseChangeStage.PhaseChanged &&
+      event.from === PlayerPhase.PhaseFinish
+    );
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
-    return owner.getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName).length > 0;
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
+    return (
+      owner.getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName).length > 0
+    );
   }
 
   async onTrigger() {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId } = skillUseEvent;
     const from = room.getPlayerById(fromId);
-    const qianxunCards = from.getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName).slice();
+    const qianxunCards = from
+      .getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName)
+      .slice();
     await room.moveCards({
-      movingCards: qianxunCards.map(card => ({ card, fromArea: CardMoveArea.OutsideArea })),
+      movingCards: qianxunCards.map((card) => ({
+        card,
+        fromArea: CardMoveArea.OutsideArea,
+      })),
       fromId,
       toId: fromId,
       toArea: CardMoveArea.HandArea,

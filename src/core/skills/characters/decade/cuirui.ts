@@ -1,12 +1,17 @@
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill } from 'core/skills/skill';
-import { LimitSkill } from 'core/skills/skill_wrappers';
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill } from "@/core/skills/skill";
+import { LimitSkill } from "@/core/skills/skill_wrappers";
 
-@LimitSkill({ name: 'cuirui', description: 'cuirui_description' })
+@LimitSkill({ name: "cuirui", description: "cuirui_description" })
 export class CuiRui extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return true;
@@ -24,8 +29,15 @@ export class CuiRui extends ActiveSkill {
     return targets.length > 0 && targets.length <= owner.Hp;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
-    return target !== owner && room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0;
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
+    return (
+      target !== owner &&
+      room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public isAvailableCard() {
@@ -36,7 +48,10 @@ export class CuiRui extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     if (!event.toIds) {
       return false;
     }
@@ -45,7 +60,8 @@ export class CuiRui extends ActiveSkill {
       const to = room.getPlayerById(toId);
 
       const options: CardChoosingOptions = {
-        [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea).length,
+        [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea)
+          .length,
       };
 
       const chooseCardEvent = {
@@ -55,11 +71,18 @@ export class CuiRui extends ActiveSkill {
         triggeredBySkills: [this.Name],
       };
 
-      const response = await room.askForChoosingPlayerCard(chooseCardEvent, event.fromId, false, true);
+      const response = await room.askForChoosingPlayerCard(
+        chooseCardEvent,
+        event.fromId,
+        false,
+        true
+      );
 
       if (response && response.selectedCard) {
         await room.moveCards({
-          movingCards: [{ card: response.selectedCard, fromArea: CardMoveArea.HandArea }],
+          movingCards: [
+            { card: response.selectedCard, fromArea: CardMoveArea.HandArea },
+          ],
           fromId: toId,
           toId: event.fromId,
           toArea: CardMoveArea.HandArea,

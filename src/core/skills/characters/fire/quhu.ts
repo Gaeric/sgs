@@ -1,17 +1,20 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { DamageType } from 'core/game/game_props';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { DamageType } from "@/core/game/game_props";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'quhu', description: 'quhu_description' })
+@CommonSkill({ name: "quhu", description: "quhu_description" })
 export class QuHu extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
-    return !owner.hasUsedSkill(this.Name) && owner.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -21,7 +24,11 @@ export class QuHu extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     const player = room.getPlayerById(owner);
     const targetPlayer = room.getPlayerById(target);
     return (
@@ -36,10 +43,16 @@ export class QuHu extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { toIds, fromId } = event;
     const { pindianRecord } = await room.pindian(fromId, toIds!, this.Name);
     if (!pindianRecord.length) {
@@ -48,25 +61,30 @@ export class QuHu extends ActiveSkill {
 
     const target = room.getPlayerById(toIds![0]);
     if (pindianRecord[0].winner === fromId) {
-      const askForChoosingPlayer: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> = {
-        toId: fromId,
-        players: room.AlivePlayers.filter(player => room.withinAttackDistance(target, player)).map(player => player.Id),
-        requiredAmount: 1,
-        conversation: TranslationPack.translationJsonPatcher(
-          'please choose a player to get a damage from {0}',
-          TranslationPack.patchPlayerInTranslation(target),
-        ).extract(),
-        triggeredBySkills: [this.Name],
-      };
+      const askForChoosingPlayer: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> =
+        {
+          toId: fromId,
+          players: room.AlivePlayers.filter((player) =>
+            room.withinAttackDistance(target, player)
+          ).map((player) => player.Id),
+          requiredAmount: 1,
+          conversation: TranslationPack.translationJsonPatcher(
+            "please choose a player to get a damage from {0}",
+            TranslationPack.patchPlayerInTranslation(target)
+          ).extract(),
+          triggeredBySkills: [this.Name],
+        };
 
       room.notify(
         GameEventIdentifiers.AskForChoosingPlayerEvent,
-        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingPlayerEvent>(askForChoosingPlayer),
-        fromId,
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+          askForChoosingPlayer
+        ),
+        fromId
       );
       const { selectedPlayers } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForChoosingPlayerEvent,
-        fromId,
+        fromId
       );
       await room.damage({
         fromId: target.Id,

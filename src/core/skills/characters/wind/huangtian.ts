@@ -1,18 +1,23 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, GameStartStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { System } from 'core/shares/libs/system';
-import { ActiveSkill, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, LordSkill, SideEffectSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, GameStartStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { System } from "@/core/shares/libs/system";
+import { ActiveSkill, TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill, LordSkill, SideEffectSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
 @LordSkill
-@CommonSkill({ name: 'huangtian', description: 'huangtian_description' })
+@CommonSkill({ name: "huangtian", description: "huangtian_description" })
 export class HuangTian extends TriggerSkill implements OnDefineReleaseTiming {
   public isAutoTrigger() {
     return true;
@@ -27,27 +32,51 @@ export class HuangTian extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   async whenObtainingSkill(room: Room, owner: Player) {
-    room.installSideEffectSkill(System.SideEffectSkillApplierEnum.HuangTian, HuangTianGiveCard.Name, owner.Id);
+    room.installSideEffectSkill(
+      System.SideEffectSkillApplierEnum.HuangTian,
+      HuangTianGiveCard.Name,
+      owner.Id
+    );
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.GameStartEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.GameStartEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === GameStartStage.BeforeGameStart;
   }
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers>
+  ): boolean {
     return true;
   }
-  public async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     event.translationsMessage = undefined;
     return true;
   }
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
-    room.installSideEffectSkill(System.SideEffectSkillApplierEnum.HuangTian, HuangTianGiveCard.Name, event.fromId);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
+    room.installSideEffectSkill(
+      System.SideEffectSkillApplierEnum.HuangTian,
+      HuangTianGiveCard.Name,
+      event.fromId
+    );
     return true;
   }
 }
 
 @SideEffectSkill
-@CommonSkill({ name: HuangTian.GeneralName, description: HuangTian.Description })
+@CommonSkill({
+  name: HuangTian.GeneralName,
+  description: HuangTian.Description,
+})
 export class HuangTianGiveCard extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name);
@@ -63,7 +92,7 @@ export class HuangTianGiveCard extends ActiveSkill {
 
   public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId): boolean {
     const card = Sanguosha.getCardById(cardId);
-    return card.GeneralName === 'jink' || card.GeneralName === 'lightning';
+    return card.GeneralName === "jink" || card.GeneralName === "lightning";
   }
 
   public isAvailableTarget(
@@ -72,15 +101,24 @@ export class HuangTianGiveCard extends ActiveSkill {
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard?: CardId,
+    containerCard?: CardId
   ): boolean {
-    return room.getPlayerById(target).hasSkill(HuangTian.GeneralName) && target !== owner;
+    return (
+      room.getPlayerById(target).hasSkill(HuangTian.GeneralName) &&
+      target !== owner
+    );
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     return true;
   }
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds, cardIds } = event;
     await room.moveCards({
       movingCards: [{ card: cardIds![0], fromArea: CardMoveArea.HandArea }],
@@ -91,10 +129,10 @@ export class HuangTianGiveCard extends ActiveSkill {
       proposer: fromId,
       movedByReason: this.GeneralName,
       translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} obtains cards {1} from {2}',
+        "{0} obtains cards {1} from {2}",
         TranslationPack.patchPlayerInTranslation(room.getPlayerById(toIds![0])),
         TranslationPack.patchCardInTranslation(...cardIds!),
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId))
       ).extract(),
     });
 

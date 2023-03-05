@@ -1,25 +1,30 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { WuXieKeJi } from 'core/cards/standard/wuxiekeji';
-import { CardMoveReason, ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, TurnOverStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, TriggerSkill, ViewAsSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import { WuXieKeJi } from "@/core/cards/standard/wuxiekeji";
+import {
+  CardMoveReason,
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { AllStage, TurnOverStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, TriggerSkill, ViewAsSkill } from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'jiewei', description: 'jiewei_description' })
+@CommonSkill({ name: "jiewei", description: "jiewei_description" })
 export class JieWei extends ViewAsSkill {
   public canViewAs(): string[] {
-    return ['wuxiekeji'];
+    return ["wuxiekeji"];
   }
 
   public canUse(room: Room, owner: Player): boolean {
     return (
-      owner.canUseCard(room, new CardMatcher({ name: ['wuxiekeji'] })) &&
+      owner.canUseCard(room, new CardMatcher({ name: ["wuxiekeji"] })) &&
       owner.getCardIds(PlayerCardsArea.EquipArea).length > 0
     );
   }
@@ -28,7 +33,11 @@ export class JieWei extends ViewAsSkill {
     return cards.length === 1;
   }
 
-  public isAvailableCard(room: Room, owner: Player, pendingCardId: CardId): boolean {
+  public isAvailableCard(
+    room: Room,
+    owner: Player,
+    pendingCardId: CardId
+  ): boolean {
     return true;
   }
 
@@ -39,10 +48,10 @@ export class JieWei extends ViewAsSkill {
   public viewAs(selectedCards: CardId[]) {
     return VirtualCard.create<WuXieKeJi>(
       {
-        cardName: 'wuxiekeji',
+        cardName: "wuxiekeji",
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
@@ -50,14 +59,17 @@ export class JieWei extends ViewAsSkill {
 @ShadowSkill
 @CommonSkill({ name: JieWei.GeneralName, description: JieWei.Description })
 export class JieWeiShadow extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerTurnOverEvent>, stage: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerTurnOverEvent>,
+    stage: AllStage
+  ): boolean {
     return stage === TurnOverStage.TurnedOver;
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PlayerTurnOverEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PlayerTurnOverEvent>
   ): boolean {
     return owner.Id === event.toId && owner.isFaceUp();
   }
@@ -79,7 +91,7 @@ export class JieWeiShadow extends TriggerSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     const to = room.getPlayerById(target);
     const equiprCardIds = to.getCardIds(PlayerCardsArea.EquipArea);
@@ -92,10 +104,16 @@ export class JieWeiShadow extends TriggerSkill {
       const from = room.getPlayerById(selectedTargets[0]);
 
       const fromEquipArea = from.getCardIds(PlayerCardsArea.EquipArea);
-      canBeTarget = canBeTarget || fromEquipArea.find(id => room.canPlaceCardTo(id, target)) !== undefined;
+      canBeTarget =
+        canBeTarget ||
+        fromEquipArea.find((id) => room.canPlaceCardTo(id, target)) !==
+          undefined;
 
       const fromJudgeArea = from.getCardIds(PlayerCardsArea.JudgeArea);
-      canBeTarget = canBeTarget || fromJudgeArea.find(id => room.canPlaceCardTo(id, target)) !== undefined;
+      canBeTarget =
+        canBeTarget ||
+        fromJudgeArea.find((id) => room.canPlaceCardTo(id, target)) !==
+          undefined;
 
       return canBeTarget;
     }
@@ -103,7 +121,9 @@ export class JieWeiShadow extends TriggerSkill {
     return false;
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = event;
     return [
       { from: fromId, tos: [toIds![0]] },
@@ -115,7 +135,10 @@ export class JieWeiShadow extends TriggerSkill {
     return false;
   }
 
-  async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     event.animation = this.getAnimationSteps(event);
     return true;
   }
@@ -126,14 +149,14 @@ export class JieWeiShadow extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     await room.dropCards(
       CardMoveReason.SelfDrop,
       skillUseEvent.cardIds!,
       skillUseEvent.fromId,
       skillUseEvent.fromId,
-      this.Name,
+      this.Name
     );
     const moveFrom = room.getPlayerById(skillUseEvent.toIds![0]);
     const moveTo = room.getPlayerById(skillUseEvent.toIds![1]);
@@ -141,10 +164,14 @@ export class JieWeiShadow extends TriggerSkill {
     const canMovedJudgeCardIds: CardId[] = [];
 
     const fromEquipArea = moveFrom.getCardIds(PlayerCardsArea.EquipArea);
-    canMovedEquipCardIds.push(...fromEquipArea.filter(id => room.canPlaceCardTo(id, moveTo.Id)));
+    canMovedEquipCardIds.push(
+      ...fromEquipArea.filter((id) => room.canPlaceCardTo(id, moveTo.Id))
+    );
 
     const fromJudgeArea = moveFrom.getCardIds(PlayerCardsArea.JudgeArea);
-    canMovedJudgeCardIds.push(...fromJudgeArea.filter(id => room.canPlaceCardTo(id, moveTo.Id)));
+    canMovedJudgeCardIds.push(
+      ...fromJudgeArea.filter((id) => room.canPlaceCardTo(id, moveTo.Id))
+    );
 
     const options: CardChoosingOptions = {
       [PlayerCardsArea.JudgeArea]: canMovedJudgeCardIds,
@@ -160,17 +187,21 @@ export class JieWeiShadow extends TriggerSkill {
 
     room.notify(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(chooseCardEvent),
-      skillUseEvent.fromId,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
+        chooseCardEvent
+      ),
+      skillUseEvent.fromId
     );
 
     const response = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      skillUseEvent.fromId,
+      skillUseEvent.fromId
     );
 
     await room.moveCards({
-      movingCards: [{ card: response.selectedCard!, fromArea: response.fromArea }],
+      movingCards: [
+        { card: response.selectedCard!, fromArea: response.fromArea },
+      ],
       moveReason: CardMoveReason.PassiveMove,
       toId: moveTo.Id,
       fromId: moveFrom.Id,

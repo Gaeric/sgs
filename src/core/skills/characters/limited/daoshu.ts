@@ -1,13 +1,22 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { DamageType } from 'core/game/game_props';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { DamageType } from "@/core/game/game_props";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CommonSkill,
@@ -15,10 +24,10 @@ import {
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'daoshu', description: 'daoshu_description' })
+@CommonSkill({ name: "daoshu", description: "daoshu_description" })
 export class DaoShu extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return !owner.getFlag<boolean>(this.Name);
@@ -28,8 +37,15 @@ export class DaoShu extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
-    return target !== owner && room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0;
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
+    return (
+      target !== owner &&
+      room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -44,26 +60,36 @@ export class DaoShu extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
     }
 
-    const options = ['spade', 'club', 'diamond', 'heart'];
+    const options = ["spade", "club", "diamond", "heart"];
 
-    const askForChooseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-      options,
-      conversation: TranslationPack.translationJsonPatcher('{0}: please choose a card suit', this.Name).extract(),
-      toId: fromId,
-      triggeredBySkills: [this.Name],
-    });
+    const askForChooseEvent =
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        {
+          options,
+          conversation: TranslationPack.translationJsonPatcher(
+            "{0}: please choose a card suit",
+            this.Name
+          ).extract(),
+          toId: fromId,
+          triggeredBySkills: [this.Name],
+        }
+      );
 
-    const resp = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-      GameEventIdentifiers.AskForChoosingOptionsEvent,
-      askForChooseEvent,
-      fromId,
-    );
+    const resp =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        askForChooseEvent,
+        fromId
+      );
 
     resp.selectedOption = resp.selectedOption || options[3];
 
@@ -85,27 +111,33 @@ export class DaoShu extends ActiveSkill {
     const toId = toIds[0];
     const target = room.getPlayerById(toId);
 
-    const response = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
-      GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      {
-        fromId,
-        toId,
-        options: {
-          [PlayerCardsArea.HandArea]: target.getCardIds(PlayerCardsArea.HandArea).length,
+    const response =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
+        GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
+        {
+          fromId,
+          toId,
+          options: {
+            [PlayerCardsArea.HandArea]: target.getCardIds(
+              PlayerCardsArea.HandArea
+            ).length,
+          },
+          triggeredBySkills: [this.Name],
         },
-        triggeredBySkills: [this.Name],
-      },
-      fromId,
-    );
+        fromId
+      );
 
     if (response.selectedCardIndex !== undefined) {
       const cardIds = target.getCardIds(PlayerCardsArea.HandArea);
-      response.selectedCard = cardIds[Math.floor(Math.random() * cardIds.length)];
+      response.selectedCard =
+        cardIds[Math.floor(Math.random() * cardIds.length)];
     }
 
     if (response.selectedCard !== undefined) {
       await room.moveCards({
-        movingCards: [{ card: response.selectedCard, fromArea: response.fromArea }],
+        movingCards: [
+          { card: response.selectedCard, fromArea: response.fromArea },
+        ],
         fromId: toId,
         toId: fromId,
         toArea: CardMoveArea.HandArea,
@@ -128,28 +160,40 @@ export class DaoShu extends ActiveSkill {
         const from = room.getPlayerById(fromId);
         const hands = from.getCardIds(PlayerCardsArea.HandArea);
 
-        const restHands = hands.filter(card => Sanguosha.getCardById(card).Suit !== cardSuit);
+        const restHands = hands.filter(
+          (card) => Sanguosha.getCardById(card).Suit !== cardSuit
+        );
         if (restHands.length > 0) {
-          const allSuits = [CardSuit.Spade, CardSuit.Club, CardSuit.Diamond, CardSuit.Heart];
-          const matcher = allSuits.filter(oneSuit => oneSuit !== cardSuit);
+          const allSuits = [
+            CardSuit.Spade,
+            CardSuit.Club,
+            CardSuit.Diamond,
+            CardSuit.Heart,
+          ];
+          const matcher = allSuits.filter((oneSuit) => oneSuit !== cardSuit);
 
-          const response = await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
-            GameEventIdentifiers.AskForCardEvent,
-            EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardEvent>({
-              cardAmount: 1,
-              toId: fromId,
-              reason: this.Name,
-              conversation: TranslationPack.translationJsonPatcher(
-                '{0}: please give {1} a hand card except the card with suit {2}',
-                this.Name,
-                TranslationPack.patchPlayerInTranslation(target),
-              ).extract(),
-              fromArea: [PlayerCardsArea.HandArea],
-              cardMatcher: new CardMatcher({ suit: [...matcher] }).toSocketPassenger(),
-              triggeredBySkills: [this.Name],
-            }),
-            fromId,
-          );
+          const response =
+            await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
+              GameEventIdentifiers.AskForCardEvent,
+              EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardEvent>(
+                {
+                  cardAmount: 1,
+                  toId: fromId,
+                  reason: this.Name,
+                  conversation: TranslationPack.translationJsonPatcher(
+                    "{0}: please give {1} a hand card except the card with suit {2}",
+                    this.Name,
+                    TranslationPack.patchPlayerInTranslation(target)
+                  ).extract(),
+                  fromArea: [PlayerCardsArea.HandArea],
+                  cardMatcher: new CardMatcher({
+                    suit: [...matcher],
+                  }).toSocketPassenger(),
+                  triggeredBySkills: [this.Name],
+                }
+              ),
+              fromId
+            );
 
           response.selectedCards =
             response.selectedCards.length > 0
@@ -157,7 +201,12 @@ export class DaoShu extends ActiveSkill {
               : [restHands[Math.floor(Math.random() * restHands.length)]];
 
           await room.moveCards({
-            movingCards: [{ card: response.selectedCards[0], fromArea: CardMoveArea.HandArea }],
+            movingCards: [
+              {
+                card: response.selectedCards[0],
+                fromArea: CardMoveArea.HandArea,
+              },
+            ],
             fromId,
             toId,
             toArea: CardMoveArea.HandArea,
@@ -169,9 +218,9 @@ export class DaoShu extends ActiveSkill {
             fromId,
             displayCards: hands,
             translationsMessage: TranslationPack.translationJsonPatcher(
-              '{0} display hand card {1}',
+              "{0} display hand card {1}",
               TranslationPack.patchPlayerInTranslation(from),
-              TranslationPack.patchCardInTranslation(...hands),
+              TranslationPack.patchCardInTranslation(...hands)
             ).extract(),
           });
         }
@@ -185,14 +234,20 @@ export class DaoShu extends ActiveSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: DaoShu.Name, description: DaoShu.Description })
-export class DaoShuShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class DaoShuShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -203,19 +258,32 @@ export class DaoShuShadow extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
-    return content.from === PlayerPhase.PlayCardStage && owner.getFlag<boolean>(this.GeneralName);
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
+    return (
+      content.from === PlayerPhase.PlayCardStage &&
+      owner.getFlag<boolean>(this.GeneralName)
+    );
   }
 
   public async onTrigger() {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     room.removeFlag(event.fromId, this.GeneralName);
 
     return true;

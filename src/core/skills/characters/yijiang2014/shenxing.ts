@@ -1,11 +1,15 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill } from 'core/skills/skill';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'shenxing', description: 'shenxing_description' })
+@CommonSkill({ name: "shenxing", description: "shenxing_description" })
 export class ShenXing extends ActiveSkill {
   canUse() {
     return true;
@@ -27,16 +31,31 @@ export class ShenXing extends ActiveSkill {
     return room.canDropCard(owner, cardId);
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    if (room.getPlayerById(event.fromId).hasUsedSkillTimes(this.Name) > 1 && event.cardIds) {
-      await room.dropCards(CardMoveReason.SelfDrop, event.cardIds, event.fromId, event.fromId, this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    if (
+      room.getPlayerById(event.fromId).hasUsedSkillTimes(this.Name) > 1 &&
+      event.cardIds
+    ) {
+      await room.dropCards(
+        CardMoveReason.SelfDrop,
+        event.cardIds,
+        event.fromId,
+        event.fromId,
+        this.Name
+      );
     }
 
-    await room.drawCards(1, event.fromId, 'top', event.fromId, this.Name);
+    await room.drawCards(1, event.fromId, "top", event.fromId, this.Name);
     return true;
   }
 }

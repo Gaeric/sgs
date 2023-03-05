@@ -1,27 +1,50 @@
-import { CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveArea, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { OnDefineReleaseTiming, TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  CardMoveStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { OnDefineReleaseTiming, TriggerSkill } from "@/core/skills/skill";
+import {
+  CompulsorySkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'new_fenyin', description: 'new_fenyin_description' })
+@CompulsorySkill({ name: "new_fenyin", description: "new_fenyin_description" })
 export class NewFenYin extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     const bannedSuits = owner.getFlag<CardSuit[]>(this.Name) || [];
     return (
       room.CurrentPlayer === owner &&
       content.infos.find(
-        info =>
+        (info) =>
           info.toArea === CardMoveArea.DropStack &&
-          info.movingCards.find(card => !bannedSuits.includes(Sanguosha.getCardById(card.card).Suit)),
+          info.movingCards.find(
+            (card) =>
+              !bannedSuits.includes(Sanguosha.getCardById(card.card).Suit)
+          )
       ) !== undefined
     );
   }
@@ -30,11 +53,14 @@ export class NewFenYin extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
-    const infos = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>).infos.filter(
-      info => info.toArea === CardMoveArea.DropStack,
-    );
+    const infos = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+    ).infos.filter((info) => info.toArea === CardMoveArea.DropStack);
 
     const bannedSuits = room.getFlag<CardSuit[]>(fromId, this.Name) || [];
     let drawNum = 0;
@@ -50,7 +76,7 @@ export class NewFenYin extends TriggerSkill {
 
     room.getPlayerById(fromId).setFlag<CardSuit[]>(this.Name, bannedSuits);
 
-    await room.drawCards(drawNum, fromId, 'top', fromId, this.Name);
+    await room.drawCards(drawNum, fromId, "top", fromId, this.Name);
 
     return true;
   }
@@ -59,14 +85,20 @@ export class NewFenYin extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CompulsorySkill({ name: NewFenYin.Name, description: NewFenYin.Description })
-export class NewFenYinShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class NewFenYinShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -77,11 +109,18 @@ export class NewFenYinShadow extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       owner.Id === event.fromPlayer &&
       event.from === PlayerPhase.PhaseFinish &&
@@ -93,7 +132,10 @@ export class NewFenYinShadow extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     room.removeFlag(event.fromId, this.GeneralName);
 
     return true;

@@ -1,6 +1,6 @@
-import { Card, CardType } from 'core/cards/card';
-import { CardSuit } from 'core/cards/libs/card_props';
-import { Precondition } from './precondition/precondition';
+import { Card, CardType } from "@/core/cards/card";
+import { CardSuit } from "@/core/cards/libs/card_props";
+import { Precondition } from "./precondition/precondition";
 
 export const enum JudgeMatcherEnum {
   LeBuSiShu = 1,
@@ -75,13 +75,17 @@ export abstract class JudgeMatcher {
     return card.isRed();
   }
   private static Lightning(card: Card) {
-    return card.Suit === CardSuit.Spade && card.CardNumber >= 2 && card.CardNumber <= 9;
+    return (
+      card.Suit === CardSuit.Spade &&
+      card.CardNumber >= 2 &&
+      card.CardNumber <= 9
+    );
   }
   private static BaoNve(card: Card) {
     return card.Suit === CardSuit.Spade;
   }
   private static WuHun(card: Card) {
-    return card.Name !== 'peach' && card.Name !== 'taoyuanjieyi';
+    return card.Name !== "peach" && card.Name !== "taoyuanjieyi";
   }
   private static LuoShen(card: Card) {
     return card.isBlack();
@@ -96,7 +100,11 @@ export abstract class JudgeMatcher {
     return card.isRed();
   }
   private static ZhuiLie(card: Card) {
-    return card.is(CardType.Weapon) || card.is(CardType.DefenseRide) || card.is(CardType.OffenseRide);
+    return (
+      card.is(CardType.Weapon) ||
+      card.is(CardType.DefenseRide) ||
+      card.is(CardType.OffenseRide)
+    );
   }
   private static BingHuo(card: Card) {
     return card.isBlack();

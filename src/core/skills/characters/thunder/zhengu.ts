@@ -1,19 +1,31 @@
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, PersistentSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'zhengu', description: 'zhengu_description' })
+@CommonSkill({ name: "zhengu", description: "zhengu_description" })
 export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
   public async whenDead(room: Room, player: Player) {
     for (const other of room.getOtherPlayers(player.Id)) {
@@ -22,7 +34,7 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
         continue;
       }
 
-      const index = originalPlayers.findIndex(p => p === player.Id);
+      const index = originalPlayers.findIndex((p) => p === player.Id);
       originalPlayers.splice(index, 1);
       if (originalPlayers.length === 0) {
         room.removeFlag(other.Id, this.Name);
@@ -32,9 +44,11 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
           this.Name,
           originalPlayers,
           TranslationPack.translationJsonPatcher(
-            'zhengu sources: {0}',
-            TranslationPack.patchPlayerInTranslation(...originalPlayers.map(playerId => room.getPlayerById(playerId))),
-          ).toString(),
+            "zhengu sources: {0}",
+            TranslationPack.patchPlayerInTranslation(
+              ...originalPlayers.map((playerId) => room.getPlayerById(playerId))
+            )
+          ).toString()
         );
       }
     }
@@ -42,7 +56,7 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -50,23 +64,30 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    return content.playerId === owner.Id && content.toStage === PlayerPhaseStages.FinishStageStart;
+    return (
+      content.playerId === owner.Id &&
+      content.toStage === PlayerPhaseStages.FinishStageStart
+    );
   }
 
   public numberOfTargets(): number {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner;
   }
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to choose a target to draw or drop hand cards until the number of hand cards equal to you?',
-      this.Name,
+      "{0}: do you want to choose a target to draw or drop hand cards until the number of hand cards equal to you?",
+      this.Name
     ).extract();
   }
 
@@ -74,19 +95,38 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
     }
 
-    const opponentsHands = room.getPlayerById(toIds[0]).getCardIds(PlayerCardsArea.HandArea);
-    const n = room.getPlayerById(fromId).getCardIds(PlayerCardsArea.HandArea).length - opponentsHands.length;
+    const opponentsHands = room
+      .getPlayerById(toIds[0])
+      .getCardIds(PlayerCardsArea.HandArea);
+    const n =
+      room.getPlayerById(fromId).getCardIds(PlayerCardsArea.HandArea).length -
+      opponentsHands.length;
     if (n > 0) {
-      await room.drawCards(Math.min(n, 5 - opponentsHands.length), toIds[0], 'top', fromId, this.Name);
+      await room.drawCards(
+        Math.min(n, 5 - opponentsHands.length),
+        toIds[0],
+        "top",
+        fromId,
+        this.Name
+      );
     } else if (n < 0) {
       if (n === -opponentsHands.length) {
-        await room.dropCards(CardMoveReason.SelfDrop, opponentsHands, toIds[0], toIds[0], this.Name);
+        await room.dropCards(
+          CardMoveReason.SelfDrop,
+          opponentsHands,
+          toIds[0],
+          toIds[0],
+          this.Name
+        );
       } else {
         const response = await room.askForCardDrop(
           toIds[0],
@@ -94,11 +134,17 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
           [PlayerCardsArea.HandArea],
           true,
           undefined,
-          this.Name,
+          this.Name
         );
 
         response.droppedCards.length > 0 &&
-          (await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, toIds[0], toIds[0], this.Name));
+          (await room.dropCards(
+            CardMoveReason.SelfDrop,
+            response.droppedCards,
+            toIds[0],
+            toIds[0],
+            this.Name
+          ));
       }
     }
 
@@ -109,9 +155,11 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
       this.Name,
       originalPlayers,
       TranslationPack.translationJsonPatcher(
-        'zhengu sources: {0}',
-        TranslationPack.patchPlayerInTranslation(...originalPlayers.map(playerId => room.getPlayerById(playerId))),
-      ).toString(),
+        "zhengu sources: {0}",
+        TranslationPack.patchPlayerInTranslation(
+          ...originalPlayers.map((playerId) => room.getPlayerById(playerId))
+        )
+      ).toString()
     );
 
     return true;
@@ -121,12 +169,15 @@ export class ZhenGu extends TriggerSkill implements OnDefineReleaseTiming {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: ZhenGu.Name, description: ZhenGu.Description })
-export class ZhenGuShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class ZhenGuShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
@@ -143,15 +194,25 @@ export class ZhenGuShadow extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       content.fromPlayer !== undefined &&
       content.from === PlayerPhase.PhaseFinish &&
-      room.getPlayerById(content.fromPlayer).getFlag<PlayerId[]>(this.GeneralName)?.includes(owner.Id)
+      room
+        .getPlayerById(content.fromPlayer)
+        .getFlag<PlayerId[]>(this.GeneralName)
+        ?.includes(owner.Id)
     );
   }
 
@@ -159,20 +220,41 @@ export class ZhenGuShadow extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = event;
-    const target = (triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>).fromPlayer;
+    const target = (
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+    ).fromPlayer;
     if (!target) {
       return false;
     }
 
-    const opponentsHands = room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea);
-    const n = room.getPlayerById(fromId).getCardIds(PlayerCardsArea.HandArea).length - opponentsHands.length;
+    const opponentsHands = room
+      .getPlayerById(target)
+      .getCardIds(PlayerCardsArea.HandArea);
+    const n =
+      room.getPlayerById(fromId).getCardIds(PlayerCardsArea.HandArea).length -
+      opponentsHands.length;
     if (n > 0) {
-      await room.drawCards(Math.min(n, 5 - opponentsHands.length), target, 'top', fromId, this.GeneralName);
+      await room.drawCards(
+        Math.min(n, 5 - opponentsHands.length),
+        target,
+        "top",
+        fromId,
+        this.GeneralName
+      );
     } else if (n < 0) {
       if (n === -opponentsHands.length) {
-        await room.dropCards(CardMoveReason.SelfDrop, opponentsHands, target, target, this.GeneralName);
+        await room.dropCards(
+          CardMoveReason.SelfDrop,
+          opponentsHands,
+          target,
+          target,
+          this.GeneralName
+        );
       } else {
         const response = await room.askForCardDrop(
           target,
@@ -180,16 +262,22 @@ export class ZhenGuShadow extends TriggerSkill implements OnDefineReleaseTiming 
           [PlayerCardsArea.HandArea],
           true,
           undefined,
-          this.GeneralName,
+          this.GeneralName
         );
 
         response.droppedCards.length > 0 &&
-          (await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, target, target, this.GeneralName));
+          (await room.dropCards(
+            CardMoveReason.SelfDrop,
+            response.droppedCards,
+            target,
+            target,
+            this.GeneralName
+          ));
       }
     }
 
     const originalPlayers = room.getFlag<PlayerId[]>(target, this.GeneralName);
-    const index = originalPlayers.findIndex(player => player === fromId);
+    const index = originalPlayers.findIndex((player) => player === fromId);
     originalPlayers.splice(index, 1);
     if (originalPlayers.length === 0) {
       room.removeFlag(target, this.GeneralName);
@@ -199,9 +287,11 @@ export class ZhenGuShadow extends TriggerSkill implements OnDefineReleaseTiming 
         this.GeneralName,
         originalPlayers,
         TranslationPack.translationJsonPatcher(
-          'zhengu sources: {0}',
-          TranslationPack.patchPlayerInTranslation(...originalPlayers.map(playerId => room.getPlayerById(playerId))),
-        ).toString(),
+          "zhengu sources: {0}",
+          TranslationPack.patchPlayerInTranslation(
+            ...originalPlayers.map((playerId) => room.getPlayerById(playerId))
+          )
+        ).toString()
       );
     }
 

@@ -1,9 +1,9 @@
-import { GameCardExtensions } from 'core/game/game_props';
-import { SkillLoader } from 'core/game/package_loader/loader.skills';
-import { WanJianQiFaSkill } from 'core/skills/cards/standard/wanjianqifa';
-import { Others } from '../card';
-import type { CardSuit, RealCardId } from '../libs/card_props';
-import { TrickCard } from '../trick_card';
+import { GameCardExtensions } from "@/core/game/game_props";
+import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { WanJianQiFaSkill } from "@/core/skills/cards/standard/wanjianqifa";
+import { Others } from "../card";
+import type { CardSuit, RealCardId } from "../libs/card_props";
+import { TrickCard } from "../trick_card";
 
 @Others
 export class WanJianQiFa extends TrickCard {
@@ -13,10 +13,10 @@ export class WanJianQiFa extends TrickCard {
       cardNumber,
       suit,
       0,
-      'wanjianqifa',
-      'wanjianqifa_description',
+      "wanjianqifa",
+      "wanjianqifa_description",
       GameCardExtensions.Standard,
-      SkillLoader.getInstance().getSkillByName('wanjianqifa'),
+      SkillLoader.getInstance().getSkillByName("wanjianqifa")
     );
   }
 

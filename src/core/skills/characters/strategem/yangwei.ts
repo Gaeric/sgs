@@ -1,9 +1,9 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_DISTANCE } from 'core/game/game_props';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_DISTANCE } from "@/core/game/game_props";
 import {
   AllStage,
   CardUseStage,
@@ -11,14 +11,23 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, OnDefineReleaseTiming, RulesBreakerSkill, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  OnDefineReleaseTiming,
+  RulesBreakerSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'yangwei', description: 'yangwei_description' })
+@CommonSkill({ name: "yangwei", description: "yangwei_description" })
 export class YangWei extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.getFlag<boolean>(this.Name);
@@ -32,7 +41,11 @@ export class YangWei extends ActiveSkill {
     return 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return false;
   }
 
@@ -40,14 +53,22 @@ export class YangWei extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
-    await room.drawCards(2, event.fromId, 'top', event.fromId, this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
+    await room.drawCards(2, event.fromId, "top", event.fromId, this.Name);
     room.setFlag<boolean>(event.fromId, this.Name, true);
-    room.getPlayerById(event.fromId).setFlag<boolean>(YangWeiRemover.Name, true);
+    room
+      .getPlayerById(event.fromId)
+      .setFlag<boolean>(YangWeiRemover.Name, true);
 
     return true;
   }
@@ -56,40 +77,61 @@ export class YangWei extends ActiveSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: YangWei.Name, description: YangWei.Description })
-export class YangWeiShadow extends RulesBreakerSkill implements OnDefineReleaseTiming {
+export class YangWeiShadow
+  extends RulesBreakerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(room: Room, owner: PlayerId): boolean {
     return !room.getPlayerById(owner).getFlag<boolean>(this.GeneralName);
   }
 
-  public breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (!owner.getFlag<boolean>(this.GeneralName)) {
       return 0;
     }
 
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ generalName: ['slash'] })) ? 1 : 0;
+      return cardId.match(new CardMatcher({ generalName: ["slash"] })) ? 1 : 0;
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName === 'slash' ? 1 : 0;
+      return Sanguosha.getCardById(cardId).GeneralName === "slash" ? 1 : 0;
     }
   }
 
-  public breakCardUsableDistance(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
+  public breakCardUsableDistance(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
     if (!owner.getFlag<boolean>(this.GeneralName)) {
       return 0;
     }
 
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ generalName: ['slash'] })) ? INFINITE_DISTANCE : 0;
+      return cardId.match(new CardMatcher({ generalName: ["slash"] }))
+        ? INFINITE_DISTANCE
+        : 0;
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName === 'slash' ? INFINITE_DISTANCE : 0;
+      return Sanguosha.getCardById(cardId).GeneralName === "slash"
+        ? INFINITE_DISTANCE
+        : 0;
     }
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: YangWeiShadow.Name, description: YangWeiShadow.Description })
-export class YangWeiRemover extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: YangWeiShadow.Name,
+  description: YangWeiShadow.Description,
+})
+export class YangWeiRemover
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(room: Room, owner: PlayerId): boolean {
     return !!room.getPlayerById(owner).getFlag<string>(this.GeneralName);
   }
@@ -98,11 +140,18 @@ export class YangWeiRemover extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage !== PhaseStageChangeStage.StageChanged;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return (
       stage === CardUseStage.BeforeCardUseEffect ||
       stage === PhaseStageChangeStage.StageChanged ||
@@ -117,18 +166,20 @@ export class YangWeiRemover extends TriggerSkill implements OnDefineReleaseTimin
       | GameEventIdentifiers.CardUseEvent
       | GameEventIdentifiers.PhaseStageChangeEvent
       | GameEventIdentifiers.PhaseChangeEvent
-    >,
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       return (
         cardUseEvent.fromId === owner.Id &&
-        Sanguosha.getCardById(cardUseEvent.cardId).GeneralName === 'slash' &&
+        Sanguosha.getCardById(cardUseEvent.cardId).GeneralName === "slash" &&
         owner.getFlag<boolean>(this.GeneralName)
       );
     } else if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {
-      const phaseStageChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
+      const phaseStageChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
       return (
         phaseStageChangeEvent.playerId === owner.Id &&
         phaseStageChangeEvent.toStage === PlayerPhaseStages.FinishStageStart &&
@@ -136,11 +187,13 @@ export class YangWeiRemover extends TriggerSkill implements OnDefineReleaseTimin
         !owner.getFlag<boolean>(this.Name)
       );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      const phaseChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
       return (
         phaseChangeEvent.from === PlayerPhase.PhaseFinish &&
         phaseChangeEvent.fromPlayer === owner.Id &&
-        (owner.getFlag<boolean>(this.GeneralName) || owner.getFlag<boolean>(this.Name))
+        (owner.getFlag<boolean>(this.GeneralName) ||
+          owner.getFlag<boolean>(this.Name))
       );
     }
 
@@ -151,7 +204,10 @@ export class YangWeiRemover extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       | GameEventIdentifiers.CardUseEvent
       | GameEventIdentifiers.PhaseStageChangeEvent
@@ -160,7 +216,8 @@ export class YangWeiRemover extends TriggerSkill implements OnDefineReleaseTimin
 
     const identifier = EventPacker.getIdentifier(unknownEvent);
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       cardUseEvent.triggeredBySkills = cardUseEvent.triggeredBySkills || [];
       cardUseEvent.triggeredBySkills.push(this.GeneralName);
     } else if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {

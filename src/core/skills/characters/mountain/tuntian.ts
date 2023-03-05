@@ -1,35 +1,54 @@
-import { CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, RulesBreakerSkill, TriggerSkill } from 'core/skills/skill';
-import { ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  RulesBreakerSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'tuntian', description: 'tuntian_description' })
+@CommonSkill({ name: "tuntian", description: "tuntian_description" })
 export class TunTian extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     if (room.CurrentPhasePlayer === owner) {
       return false;
     }
 
     return (
       content.infos.find(
-        info =>
+        (info) =>
           owner.Id === info.fromId &&
           !(
             owner.Id === info.toId &&
-            (info.toArea === PlayerCardsArea.HandArea || info.toArea === PlayerCardsArea.EquipArea)
+            (info.toArea === PlayerCardsArea.HandArea ||
+              info.toArea === PlayerCardsArea.EquipArea)
           ) &&
           info.movingCards.filter(
-            card => card.fromArea === PlayerCardsArea.HandArea || card.fromArea === PlayerCardsArea.EquipArea,
-          ).length > 0,
+            (card) =>
+              card.fromArea === PlayerCardsArea.HandArea ||
+              card.fromArea === PlayerCardsArea.EquipArea
+          ).length > 0
       ) !== undefined
     );
   }
@@ -38,7 +57,10 @@ export class TunTian extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
 
     const judgeEvent = await room.judge(fromId, undefined, this.Name);
@@ -49,7 +71,9 @@ export class TunTian extends TriggerSkill {
 
     if (Sanguosha.getCardById(judgeEvent.judgeCardId).Suit !== CardSuit.Heart) {
       await room.moveCards({
-        movingCards: [{ card: judgeEvent.judgeCardId, fromArea: CardMoveArea.DropStack }],
+        movingCards: [
+          { card: judgeEvent.judgeCardId, fromArea: CardMoveArea.DropStack },
+        ],
         toId: fromId,
         toArea: PlayerCardsArea.OutsideArea,
         moveReason: CardMoveReason.ActiveMove,
@@ -58,9 +82,13 @@ export class TunTian extends TriggerSkill {
         proposer: fromId,
         movedByReason: this.Name,
       });
-    } else if (Sanguosha.getCardById(judgeEvent.judgeCardId).Suit === CardSuit.Heart) {
+    } else if (
+      Sanguosha.getCardById(judgeEvent.judgeCardId).Suit === CardSuit.Heart
+    ) {
       await room.moveCards({
-        movingCards: [{ card: judgeEvent.judgeCardId, fromArea: CardMoveArea.DropStack }],
+        movingCards: [
+          { card: judgeEvent.judgeCardId, fromArea: CardMoveArea.DropStack },
+        ],
         toId: fromId,
         toArea: PlayerCardsArea.HandArea,
         moveReason: CardMoveReason.ActivePrey,
@@ -77,6 +105,7 @@ export class TunTian extends TriggerSkill {
 @CommonSkill({ name: TunTian.Name, description: TunTian.Description })
 export class TunTianShadow extends RulesBreakerSkill {
   public breakOffenseDistance(room: Room, owner: Player) {
-    return owner.getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName).length;
+    return owner.getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName)
+      .length;
   }
 }

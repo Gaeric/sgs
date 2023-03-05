@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "baseUrl": "src",
-    "inlineSourceMap": true,
-    "module": "commonjs"
-  },
-  "extends": "./tsconfig.json"
-}

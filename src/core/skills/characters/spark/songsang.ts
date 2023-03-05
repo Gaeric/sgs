@@ -1,21 +1,28 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PlayerDiedStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { LimitSkill } from 'core/skills/skill_wrappers';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { AllStage, PlayerDiedStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { LimitSkill } from "@/core/skills/skill_wrappers";
 
-@LimitSkill({ name: 'songsang', description: 'songsang_description' })
+@LimitSkill({ name: "songsang", description: "songsang_description" })
 export class SongSang extends TriggerSkill {
   public get RelatedSkills(): string[] {
-    return ['zhanji'];
+    return ["zhanji"];
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PlayerDiedStage.PlayerDied;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PlayerDiedEvent>
+  ): boolean {
     return content.playerId !== owner.Id;
   }
 
@@ -23,7 +30,10 @@ export class SongSang extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     if (room.getPlayerById(fromId).LostHp > 0) {
       await room.recover({
@@ -35,7 +45,7 @@ export class SongSang extends TriggerSkill {
       await room.changeMaxHp(fromId, 1);
     }
 
-    await room.obtainSkill(fromId, 'zhanji');
+    await room.obtainSkill(fromId, "zhanji");
 
     return true;
   }

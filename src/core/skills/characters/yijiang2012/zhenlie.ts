@@ -1,19 +1,29 @@
-import { ZhenLieSkillTrigger } from 'core/ai/skills/characters/yijiang2012/zhenlie';
-import { CardType } from 'core/cards/card';
-import { CardChoosingOptions } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AimStage, AllStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { AI, CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { ZhenLieSkillTrigger } from "@/core/ai/skills/characters/yijiang2012/zhenlie";
+import { CardType } from "@/core/cards/card";
+import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AimStage, AllStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { AI, CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
 @AI(ZhenLieSkillTrigger)
-@CommonSkill({ name: 'zhenlie', description: 'zhenlie_description' })
+@CommonSkill({ name: "zhenlie", description: "zhenlie_description" })
 export class ZhenLie extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.AimEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>,
+    stage?: AllStage
+  ): boolean {
     if (!event.byCardId) {
       return false;
     }
@@ -21,24 +31,29 @@ export class ZhenLie extends TriggerSkill {
     const card = Sanguosha.getCardById(event.byCardId);
     return (
       stage === AimStage.AfterAimmed &&
-      (card.GeneralName === 'slash' || (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick)))
+      (card.GeneralName === "slash" ||
+        (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick)))
     );
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.AimEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>
+  ): boolean {
     return event.toId === owner.Id && event.fromId !== owner.Id && owner.Hp > 0;
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.AimEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to lose 1 hp to nullify {1}, then drop a card from {2}',
+      "{0}: do you want to lose 1 hp to nullify {1}, then drop a card from {2}",
       this.Name,
       TranslationPack.patchCardInTranslation(event.byCardId!),
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.fromId)),
+      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.fromId))
     ).extract();
   }
 
@@ -46,9 +61,13 @@ export class ZhenLie extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, triggeredOnEvent } = event;
-    const aimEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+    const aimEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
 
     await room.loseHp(fromId, 1);
     aimEvent.nullifiedTargets.push(fromId);
@@ -61,7 +80,8 @@ export class ZhenLie extends TriggerSkill {
 
       const options: CardChoosingOptions = {
         [PlayerCardsArea.EquipArea]: user.getCardIds(PlayerCardsArea.EquipArea),
-        [PlayerCardsArea.HandArea]: user.getCardIds(PlayerCardsArea.HandArea).length,
+        [PlayerCardsArea.HandArea]: user.getCardIds(PlayerCardsArea.HandArea)
+          .length,
       };
 
       const chooseCardEvent = {
@@ -71,7 +91,12 @@ export class ZhenLie extends TriggerSkill {
         triggeredBySkills: [this.Name],
       };
 
-      const response = await room.askForChoosingPlayerCard(chooseCardEvent, fromId, true, true);
+      const response = await room.askForChoosingPlayerCard(
+        chooseCardEvent,
+        fromId,
+        true,
+        true
+      );
       if (!response) {
         return false;
       }
@@ -81,7 +106,7 @@ export class ZhenLie extends TriggerSkill {
         [response.selectedCard!],
         chooseCardEvent.toId,
         fromId,
-        this.Name,
+        this.Name
       );
     }
 

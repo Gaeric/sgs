@@ -1,23 +1,33 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, JudgeEffectStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, FilterSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { AllStage, JudgeEffectStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, FilterSkill, TriggerSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'guicai', description: 'guicai_description' })
+@CommonSkill({ name: "guicai", description: "guicai_description" })
 export class GuiCai extends TriggerSkill {
   public get RelatedCharacters(): string[] {
-    return ['god_simayi'];
+    return ["god_simayi"];
   }
 
   public audioIndex(characterName?: string) {
-    return characterName && this.RelatedCharacters.includes(characterName) ? 1 : 2;
+    return characterName && this.RelatedCharacters.includes(characterName)
+      ? 1
+      : 2;
   }
 
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.JudgeEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.JudgeEvent>,
+    stage?: AllStage
+  ) {
     return stage === JudgeEffectStage.BeforeJudgeEffect;
   }
 
@@ -32,8 +42,10 @@ export class GuiCai extends TriggerSkill {
     return (
       room
         .getPlayerById(owner)
-        .getSkills<FilterSkill>('filter')
-        .find(skill => !skill.canUseCard(cardId, room, owner, undefined, true)) === undefined
+        .getSkills<FilterSkill>("filter")
+        .find(
+          (skill) => !skill.canUseCard(cardId, room, owner, undefined, true)
+        ) === undefined
     );
   }
 
@@ -41,24 +53,32 @@ export class GuiCai extends TriggerSkill {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent, cardIds } = skillUseEvent;
-    const judgeEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.JudgeEvent>;
+    const judgeEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.JudgeEvent>;
 
     await room.responseCard({
       cardId: cardIds![0],
       fromId: skillUseEvent.fromId,
       translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} responsed card {1} to replace judge card {2}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(skillUseEvent.fromId)),
+        "{0} responsed card {1} to replace judge card {2}",
+        TranslationPack.patchPlayerInTranslation(
+          room.getPlayerById(skillUseEvent.fromId)
+        ),
         TranslationPack.patchCardInTranslation(cardIds![0]),
-        TranslationPack.patchCardInTranslation(judgeEvent.judgeCardId),
+        TranslationPack.patchCardInTranslation(judgeEvent.judgeCardId)
       ).extract(),
       mute: true,
     });
 
     room.moveCards({
-      movingCards: [{ card: judgeEvent.judgeCardId, fromArea: CardMoveArea.ProcessingArea }],
+      movingCards: [
+        { card: judgeEvent.judgeCardId, fromArea: CardMoveArea.ProcessingArea },
+      ],
       toArea: CardMoveArea.DropStack,
       moveReason: CardMoveReason.PlaceToDropStack,
       proposer: skillUseEvent.fromId,

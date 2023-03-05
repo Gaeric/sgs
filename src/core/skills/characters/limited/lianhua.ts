@@ -1,7 +1,12 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { MovingCardProps } from 'core/event/event.server';
-import { EventPacker } from 'core/event/event_packer';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { MovingCardProps } from "@/core/event/event.server";
+import { EventPacker } from "@/core/event/event_packer";
 import {
   AllStage,
   DamageEffectStage,
@@ -9,41 +14,55 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CompulsorySkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CompulsorySkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'lianhua', description: 'lianhua_description' })
+@CompulsorySkill({ name: "lianhua", description: "lianhua_description" })
 export class LianHua extends TriggerSkill {
   public get RelatedSkills(): string[] {
-    return ['yingzi', 'guanxing', 'zhiyan', 'gongxin'];
+    return ["yingzi", "guanxing", "zhiyan", "gongxin"];
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.DamageEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
-    return stage === DamageEffectStage.AfterDamagedEffect || stage === PhaseStageChangeStage.StageChanged;
+    return (
+      stage === DamageEffectStage.AfterDamagedEffect ||
+      stage === PhaseStageChangeStage.StageChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<
+      | GameEventIdentifiers.DamageEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
+    >
   ): boolean {
     const identfier = EventPacker.getIdentifier(content);
     if (identfier === GameEventIdentifiers.DamageEvent) {
       return (
-        (content as ServerEventFinder<GameEventIdentifiers.DamageEvent>).toId !== owner.Id &&
-        room.CurrentPlayer !== owner
+        (content as ServerEventFinder<GameEventIdentifiers.DamageEvent>)
+          .toId !== owner.Id && room.CurrentPlayer !== owner
       );
     } else if (identfier === GameEventIdentifiers.PhaseStageChangeEvent) {
-      const phaseStageChangeEvent = content as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
+      const phaseStageChangeEvent =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
       return (
         phaseStageChangeEvent.playerId === owner.Id &&
         phaseStageChangeEvent.toStage === PlayerPhaseStages.PrepareStageStart
@@ -57,20 +76,31 @@ export class LianHua extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
-      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseStageChangeEvent
+      | GameEventIdentifiers.DamageEvent
+      | GameEventIdentifiers.PhaseStageChangeEvent
     >;
 
     const identfier = EventPacker.getIdentifier(unknownEvent);
     if (identfier === GameEventIdentifiers.DamageEvent) {
-      const victim = (unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>).toId;
+      const victim = (
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>
+      ).toId;
       room
         .getPlayerById(fromId)
         .addInvisibleMark(
           this.Name,
-          room.hasDifferentCampWith(room.getPlayerById(fromId), room.getPlayerById(victim)) ? -1 : 1,
+          room.hasDifferentCampWith(
+            room.getPlayerById(fromId),
+            room.getPlayerById(victim)
+          )
+            ? -1
+            : 1
         );
       room.addMark(fromId, MarkEnum.DanXue, 1);
     } else {
@@ -78,18 +108,23 @@ export class LianHua extends TriggerSkill {
       let toGainSkill: string = this.RelatedSkills[0];
       let cardMatchers: CardMatcher[];
 
-      const invisibleDanXue = room.getPlayerById(fromId).getInvisibleMark(this.Name);
+      const invisibleDanXue = room
+        .getPlayerById(fromId)
+        .getInvisibleMark(this.Name);
 
       if (room.getMark(fromId, MarkEnum.DanXue) <= 3) {
-        cardMatchers = [new CardMatcher({ name: ['peach'] })];
+        cardMatchers = [new CardMatcher({ name: ["peach"] })];
       } else if (invisibleDanXue > 0) {
-        cardMatchers = [new CardMatcher({ name: ['wuzhongshengyou'] })];
+        cardMatchers = [new CardMatcher({ name: ["wuzhongshengyou"] })];
         toGainSkill = this.RelatedSkills[1];
       } else if (invisibleDanXue < 0) {
-        cardMatchers = [new CardMatcher({ name: ['shunshouqianyang'] })];
+        cardMatchers = [new CardMatcher({ name: ["shunshouqianyang"] })];
         toGainSkill = this.RelatedSkills[2];
       } else {
-        cardMatchers = [new CardMatcher({ generalName: ['slash'] }), new CardMatcher({ name: ['duel'] })];
+        cardMatchers = [
+          new CardMatcher({ generalName: ["slash"] }),
+          new CardMatcher({ name: ["duel"] }),
+        ];
         toGainSkill = this.RelatedSkills[3];
       }
 
@@ -102,7 +137,10 @@ export class LianHua extends TriggerSkill {
           const randomIndex = Math.floor(Math.random() * randomCards.length);
           toGainCards.push({
             card: randomCards[randomIndex],
-            fromArea: randomIndex < length ? CardMoveArea.DrawStack : CardMoveArea.DropStack,
+            fromArea:
+              randomIndex < length
+                ? CardMoveArea.DrawStack
+                : CardMoveArea.DropStack,
           });
         }
       }
@@ -133,25 +171,37 @@ export class LianHua extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CompulsorySkill({ name: LianHua.Name, description: LianHua.Description })
-export class LianHuaShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class LianHuaShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.getMark(owner, MarkEnum.DanXue) === 0 && room.getFlag<string[]>(owner, this.GeneralName) === undefined;
+    return (
+      room.getMark(owner, MarkEnum.DanXue) === 0 &&
+      room.getFlag<string[]>(owner, this.GeneralName) === undefined
+    );
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
-    return stage === PhaseChangeStage.PhaseChanged || stage === PhaseChangeStage.AfterPhaseChanged;
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
+    return (
+      stage === PhaseChangeStage.PhaseChanged ||
+      stage === PhaseChangeStage.AfterPhaseChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
     content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       (stage === PhaseChangeStage.AfterPhaseChanged &&
@@ -169,8 +219,12 @@ export class LianHuaShadow extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const phaseChangeEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const phaseChangeEvent =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
 
     if (phaseChangeEvent.from === PlayerPhase.PhaseFinish) {
       const skills = room.getFlag<string[]>(event.fromId, this.GeneralName);

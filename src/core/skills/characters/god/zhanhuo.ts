@@ -1,12 +1,16 @@
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { DamageType } from 'core/game/game_props';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { ActiveSkill, LimitSkill } from 'core/skills/skill';
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { DamageType } from "@/core/game/game_props";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { ActiveSkill, LimitSkill } from "@/core/skills/skill";
 
-@LimitSkill({ name: 'zhanhuo', description: 'zhanhuo_description' })
+@LimitSkill({ name: "zhanhuo", description: "zhanhuo_description" })
 export class ZhanHuo extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return owner.getMark(MarkEnum.JunLve) > 0;
@@ -25,7 +29,9 @@ export class ZhanHuo extends ActiveSkill {
   }
 
   public targetFilter(room: Room, owner: Player, targets: PlayerId[]) {
-    return targets.length <= owner.getMark(MarkEnum.JunLve) && targets.length > 0;
+    return (
+      targets.length <= owner.getMark(MarkEnum.JunLve) && targets.length > 0
+    );
   }
 
   public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId) {
@@ -36,7 +42,10 @@ export class ZhanHuo extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = skillUseEvent;
     const from = room.getPlayerById(fromId);
 
@@ -44,25 +53,45 @@ export class ZhanHuo extends ActiveSkill {
 
     for (const targetId of toIds!) {
       const target = room.getPlayerById(targetId);
-      const equips = target.getCardIds(PlayerCardsArea.EquipArea).filter(id => room.canDropCard(targetId, id));
+      const equips = target
+        .getCardIds(PlayerCardsArea.EquipArea)
+        .filter((id) => room.canDropCard(targetId, id));
       if (equips.length > 0) {
-        await room.dropCards(CardMoveReason.SelfDrop, equips, targetId, targetId, this.Name);
+        await room.dropCards(
+          CardMoveReason.SelfDrop,
+          equips,
+          targetId,
+          targetId,
+          this.Name
+        );
       }
     }
 
-    const askForPlayerChoose: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> = {
-      toId: fromId,
-      players: toIds!,
-      requiredAmount: 1,
-      conversation: 'zhanhuo: please choose a target to whom you cause 1 fire damage',
-      triggeredBySkills: [this.Name],
-    };
+    const askForPlayerChoose: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> =
+      {
+        toId: fromId,
+        players: toIds!,
+        requiredAmount: 1,
+        conversation:
+          "zhanhuo: please choose a target to whom you cause 1 fire damage",
+        triggeredBySkills: [this.Name],
+      };
 
-    room.notify(GameEventIdentifiers.AskForChoosingPlayerEvent, askForPlayerChoose, fromId);
+    room.notify(
+      GameEventIdentifiers.AskForChoosingPlayerEvent,
+      askForPlayerChoose,
+      fromId
+    );
 
-    const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingPlayerEvent, fromId);
+    const response = await room.onReceivingAsyncResponseFrom(
+      GameEventIdentifiers.AskForChoosingPlayerEvent,
+      fromId
+    );
 
-    const starter = response.selectedPlayers === undefined ? toIds![0] : response.selectedPlayers[0];
+    const starter =
+      response.selectedPlayers === undefined
+        ? toIds![0]
+        : response.selectedPlayers[0];
     await room.damage({
       fromId,
       toId: starter,

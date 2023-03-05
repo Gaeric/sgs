@@ -1,28 +1,38 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardColor, CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardColor, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, FilterSkill, OnDefineReleaseTiming, ShadowSkill, TriggerSkill } from 'core/skills/skill';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  FilterSkill,
+  OnDefineReleaseTiming,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
 
-@CommonSkill({ name: 'qianxi', description: 'qianxi_description' })
+@CommonSkill({ name: "qianxi", description: "qianxi_description" })
 export class QianXi extends TriggerSkill {
-  public static readonly Red = 'qianxi_red';
-  public static readonly Black = 'qianxi_black';
+  public static readonly Red = "qianxi_red";
+  public static readonly Black = "qianxi_black";
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -30,19 +40,25 @@ export class QianXi extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    return owner.Id === content.playerId && content.toStage === PlayerPhaseStages.PrepareStageStart;
+    return (
+      owner.Id === content.playerId &&
+      content.toStage === PlayerPhaseStages.PrepareStageStart
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
 
-    await room.drawCards(1, fromId, 'top', fromId, this.Name);
+    await room.drawCards(1, fromId, "top", fromId, this.Name);
 
     if (room.getPlayerById(fromId).getPlayerCards().length < 1) {
       return false;
@@ -54,39 +70,54 @@ export class QianXi extends TriggerSkill {
       [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
       true,
       undefined,
-      this.Name,
+      this.Name
     );
     if (response.droppedCards.length === 0) {
       return false;
     }
 
     const color = Sanguosha.getCardById(response.droppedCards[0]).Color;
-    await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, fromId, fromId, this.Name);
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      response.droppedCards,
+      fromId,
+      fromId,
+      this.Name
+    );
 
     const players = room
       .getAlivePlayersFrom()
-      .filter(player => room.distanceBetween(room.getPlayerById(fromId), player) === 1)
-      .map(player => player.Id);
+      .filter(
+        (player) =>
+          room.distanceBetween(room.getPlayerById(fromId), player) === 1
+      )
+      .map((player) => player.Id);
 
     if (players.length < 1) {
       return false;
     }
 
-    const askForPlayerChoose: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> = {
-      toId: fromId,
-      players,
-      requiredAmount: 1,
-      conversation: 'qianxi: please choose a target with 1 Distance(to you)',
-      triggeredBySkills: [this.Name],
-    };
+    const askForPlayerChoose: ServerEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> =
+      {
+        toId: fromId,
+        players,
+        requiredAmount: 1,
+        conversation: "qianxi: please choose a target with 1 Distance(to you)",
+        triggeredBySkills: [this.Name],
+      };
 
     room.notify(
       GameEventIdentifiers.AskForChoosingPlayerEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingPlayerEvent>(askForPlayerChoose),
-      fromId,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+        askForPlayerChoose
+      ),
+      fromId
     );
 
-    const resp = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingPlayerEvent, fromId);
+    const resp = await room.onReceivingAsyncResponseFrom(
+      GameEventIdentifiers.AskForChoosingPlayerEvent,
+      fromId
+    );
     resp.selectedPlayers = resp.selectedPlayers || [players[0]];
 
     await room.obtainSkill(resp.selectedPlayers[0], QianXiBlock.Name);
@@ -100,23 +131,32 @@ export class QianXi extends TriggerSkill {
 
 @ShadowSkill
 @CommonSkill({ name: QianXi.Name, description: QianXi.Description })
-export class QianXiShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class QianXiShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterDead(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isFlaggedSkill(): boolean {
@@ -127,11 +167,18 @@ export class QianXiShadow extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return content.from === PlayerPhase.PhaseFinish;
   }
 
@@ -153,9 +200,16 @@ export class QianXiShadow extends TriggerSkill implements OnDefineReleaseTiming 
 }
 
 @ShadowSkill
-@CommonSkill({ name: 'qianxiBlocker', description: 'qianxiBlocker_description' })
+@CommonSkill({
+  name: "qianxiBlocker",
+  description: "qianxiBlocker_description",
+})
 export class QianXiBlock extends FilterSkill {
-  public canUseCard(cardId: CardId | CardMatcher, room: Room, owner: PlayerId): boolean {
+  public canUseCard(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: PlayerId
+  ): boolean {
     const color = room.getFlag<CardColor>(owner, QianXi.Name);
     if (color === undefined) {
       return true;
@@ -163,7 +217,8 @@ export class QianXiBlock extends FilterSkill {
 
     return cardId instanceof CardMatcher
       ? true
-      : room.getPlayerById(owner).cardFrom(cardId) !== PlayerCardsArea.HandArea ||
+      : room.getPlayerById(owner).cardFrom(cardId) !==
+          PlayerCardsArea.HandArea ||
           Sanguosha.getCardById(cardId).Color !== color;
   }
 }

@@ -1,28 +1,28 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CharacterGender } from 'core/characters/character';
+import { CardId } from "@/core/cards/libs/card_props";
+import { CharacterGender } from "@/core/characters/character";
 import {
   CardMoveArea,
   CardMoveReason,
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
+} from "@/core/event/event";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { PersistentSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'lihun', description: 'lihun_description' })
+@CommonSkill({ name: "lihun", description: "lihun_description" })
 export class Lihun extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name) && owner.getPlayerCards().length > 0;
@@ -44,23 +44,48 @@ export class Lihun extends ActiveSkill {
     return room.canDropCard(owner, cardId);
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId, selectedCards: CardId[]) {
-    return room.getPlayerById(target).Gender === CharacterGender.Male && target !== owner;
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId,
+    selectedCards: CardId[]
+  ) {
+    return (
+      room.getPlayerById(target).Gender === CharacterGender.Male &&
+      target !== owner
+    );
   }
 
-  async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { cardIds, toIds, fromId } = event;
 
-    await room.dropCards(CardMoveReason.SelfDrop, cardIds!, fromId, fromId, this.Name);
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      cardIds!,
+      fromId,
+      fromId,
+      this.Name
+    );
     await room.turnOver(fromId);
 
-    const handcards = room.getPlayerById(toIds![0]).getCardIds(PlayerCardsArea.HandArea);
+    const handcards = room
+      .getPlayerById(toIds![0])
+      .getCardIds(PlayerCardsArea.HandArea);
     await room.moveCards({
-      movingCards: handcards.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+      movingCards: handcards.map((card) => ({
+        card,
+        fromArea: CardMoveArea.HandArea,
+      })),
       fromId: toIds![0],
       toId: fromId,
       toArea: CardMoveArea.HandArea,
@@ -73,9 +98,9 @@ export class Lihun extends ActiveSkill {
       this.Name,
       toIds![0],
       TranslationPack.translationJsonPatcher(
-        'lihun target: {0}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(toIds![0])),
-      ).toString(),
+        "lihun target: {0}",
+        TranslationPack.patchPlayerInTranslation(room.getPlayerById(toIds![0]))
+      ).toString()
     );
 
     return true;
@@ -90,9 +115,12 @@ export class LihunShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ) {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public async whenDead(room: Room, player: Player) {
@@ -109,11 +137,18 @@ export class LihunShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
     return (
       content.playerId === owner.Id &&
       content.toStage === PlayerPhaseStages.PlayCardStageEnd &&
@@ -125,7 +160,10 @@ export class LihunShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const toId = room.getPlayerById(fromId).getFlag<PlayerId>(this.GeneralName);
     if (room.getPlayerById(toId).Dead) {
@@ -137,25 +175,29 @@ export class LihunShadow extends TriggerSkill implements OnDefineReleaseTiming {
     const from = room.getPlayerById(fromId);
     let cards = from.getPlayerCards();
     if (cards.length > hp) {
-      const resp = await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
-        GameEventIdentifiers.AskForCardEvent,
-        {
-          cardAmount: hp,
-          toId: fromId,
-          reason: this.Name,
-          conversation: 'lihun: please give the targets some cards',
-          fromArea: [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
-          triggeredBySkills: [this.Name],
-        },
-        fromId,
-        true,
-      );
+      const resp =
+        await room.doAskForCommonly<GameEventIdentifiers.AskForCardEvent>(
+          GameEventIdentifiers.AskForCardEvent,
+          {
+            cardAmount: hp,
+            toId: fromId,
+            reason: this.Name,
+            conversation: "lihun: please give the targets some cards",
+            fromArea: [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
+            triggeredBySkills: [this.Name],
+          },
+          fromId,
+          true
+        );
 
       cards = resp.selectedCards;
     }
 
     await room.moveCards({
-      movingCards: cards.map(card => ({ card, fromArea: room.getPlayerById(fromId).cardFrom(card) })),
+      movingCards: cards.map((card) => ({
+        card,
+        fromArea: room.getPlayerById(fromId).cardFrom(card),
+      })),
       fromId,
       toId,
       toArea: CardMoveArea.HandArea,

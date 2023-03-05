@@ -1,18 +1,22 @@
-import { ClientEventFinder, GameEventIdentifiers, WorkPlace } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { GameInfo, GameRunningInfo } from 'core/game/game_props';
-import { GameCommonRules } from 'core/game/game_rules';
-import { RecordAnalytics } from 'core/game/record_analytics';
-import { PlayerPhase, PlayerPhaseStages } from 'core/game/stage_processor';
-import { ClientSocket } from 'core/network/socket.client';
-import { Player } from 'core/player/player';
-import { ClientPlayer } from 'core/player/player.client';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { GameMode } from 'core/shares/types/room_props';
-import { RoomShortcutInfo } from 'core/shares/types/server_types';
-import { OnDefineReleaseTiming, SkillLifeCycle } from 'core/skills/skill';
-import { Room, RoomId } from './room';
-import { RoomEventStacker } from './utils/room_event_stack';
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  WorkPlace,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { GameInfo, GameRunningInfo } from "@/core/game/game_props";
+import { GameCommonRules } from "@/core/game/game_rules";
+import { RecordAnalytics } from "@/core/game/record_analytics";
+import { PlayerPhase, PlayerPhaseStages } from "@/core/game/stage_processor";
+import { ClientSocket } from "@/core/network/socket.client";
+import { Player } from "@/core/player/player";
+import { ClientPlayer } from "@/core/player/player.client";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { GameMode } from "@/core/shares/types/room_props";
+import { RoomShortcutInfo } from "@/core/shares/types/server_types";
+import { OnDefineReleaseTiming, SkillLifeCycle } from "@/core/skills/skill";
+import { Room, RoomId } from "./room";
+import { RoomEventStacker } from "./utils/room_event_stack";
 
 export class ClientRoom extends Room<WorkPlace.Client> {
   protected readonly socket: ClientSocket;
@@ -34,7 +38,7 @@ export class ClientRoom extends Room<WorkPlace.Client> {
     players: ClientPlayer[],
     protected analytics: RecordAnalytics,
     protected gameCommonRules: GameCommonRules,
-    protected eventStack: RoomEventStacker<WorkPlace.Client>,
+    protected eventStack: RoomEventStacker<WorkPlace.Client>
   ) {
     super();
 
@@ -53,7 +57,9 @@ export class ClientRoom extends Room<WorkPlace.Client> {
   }
 
   protected init(gameStartInfo: GameRunningInfo): void {
-    this.currentPlayer = this.getPlayerById(gameStartInfo.currentPlayerId) as ClientPlayer;
+    this.currentPlayer = this.getPlayerById(
+      gameStartInfo.currentPlayerId
+    ) as ClientPlayer;
     this.numberOfDrawStack = gameStartInfo.numberOfDrawStack;
     this.circle = gameStartInfo.circle;
   }
@@ -242,7 +248,10 @@ export class ClientRoom extends Room<WorkPlace.Client> {
     this.throwUntouchableError(this.getCardsByNameFromStack.name);
   }
 
-  public broadcast<T extends GameEventIdentifiers>(type: T, content: ClientEventFinder<T>): void {
+  public broadcast<T extends GameEventIdentifiers>(
+    type: T,
+    content: ClientEventFinder<T>
+  ): void {
     this.socket.notify(type, content);
   }
 
@@ -315,19 +324,29 @@ export class ClientRoom extends Room<WorkPlace.Client> {
     playerId: PlayerId,
     skillName: string,
     broadcast?: boolean,
-    insertIndex?: number,
+    insertIndex?: number
   ): Promise<void> {
     const player = this.getPlayerById(playerId);
     player.obtainSkill(skillName, insertIndex);
-    await SkillLifeCycle.executeHookOnObtainingSkill(Sanguosha.getSkillBySkillName(skillName), this, player);
+    await SkillLifeCycle.executeHookOnObtainingSkill(
+      Sanguosha.getSkillBySkillName(skillName),
+      this,
+      player
+    );
   }
 
-  public async loseSkill(playerId: PlayerId, skillName: string | string[]): Promise<void> {
+  public async loseSkill(
+    playerId: PlayerId,
+    skillName: string | string[]
+  ): Promise<void> {
     const player = this.getPlayerById(playerId);
     const lostSkill = player.loseSkill(skillName);
 
     for (const skill of lostSkill) {
-      const outsideCards = player.getCardIds(PlayerCardsArea.OutsideArea, skill.Name);
+      const outsideCards = player.getCardIds(
+        PlayerCardsArea.OutsideArea,
+        skill.Name
+      );
       if (outsideCards && player.isCharacterOutsideArea(skill.Name)) {
         outsideCards.splice(0, outsideCards.length);
       }
@@ -353,7 +372,10 @@ export class ClientRoom extends Room<WorkPlace.Client> {
     deadPlayer.revive();
   }
 
-  public emitStatus(status: 'offline' | 'online' | 'quit' | 'trusted' | 'player', toId: PlayerId) {
+  public emitStatus(
+    status: "offline" | "online" | "quit" | "trusted" | "player",
+    toId: PlayerId
+  ) {
     this.broadcast(GameEventIdentifiers.PlayerStatusEvent, { status, toId });
   }
 }

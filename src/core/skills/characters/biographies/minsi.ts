@@ -1,15 +1,23 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardColor, CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_DISTANCE } from 'core/game/game_props';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardColor, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_DISTANCE } from "@/core/game/game_props";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
 import {
   ActiveSkill,
   CommonSkill,
@@ -17,10 +25,10 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
-import { PersistentSkill } from 'core/skills/skill_wrappers';
+} from "@/core/skills/skill";
+import { PersistentSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'minsi', description: 'minsi_description' })
+@CommonSkill({ name: "minsi", description: "minsi_description" })
 export class MinSi extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return !owner.hasUsedSkill(this.Name) && owner.getPlayerCards().length > 0;
@@ -36,11 +44,20 @@ export class MinSi extends ActiveSkill {
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
     return (
-      cards.length > 0 && cards.reduce<number>((sum, id) => (sum += Sanguosha.getCardById(id).CardNumber), 0) === 13
+      cards.length > 0 &&
+      cards.reduce<number>(
+        (sum, id) => (sum += Sanguosha.getCardById(id).CardNumber),
+        0
+      ) === 13
     );
   }
 
-  public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId, selectedCards: CardId[]): boolean {
+  public isAvailableCard(
+    owner: PlayerId,
+    room: Room,
+    cardId: CardId,
+    selectedCards: CardId[]
+  ): boolean {
     if (!room.canDropCard(owner, cardId)) {
       return false;
     }
@@ -48,7 +65,11 @@ export class MinSi extends ActiveSkill {
     if (selectedCards.length > 0) {
       return (
         Sanguosha.getCardById(cardId).CardNumber <=
-        13 - selectedCards.reduce<number>((sum, id) => (sum += Sanguosha.getCardById(id).CardNumber), 0)
+        13 -
+          selectedCards.reduce<number>(
+            (sum, id) => (sum += Sanguosha.getCardById(id).CardNumber),
+            0
+          )
       );
     }
 
@@ -59,12 +80,30 @@ export class MinSi extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
-    const cardIds = Precondition.exists(event.cardIds, 'Unable to get minsi cards');
-    await room.dropCards(CardMoveReason.SelfDrop, cardIds, fromId, fromId, this.Name);
+    const cardIds = Precondition.exists(
+      event.cardIds,
+      "Unable to get minsi cards"
+    );
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      cardIds,
+      fromId,
+      fromId,
+      this.Name
+    );
 
-    const cards = await room.drawCards(cardIds.length * 2, fromId, 'top', fromId, this.Name);
+    const cards = await room.drawCards(
+      cardIds.length * 2,
+      fromId,
+      "top",
+      fromId,
+      this.Name
+    );
     room.setCardTag(fromId, this.Name, VirtualCard.getActualCards(cards));
 
     return true;
@@ -79,9 +118,12 @@ export class MinSiShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public get Muted() {
@@ -93,29 +135,49 @@ export class MinSiShadow extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage: AllStage,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.AskForCardDropEvent
+      | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage: AllStage
   ): boolean {
     return (
-      EventPacker.getIdentifier(event) === GameEventIdentifiers.AskForCardDropEvent ||
+      EventPacker.getIdentifier(event) ===
+        GameEventIdentifiers.AskForCardDropEvent ||
       stage === PhaseChangeStage.PhaseChanged
     );
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage) {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ) {
     return true;
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    content: ServerEventFinder<
+      | GameEventIdentifiers.AskForCardDropEvent
+      | GameEventIdentifiers.PhaseChangeEvent
+    >
   ) {
     let canTrigger = false;
-    if (EventPacker.getIdentifier(content) === GameEventIdentifiers.AskForCardDropEvent) {
-      canTrigger = room.CurrentPlayerPhase === PlayerPhase.DropCardStage && room.CurrentPhasePlayer.Id === owner.Id;
-    } else if (EventPacker.getIdentifier(content) === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+    if (
+      EventPacker.getIdentifier(content) ===
+      GameEventIdentifiers.AskForCardDropEvent
+    ) {
+      canTrigger =
+        room.CurrentPlayerPhase === PlayerPhase.DropCardStage &&
+        room.CurrentPhasePlayer.Id === owner.Id;
+    } else if (
+      EventPacker.getIdentifier(content) ===
+      GameEventIdentifiers.PhaseChangeEvent
+    ) {
+      const phaseChangeEvent =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
       canTrigger = phaseChangeEvent.from === PlayerPhase.PhaseFinish;
     }
 
@@ -126,25 +188,31 @@ export class MinSiShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
-      GameEventIdentifiers.AskForCardDropEvent | GameEventIdentifiers.PhaseChangeEvent
+      | GameEventIdentifiers.AskForCardDropEvent
+      | GameEventIdentifiers.PhaseChangeEvent
     >;
     const identifier = EventPacker.getIdentifier(unknownEvent);
 
     if (identifier === GameEventIdentifiers.AskForCardDropEvent) {
-      const askForCardDropEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent>;
+      const askForCardDropEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent>;
       const player = room.getPlayerById(askForCardDropEvent.toId);
       const cardIds = player.getCardTag(this.GeneralName);
 
       if (cardIds && cardIds.length > 0) {
         const hands = player.getCardIds(PlayerCardsArea.HandArea);
         const minSiCards = hands.filter(
-          card =>
+          (card) =>
             cardIds.includes(VirtualCard.getActualCards([card])[0]) &&
-            Sanguosha.getCardById(card).Color === CardColor.Red,
+            Sanguosha.getCardById(card).Color === CardColor.Red
         );
-        const discardAmount = hands.length - minSiCards.length - player.getMaxCardHold(room);
+        const discardAmount =
+          hands.length - minSiCards.length - player.getMaxCardHold(room);
 
         askForCardDropEvent.cardAmount = discardAmount;
         askForCardDropEvent.except = askForCardDropEvent.except
@@ -162,18 +230,31 @@ export class MinSiShadow extends TriggerSkill implements OnDefineReleaseTiming {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: MinSiShadow.Name, description: MinSiShadow.Description })
-export class MinSiUnlimited extends RulesBreakerSkill implements OnDefineReleaseTiming {
+export class MinSiUnlimited
+  extends RulesBreakerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public breakCardUsableDistance(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
-    if (!room.getCardTag(owner.Id, this.GeneralName) || cardId instanceof CardMatcher) {
+  public breakCardUsableDistance(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
+    if (
+      !room.getCardTag(owner.Id, this.GeneralName) ||
+      cardId instanceof CardMatcher
+    ) {
       return 0;
     }
 

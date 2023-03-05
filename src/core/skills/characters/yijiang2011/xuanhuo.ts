@@ -1,24 +1,40 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'xuanhuo', description: 'xuanhuo_description' })
+@CommonSkill({ name: "xuanhuo", description: "xuanhuo_description" })
 export class XuanHuo extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
     return (
       room.AlivePlayers.length > 2 &&
       owner.Id === content.playerId &&
@@ -35,7 +51,11 @@ export class XuanHuo extends TriggerSkill {
     return cards.length === 2;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return owner !== target;
   }
 
@@ -47,7 +67,9 @@ export class XuanHuo extends TriggerSkill {
     return [PlayerCardsArea.HandArea];
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = event;
     return [
       { from: fromId, tos: [toIds![0]] },
@@ -63,13 +85,19 @@ export class XuanHuo extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds, cardIds } = event;
     const first = toIds![0];
     const second = toIds![1];
 
     await room.moveCards({
-      movingCards: cardIds!.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+      movingCards: cardIds!.map((card) => ({
+        card,
+        fromArea: CardMoveArea.HandArea,
+      })),
       fromId,
       toId: first,
       toArea: CardMoveArea.HandArea,
@@ -79,14 +107,13 @@ export class XuanHuo extends TriggerSkill {
     });
 
     const options: string[] = [];
-    const attackCards = Sanguosha.getCardsByMatcher(new CardMatcher({ generalName: ['slash'] })).reduce<string[]>(
-      (allName, card) => {
-        allName.push(card.Name);
-        return allName;
-      },
-      [],
-    );
-    attackCards.push('duel');
+    const attackCards = Sanguosha.getCardsByMatcher(
+      new CardMatcher({ generalName: ["slash"] })
+    ).reduce<string[]>((allName, card) => {
+      allName.push(card.Name);
+      return allName;
+    }, []);
+    attackCards.push("duel");
 
     const newOptions: string[] = [];
 
@@ -96,79 +123,106 @@ export class XuanHuo extends TriggerSkill {
           .getPlayerById(first)
           .canUseCardTo(
             room,
-            acard !== 'duel' ? new CardMatcher({ name: [acard] }) : new CardMatcher({ generalName: [acard] }),
-            second,
+            acard !== "duel"
+              ? new CardMatcher({ name: [acard] })
+              : new CardMatcher({ generalName: [acard] }),
+            second
           )
       ) {
-        if (!options.includes('xuanhuo:attack')) {
-          options.push('xuanhuo:attack');
+        if (!options.includes("xuanhuo:attack")) {
+          options.push("xuanhuo:attack");
         }
         newOptions.push(acard);
       }
     }
 
-    if (room.getPlayerById(first).getCardIds(PlayerCardsArea.HandArea).length > 0) {
-      options.push('xuanhuo:give');
+    if (
+      room.getPlayerById(first).getCardIds(PlayerCardsArea.HandArea).length > 0
+    ) {
+      options.push("xuanhuo:give");
     }
 
     if (options.length === 0) {
       return false;
     }
 
-    const askForChooseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-      options,
-      conversation: TranslationPack.translationJsonPatcher(
-        '{0}: please choose xuanhuo options: {1} {2}',
-        this.Name,
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(second)),
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-      ).extract(),
-      toId: first,
-      triggeredBySkills: [this.Name],
-    });
+    const askForChooseEvent =
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        {
+          options,
+          conversation: TranslationPack.translationJsonPatcher(
+            "{0}: please choose xuanhuo options: {1} {2}",
+            this.Name,
+            TranslationPack.patchPlayerInTranslation(
+              room.getPlayerById(second)
+            ),
+            TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId))
+          ).extract(),
+          toId: first,
+          triggeredBySkills: [this.Name],
+        }
+      );
 
-    const response = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-      GameEventIdentifiers.AskForChoosingOptionsEvent,
-      askForChooseEvent,
-      first,
-    );
+    const response =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        askForChooseEvent,
+        first
+      );
 
-    response.selectedOption = response.selectedOption || askForChooseEvent.options[0];
+    response.selectedOption =
+      response.selectedOption || askForChooseEvent.options[0];
 
-    if (response.selectedOption === 'xuanhuo:attack') {
+    if (response.selectedOption === "xuanhuo:attack") {
       if (newOptions.length === 0) {
         return false;
       }
 
-      const askForChooseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-        options: newOptions,
-        conversation: TranslationPack.translationJsonPatcher(
-          '{0}: please choose xuanhuo attack options: {1}',
-          this.Name,
-          TranslationPack.patchPlayerInTranslation(room.getPlayerById(second)),
-        ).extract(),
-        toId: first,
-        triggeredBySkills: [this.Name],
-      });
+      const askForChooseEvent =
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          {
+            options: newOptions,
+            conversation: TranslationPack.translationJsonPatcher(
+              "{0}: please choose xuanhuo attack options: {1}",
+              this.Name,
+              TranslationPack.patchPlayerInTranslation(
+                room.getPlayerById(second)
+              )
+            ).extract(),
+            toId: first,
+            triggeredBySkills: [this.Name],
+          }
+        );
 
-      const newResponse = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-        GameEventIdentifiers.AskForChoosingOptionsEvent,
-        askForChooseEvent,
-        first,
-      );
+      const newResponse =
+        await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          GameEventIdentifiers.AskForChoosingOptionsEvent,
+          askForChooseEvent,
+          first
+        );
 
-      newResponse.selectedOption = newResponse.selectedOption || askForChooseEvent.options[0];
+      newResponse.selectedOption =
+        newResponse.selectedOption || askForChooseEvent.options[0];
 
-      const cardUseEvent: ServerEventFinder<GameEventIdentifiers.CardUseEvent> = {
-        fromId: first,
-        targetGroup: [[second]],
-        cardId: VirtualCard.create({ cardName: newResponse.selectedOption, bySkill: this.Name }).Id,
-      };
+      const cardUseEvent: ServerEventFinder<GameEventIdentifiers.CardUseEvent> =
+        {
+          fromId: first,
+          targetGroup: [[second]],
+          cardId: VirtualCard.create({
+            cardName: newResponse.selectedOption,
+            bySkill: this.Name,
+          }).Id,
+        };
       await room.useCard(cardUseEvent);
     } else {
-      const handcards = room.getPlayerById(first).getCardIds(PlayerCardsArea.HandArea);
+      const handcards = room
+        .getPlayerById(first)
+        .getCardIds(PlayerCardsArea.HandArea);
       await room.moveCards({
-        movingCards: handcards.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+        movingCards: handcards.map((card) => ({
+          card,
+          fromArea: CardMoveArea.HandArea,
+        })),
         fromId: first,
         toId: fromId,
         toArea: CardMoveArea.HandArea,

@@ -1,26 +1,50 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CharacterNationality } from 'core/characters/character';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, LordSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId } from "@/core/cards/libs/card_props";
+import { CharacterNationality } from "@/core/characters/character";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, LordSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
 @LordSkill
-@CommonSkill({ name: 'lei_weidi', description: 'lei_weidi_description' })
+@CommonSkill({ name: "lei_weidi", description: "lei_weidi_description" })
 export class LeiWeiDi extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
     return (
       content.playerId === owner.Id &&
       content.toStage === PlayerPhaseStages.DropCardStageStart &&
-      owner.getCardIds(PlayerCardsArea.HandArea).length - owner.getMaxCardHold(room) > 0 &&
-      room.getOtherPlayers(owner.Id).find(player => player.Nationality === CharacterNationality.Qun) !== undefined
+      owner.getCardIds(PlayerCardsArea.HandArea).length -
+        owner.getMaxCardHold(room) >
+        0 &&
+      room
+        .getOtherPlayers(owner.Id)
+        .find((player) => player.Nationality === CharacterNationality.Qun) !==
+        undefined
     );
   }
 
@@ -28,11 +52,18 @@ export class LeiWeiDi extends TriggerSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return (
       target !== owner &&
       room.getPlayerById(target).Nationality === CharacterNationality.Qun &&
-      !room.getPlayerById(owner).getFlag<PlayerId[]>(this.Name)?.includes(target)
+      !room
+        .getPlayerById(owner)
+        .getFlag<PlayerId[]>(this.Name)
+        ?.includes(target)
     );
   }
 
@@ -50,9 +81,10 @@ export class LeiWeiDi extends TriggerSkill {
 
   public getSkillLog(room: Room, owner: Player): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to choose a card to give it to another Qun general (can repeat {1} times)?',
+      "{0}: do you want to choose a card to give it to another Qun general (can repeat {1} times)?",
       this.Name,
-      owner.getCardIds(PlayerCardsArea.HandArea).length - owner.getMaxCardHold(room),
+      owner.getCardIds(PlayerCardsArea.HandArea).length -
+        owner.getMaxCardHold(room)
     ).extract();
   }
 
@@ -60,14 +92,19 @@ export class LeiWeiDi extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds, cardIds } = event;
     if (!toIds || !cardIds) {
       return false;
     }
 
     const from = room.getPlayerById(fromId);
-    let n = from.getCardIds(PlayerCardsArea.HandArea).length - room.getPlayerById(fromId).getMaxCardHold(room);
+    let n =
+      from.getCardIds(PlayerCardsArea.HandArea).length -
+      room.getPlayerById(fromId).getMaxCardHold(room);
 
     let toGive: CardId = cardIds[0];
     let target: PlayerId = toIds[0];
@@ -97,14 +134,17 @@ export class LeiWeiDi extends TriggerSkill {
           invokeSkillNames: [this.Name],
           toId: fromId,
           conversation: TranslationPack.translationJsonPatcher(
-            '{0}: do you want to choose a card to give it to another Qun general (can repeat {1} times)?',
+            "{0}: do you want to choose a card to give it to another Qun general (can repeat {1} times)?",
             this.Name,
-            n,
+            n
           ).extract(),
         },
-        fromId,
+        fromId
       );
-      const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForSkillUseEvent, fromId);
+      const response = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForSkillUseEvent,
+        fromId
+      );
 
       if (response.toIds && response.cardIds) {
         target = response.toIds[0];

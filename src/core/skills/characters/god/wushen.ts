@@ -1,14 +1,14 @@
-import { Card, VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_TRIGGERING_TIMES } from 'core/game/game_props';
-import { AimStage, AllStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { Card, VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_TRIGGERING_TIMES } from "@/core/game/game_props";
+import { AimStage, AllStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   CompulsorySkill,
   OnDefineReleaseTiming,
@@ -16,12 +16,12 @@ import {
   ShadowSkill,
   TransformSkill,
   TriggerSkill,
-} from 'core/skills/skill';
+} from "@/core/skills/skill";
 
-@CompulsorySkill({ name: 'wushen', description: 'wushen_description' })
+@CompulsorySkill({ name: "wushen", description: "wushen_description" })
 export class WuShen extends TransformSkill implements OnDefineReleaseTiming {
   async whenObtainingSkill(room: Room, owner: Player) {
-    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map(cardId => {
+    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map((cardId) => {
       if (this.canTransform(owner, cardId, PlayerCardsArea.HandArea)) {
         return this.forceToTransformCardTo(cardId).Id;
       }
@@ -33,7 +33,7 @@ export class WuShen extends TransformSkill implements OnDefineReleaseTiming {
   }
 
   async whenLosingSkill(room: Room, owner: Player) {
-    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map(cardId => {
+    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map((cardId) => {
       if (!Card.isVirtualCardId(cardId)) {
         return cardId;
       }
@@ -49,7 +49,11 @@ export class WuShen extends TransformSkill implements OnDefineReleaseTiming {
     owner.setupCards(PlayerCardsArea.HandArea, cards);
   }
 
-  public canTransform(owner: Player, cardId: CardId, area: PlayerCardsArea.HandArea): boolean {
+  public canTransform(
+    owner: Player,
+    cardId: CardId,
+    area: PlayerCardsArea.HandArea
+  ): boolean {
     const card = Sanguosha.getCardById(cardId);
     return card.Suit === CardSuit.Heart && area === PlayerCardsArea.HandArea;
   }
@@ -58,12 +62,12 @@ export class WuShen extends TransformSkill implements OnDefineReleaseTiming {
     const card = Sanguosha.getCardById(cardId);
     return VirtualCard.create(
       {
-        cardName: 'slash',
+        cardName: "slash",
         cardNumber: card.CardNumber,
         cardSuit: CardSuit.Heart,
         bySkill: this.Name,
       },
-      [cardId],
+      [cardId]
     );
   }
 }
@@ -74,10 +78,12 @@ export class WuShenShadow extends RulesBreakerSkill {
   private breakCardUsableMethod(cardId: CardId | CardMatcher): number {
     let match = false;
     if (cardId instanceof CardMatcher) {
-      match = cardId.match(new CardMatcher({ suit: [CardSuit.Heart], generalName: ['slash'] }));
+      match = cardId.match(
+        new CardMatcher({ suit: [CardSuit.Heart], generalName: ["slash"] })
+      );
     } else {
       const card = Sanguosha.getCardById(cardId);
-      match = card.GeneralName === 'slash' && card.Suit === CardSuit.Heart;
+      match = card.GeneralName === "slash" && card.Suit === CardSuit.Heart;
     }
 
     return match ? INFINITE_TRIGGERING_TIMES : 0;
@@ -93,15 +99,30 @@ export class WuShenShadow extends RulesBreakerSkill {
 }
 
 @ShadowSkill
-@CompulsorySkill({ name: WuShenShadow.Name, description: WuShenShadow.Description })
+@CompulsorySkill({
+  name: WuShenShadow.Name,
+  description: WuShenShadow.Description,
+})
 export class WuShenDisresponse extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage: AllStage
+  ): boolean {
     return stage === AimStage.AfterAim;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.AimEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>
+  ): boolean {
     const card = event.byCardId && Sanguosha.getCardById(event.byCardId);
-    return event.fromId === owner.Id && !!card && card.GeneralName === 'slash' && card.Suit === CardSuit.Heart;
+    return (
+      event.fromId === owner.Id &&
+      !!card &&
+      card.GeneralName === "slash" &&
+      card.Suit === CardSuit.Heart
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
@@ -110,9 +131,10 @@ export class WuShenDisresponse extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
-    const aimEvent = skillEffectEvent.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+    const aimEvent =
+      skillEffectEvent.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
     EventPacker.setDisresponsiveEvent(aimEvent);
 
     return true;

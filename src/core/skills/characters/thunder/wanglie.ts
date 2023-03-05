@@ -1,13 +1,19 @@
-import { CardType } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { INFINITE_TRIGGERING_TIMES } from 'core/game/game_props';
-import { AllStage, CardUseStage, PhaseChangeStage, PlayerPhase, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardType } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { INFINITE_TRIGGERING_TIMES } from "@/core/game/game_props";
+import {
+  AllStage,
+  CardUseStage,
+  PhaseChangeStage,
+  PlayerPhase,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   CommonSkill,
   FilterSkill,
@@ -16,34 +22,45 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'wanglie', description: 'wanglie_description' })
+@CommonSkill({ name: "wanglie", description: "wanglie_description" })
 export class WangLie extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.CardUsing;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ): boolean {
     const card = Sanguosha.getCardById(content.cardId);
     return (
       content.fromId === owner.Id &&
       room.CurrentPhasePlayer === owner &&
       room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
-      (card.GeneralName === 'slash' || (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick)))
+      (card.GeneralName === "slash" ||
+        (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick)))
     );
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to make {1} disreponsive, then you cannot use card this phase?',
+      "{0}: do you want to make {1} disreponsive, then you cannot use card this phase?",
       this.Name,
-      TranslationPack.patchCardInTranslation(event.cardId),
+      TranslationPack.patchCardInTranslation(event.cardId)
     ).extract();
   }
 
@@ -51,11 +68,17 @@ export class WangLie extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, triggeredOnEvent } = event;
-    const cardUseEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+    const cardUseEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
 
-    cardUseEvent.disresponsiveList = room.getAlivePlayersFrom().map(player => player.Id);
+    cardUseEvent.disresponsiveList = room
+      .getAlivePlayersFrom()
+      .map((player) => player.Id);
 
     room.setFlag<boolean>(fromId, this.Name, true);
 
@@ -79,11 +102,18 @@ export class WangLieShadow extends TriggerSkill {
     return StagePriority.High;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.BeforeCardUseEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ): boolean {
     return (
       content.fromId === owner.Id &&
       room.CurrentPhasePlayer === owner &&
@@ -96,7 +126,10 @@ export class WangLieShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     room.setFlag<boolean>(event.fromId, this.Name, true);
 
     return true;
@@ -104,24 +137,39 @@ export class WangLieShadow extends TriggerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: WangLieShadow.Name, description: WangLieShadow.Description })
+@CommonSkill({
+  name: WangLieShadow.Name,
+  description: WangLieShadow.Description,
+})
 export class WangLieBuff extends RulesBreakerSkill {
-  public breakCardUsableDistance(cardId: CardId | CardMatcher, room: Room, owner: Player): number {
-    return owner.getFlag<boolean>(WangLieShadow.Name) ? 0 : INFINITE_TRIGGERING_TIMES;
+  public breakCardUsableDistance(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ): number {
+    return owner.getFlag<boolean>(WangLieShadow.Name)
+      ? 0
+      : INFINITE_TRIGGERING_TIMES;
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: WangLieBuff.Name, description: WangLieBuff.Description })
-export class WangLieDebuff extends FilterSkill implements OnDefineReleaseTiming {
+export class WangLieDebuff
+  extends FilterSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canUseCard(
@@ -129,23 +177,35 @@ export class WangLieDebuff extends FilterSkill implements OnDefineReleaseTiming 
     room: Room,
     owner: PlayerId,
     onResponse?: ServerEventFinder<GameEventIdentifiers>,
-    isCardResponse?: boolean,
+    isCardResponse?: boolean
   ): boolean {
-    return !room.getPlayerById(owner).getFlag<boolean>(this.GeneralName) || isCardResponse === true;
+    return (
+      !room.getPlayerById(owner).getFlag<boolean>(this.GeneralName) ||
+      isCardResponse === true
+    );
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: WangLieDebuff.Name, description: WangLieDebuff.Description })
-export class WangLieRemove extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: WangLieDebuff.Name,
+  description: WangLieDebuff.Description,
+})
+export class WangLieRemove
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -156,11 +216,18 @@ export class WangLieRemove extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       owner.Id === event.fromPlayer &&
       event.from === PlayerPhase.PlayCardStage &&
@@ -173,7 +240,10 @@ export class WangLieRemove extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const from = room.getPlayerById(event.fromId);
     if (from.getFlag<boolean>(this.GeneralName)) {
       room.removeFlag(event.fromId, this.GeneralName);

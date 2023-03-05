@@ -1,19 +1,33 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'xuancun', description: 'xuancun_description' })
+@CommonSkill({ name: "xuancun", description: "xuancun_description" })
 export class XuanCun extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       event.fromPlayer !== undefined &&
       event.fromPlayer !== owner.Id &&
@@ -26,13 +40,15 @@ export class XuanCun extends TriggerSkill {
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to let {1} draws {2} card(s)?',
+      "{0}: do you want to let {1} draws {2} card(s)?",
       this.Name,
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.fromPlayer!)),
-      Math.min(owner.Hp - owner.getCardIds(PlayerCardsArea.HandArea).length, 2),
+      TranslationPack.patchPlayerInTranslation(
+        room.getPlayerById(event.fromPlayer!)
+      ),
+      Math.min(owner.Hp - owner.getCardIds(PlayerCardsArea.HandArea).length, 2)
     ).extract();
   }
 
@@ -40,17 +56,23 @@ export class XuanCun extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     await room.drawCards(
       Math.min(
         room.getPlayerById(event.fromId).Hp -
-          room.getPlayerById(event.fromId).getCardIds(PlayerCardsArea.HandArea).length,
-        2,
+          room.getPlayerById(event.fromId).getCardIds(PlayerCardsArea.HandArea)
+            .length,
+        2
       ),
-      (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>).fromPlayer!,
-      'top',
+      (
+        event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+      ).fromPlayer!,
+      "top",
       event.fromId,
-      this.Name,
+      this.Name
     );
 
     return true;

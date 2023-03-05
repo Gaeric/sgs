@@ -1,20 +1,29 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { TriggerSkill, ViewAsSkill } from 'core/skills/skill';
-import { CommonSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  DamageEffectStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { TriggerSkill, ViewAsSkill } from "@/core/skills/skill";
+import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'mansi', description: 'mansi_description' })
+@CommonSkill({ name: "mansi", description: "mansi_description" })
 export class ManSi extends ViewAsSkill {
-  public canViewAs(room: Room, owner: Player, selectedCards?: CardId[], cardMatcher?: CardMatcher): string[] {
-    return cardMatcher ? [] : ['nanmanruqing'];
+  public canViewAs(
+    room: Room,
+    owner: Player,
+    selectedCards?: CardId[],
+    cardMatcher?: CardMatcher
+  ): string[] {
+    return cardMatcher ? [] : ["nanmanruqing"];
   }
 
   public isRefreshAt(room: Room, owner: Player, phase: PlayerPhase): boolean {
@@ -28,8 +37,8 @@ export class ManSi extends ViewAsSkill {
       owner.canUseCard(
         room,
         new CardMatcher({
-          name: ['nanmanruqing'],
-        }),
+          name: ["nanmanruqing"],
+        })
       )
     );
   }
@@ -42,35 +51,52 @@ export class ManSi extends ViewAsSkill {
     return false;
   }
 
-  public viewAs(selectedCards: CardId[], owner: Player, viewAs: string): VirtualCard {
-    Precondition.assert(!!viewAs, 'Unknown mansi card');
+  public viewAs(
+    selectedCards: CardId[],
+    owner: Player,
+    viewAs: string
+  ): VirtualCard {
+    Precondition.assert(!!viewAs, "Unknown mansi card");
     return VirtualCard.create(
       {
-        cardName: 'nanmanruqing',
+        cardName: "nanmanruqing",
         bySkill: this.Name,
       },
-      owner.getCardIds(PlayerCardsArea.HandArea),
+      owner.getCardIds(PlayerCardsArea.HandArea)
     );
   }
 }
 
 @ShadowSkill
-@CommonSkill({ name: 'manyi', description: 'manyi_description' })
+@CommonSkill({ name: "manyi", description: "manyi_description" })
 export class ManSiShadow extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === DamageEffectStage.AfterDamagedEffect;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.DamageEvent>): boolean {
-    return !!event.cardIds && Sanguosha.getCardById(event.cardIds[0]).GeneralName === 'nanmanruqing';
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ): boolean {
+    return (
+      !!event.cardIds &&
+      Sanguosha.getCardById(event.cardIds[0]).GeneralName === "nanmanruqing"
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    await room.drawCards(1, event.fromId, 'top', event.fromId, this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    await room.drawCards(1, event.fromId, "top", event.fromId, this.Name);
 
     return true;
   }

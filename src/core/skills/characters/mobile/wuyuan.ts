@@ -1,23 +1,35 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'wuyuan', description: 'wuyuan_description' })
+@CommonSkill({ name: "wuyuan", description: "wuyuan_description" })
 export class WuYuan extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
-    return !owner.hasUsedSkill(this.Name) && owner.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      owner.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public numberOfTargets(): number {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return owner !== target;
   }
 
@@ -26,7 +38,7 @@ export class WuYuan extends ActiveSkill {
   }
 
   public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId): boolean {
-    return Sanguosha.getCardById(cardId).GeneralName === 'slash';
+    return Sanguosha.getCardById(cardId).GeneralName === "slash";
   }
 
   public availableCardAreas(): PlayerCardsArea[] {
@@ -37,14 +49,19 @@ export class WuYuan extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     if (!event.toIds || !event.cardIds) {
       return false;
     }
 
     const { fromId } = event;
     await room.moveCards({
-      movingCards: [{ card: event.cardIds[0], fromArea: CardMoveArea.HandArea }],
+      movingCards: [
+        { card: event.cardIds[0], fromArea: CardMoveArea.HandArea },
+      ],
       fromId,
       toId: event.toIds[0],
       toArea: CardMoveArea.HandArea,
@@ -60,11 +77,11 @@ export class WuYuan extends ActiveSkill {
 
     const cardGiven = Sanguosha.getCardById(event.cardIds[0]);
     await room.drawCards(
-      ['thunder_slash', 'fire_slash'].includes(cardGiven.Name) ? 2 : 1,
+      ["thunder_slash", "fire_slash"].includes(cardGiven.Name) ? 2 : 1,
       event.toIds[0],
-      'top',
+      "top",
       fromId,
-      this.Name,
+      this.Name
     );
 
     if (cardGiven.isRed()) {

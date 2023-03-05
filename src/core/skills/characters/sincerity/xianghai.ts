@@ -1,22 +1,22 @@
-import { Card, CardType, VirtualCard } from 'core/cards/card';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { Card, CardType, VirtualCard } from "@/core/cards/card";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   CompulsorySkill,
   GlobalRulesBreakerSkill,
   OnDefineReleaseTiming,
   ShadowSkill,
   TransformSkill,
-} from 'core/skills/skill';
+} from "@/core/skills/skill";
 
-@CompulsorySkill({ name: 'xianghai', description: 'xianghai_description' })
+@CompulsorySkill({ name: "xianghai", description: "xianghai_description" })
 export class XiangHai extends TransformSkill implements OnDefineReleaseTiming {
   async whenObtainingSkill(room: Room, owner: Player) {
-    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map(cardId => {
+    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map((cardId) => {
       if (this.canTransform(owner, cardId, PlayerCardsArea.HandArea)) {
         return this.forceToTransformCardTo(cardId).Id;
       }
@@ -35,7 +35,7 @@ export class XiangHai extends TransformSkill implements OnDefineReleaseTiming {
   }
 
   async whenLosingSkill(room: Room, owner: Player) {
-    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map(cardId => {
+    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map((cardId) => {
       if (!Card.isVirtualCardId(cardId)) {
         return cardId;
       }
@@ -51,7 +51,11 @@ export class XiangHai extends TransformSkill implements OnDefineReleaseTiming {
     owner.setupCards(PlayerCardsArea.HandArea, cards);
   }
 
-  public canTransform(owner: Player, cardId: CardId, area: PlayerCardsArea.HandArea): boolean {
+  public canTransform(
+    owner: Player,
+    cardId: CardId,
+    area: PlayerCardsArea.HandArea
+  ): boolean {
     const card = Sanguosha.getCardById(cardId);
     return card.is(CardType.Equip) && area === PlayerCardsArea.HandArea;
   }
@@ -59,10 +63,10 @@ export class XiangHai extends TransformSkill implements OnDefineReleaseTiming {
   public forceToTransformCardTo(cardId: CardId): VirtualCard {
     return VirtualCard.create(
       {
-        cardName: 'alcohol',
+        cardName: "alcohol",
         bySkill: this.Name,
       },
-      [cardId],
+      [cardId]
     );
   }
 }
@@ -70,7 +74,11 @@ export class XiangHai extends TransformSkill implements OnDefineReleaseTiming {
 @ShadowSkill
 @CompulsorySkill({ name: XiangHai.Name, description: XiangHai.Description })
 export class XiangHaiShadow extends GlobalRulesBreakerSkill {
-  public breakAdditionalCardHold(room: Room, owner: Player, target: Player): number {
+  public breakAdditionalCardHold(
+    room: Room,
+    owner: Player,
+    target: Player
+  ): number {
     return target !== owner ? -1 : 0;
   }
 }

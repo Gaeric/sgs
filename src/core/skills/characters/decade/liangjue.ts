@@ -1,31 +1,46 @@
-import { CardMoveArea, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import {
+  CardMoveArea,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'liangjue', description: 'liangjue_description' })
+@CompulsorySkill({ name: "liangjue", description: "liangjue_description" })
 export class LiangJue extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     return (
       owner.Hp > 1 &&
       content.infos.find(
-        info =>
+        (info) =>
           (info.toId === owner.Id &&
-            (info.toArea === CardMoveArea.JudgeArea || info.toArea === CardMoveArea.EquipArea) &&
-            info.movingCards.find(cardInfo => Sanguosha.getCardById(cardInfo.card).isBlack())) ||
+            (info.toArea === CardMoveArea.JudgeArea ||
+              info.toArea === CardMoveArea.EquipArea) &&
+            info.movingCards.find((cardInfo) =>
+              Sanguosha.getCardById(cardInfo.card).isBlack()
+            )) ||
           (info.fromId === owner.Id &&
             info.movingCards.find(
-              cardInfo =>
+              (cardInfo) =>
                 Sanguosha.getCardById(cardInfo.card).isBlack() &&
-                (cardInfo.fromArea === CardMoveArea.EquipArea || cardInfo.fromArea === CardMoveArea.JudgeArea),
-            )),
+                (cardInfo.fromArea === CardMoveArea.EquipArea ||
+                  cardInfo.fromArea === CardMoveArea.JudgeArea)
+            ))
       ) !== undefined
     );
   }
@@ -34,9 +49,12 @@ export class LiangJue extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     await room.loseHp(event.fromId, 1);
-    await room.drawCards(2, event.fromId, 'top', event.fromId, this.Name);
+    await room.drawCards(2, event.fromId, "top", event.fromId, this.Name);
 
     return true;
   }

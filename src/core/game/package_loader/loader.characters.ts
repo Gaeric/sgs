@@ -1,31 +1,31 @@
-import { BenevolencePackage } from 'core/characters/benevolence';
-import { BiographiesPackage } from 'core/characters/biographies';
-import { Character } from 'core/characters/character';
-import { DecadePackage } from 'core/characters/decade';
-import { FireCharacterPackage } from 'core/characters/fire';
-import { ForestCharacterPackage } from 'core/characters/forest';
-import { GodCharacterPackage } from 'core/characters/god';
-import { LimitedPackage } from 'core/characters/limited';
-import { MobilePackage } from 'core/characters/mobile';
-import { MountainCharacterPackage } from 'core/characters/mountain';
-import { PvePackage } from 'core/characters/pve';
-import { ShadowCharacterPackage } from 'core/characters/shadow';
-import { SincerityCharacterPackage } from 'core/characters/sincerity';
-import { SpPackage } from 'core/characters/sp';
-import { SparkPackage } from 'core/characters/spark';
-import { StandardCharacterPackage } from 'core/characters/standard';
-import { StrategemPackage } from 'core/characters/strategem';
-import { ThunderCharacterPackage } from 'core/characters/thunder';
-import { WindCharacterPackage } from 'core/characters/wind';
-import { WisdomPackage } from 'core/characters/wisdom';
-import { YiJiang2011Package } from 'core/characters/yijiang2011';
-import { YiJiang2012Package } from 'core/characters/yijiang2012';
-import { YiJiang2013Package } from 'core/characters/yijiang2013';
-import { YiJiang2014Package } from 'core/characters/yijiang2014';
-import { YiJiang2015Package } from 'core/characters/yijiang2015';
-import { Yuan6Package } from 'core/characters/yuan6';
-import { Yuan7Package } from 'core/characters/yuan7';
-import { GameCharacterExtensions } from 'core/game/game_props';
+import { BenevolencePackage } from "@/core/characters/benevolence";
+import { BiographiesPackage } from "@/core/characters/biographies";
+import { Character } from "@/core/characters/character";
+import { DecadePackage } from "@/core/characters/decade";
+import { FireCharacterPackage } from "@/core/characters/fire";
+import { ForestCharacterPackage } from "@/core/characters/forest";
+import { GodCharacterPackage } from "@/core/characters/god";
+import { LimitedPackage } from "@/core/characters/limited";
+import { MobilePackage } from "@/core/characters/mobile";
+import { MountainCharacterPackage } from "@/core/characters/mountain";
+import { PvePackage } from "@/core/characters/pve";
+import { ShadowCharacterPackage } from "@/core/characters/shadow";
+import { SincerityCharacterPackage } from "@/core/characters/sincerity";
+import { SpPackage } from "@/core/characters/sp";
+import { SparkPackage } from "@/core/characters/spark";
+import { StandardCharacterPackage } from "@/core/characters/standard";
+import { StrategemPackage } from "@/core/characters/strategem";
+import { ThunderCharacterPackage } from "@/core/characters/thunder";
+import { WindCharacterPackage } from "@/core/characters/wind";
+import { WisdomPackage } from "@/core/characters/wisdom";
+import { YiJiang2011Package } from "@/core/characters/yijiang2011";
+import { YiJiang2012Package } from "@/core/characters/yijiang2012";
+import { YiJiang2013Package } from "@/core/characters/yijiang2013";
+import { YiJiang2014Package } from "@/core/characters/yijiang2014";
+import { YiJiang2015Package } from "@/core/characters/yijiang2015";
+import { Yuan6Package } from "@/core/characters/yuan6";
+import { Yuan7Package } from "@/core/characters/yuan7";
+import { GameCharacterExtensions } from "@/core/game/game_props";
 
 export type CharacterPackages = {
   [K in GameCharacterExtensions]: Character[];
@@ -84,7 +84,9 @@ export class CharacterLoader {
 
   private loadCharacters() {
     let index = 0;
-    for (const [packageName, loader] of Object.entries(CharacterLoader.CharacterLoaders)) {
+    for (const [packageName, loader] of Object.entries(
+      CharacterLoader.CharacterLoaders
+    )) {
       const characters = loader(index);
       this.characters[packageName] = characters;
 
@@ -95,11 +97,14 @@ export class CharacterLoader {
   public getAllCharacters() {
     return Object.values(this.characters).reduce<Character[]>(
       (addedCards, characters) => addedCards.concat(characters),
-      [],
+      []
     );
   }
 
   public getPackages(...extensions: GameCharacterExtensions[]): Character[] {
-    return extensions.reduce<Character[]>((addedCards, extension) => addedCards.concat(this.characters[extension]), []);
+    return extensions.reduce<Character[]>(
+      (addedCards, extension) => addedCards.concat(this.characters[extension]),
+      []
+    );
   }
 }

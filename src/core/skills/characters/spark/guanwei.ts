@@ -1,15 +1,27 @@
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseStageChangeStage, PlayerPhase, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhase,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'guanwei', description: 'guanwei_description' })
+@CommonSkill({ name: "guanwei", description: "guanwei_description" })
 export class GuanWei extends TriggerSkill {
   public isRefreshAt(room: Room, owner: Player, stage: PlayerPhase) {
     return stage === PlayerPhase.PhaseBegin;
@@ -17,7 +29,7 @@ export class GuanWei extends TriggerSkill {
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -25,11 +37,13 @@ export class GuanWei extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    let canUse = content.toStage === PlayerPhaseStages.PlayCardStageEnd && !owner.hasUsedSkill(this.Name);
+    let canUse =
+      content.toStage === PlayerPhaseStages.PlayCardStageEnd &&
+      !owner.hasUsedSkill(this.Name);
     if (canUse) {
-      const events = room.Analytics.getCardUseRecord(content.playerId, 'round');
+      const events = room.Analytics.getCardUseRecord(content.playerId, "round");
       if (events.length > 1) {
         let suit: CardSuit = Sanguosha.getCardById(events[0].cardId).Suit;
         events.shift();
@@ -60,12 +74,14 @@ export class GuanWei extends TriggerSkill {
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to drop a card to let {1} draw 2 cards and gain an extra play phase?',
+      "{0}: do you want to drop a card to let {1} draw 2 cards and gain an extra play phase?",
       this.Name,
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.playerId)),
+      TranslationPack.patchPlayerInTranslation(
+        room.getPlayerById(event.playerId)
+      )
     ).extract();
   }
 
@@ -73,16 +89,27 @@ export class GuanWei extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, cardIds } = event;
     if (!cardIds) {
       return false;
     }
-    const toId = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>).playerId;
+    const toId = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+    ).playerId;
 
-    await room.dropCards(CardMoveReason.SelfDrop, cardIds, fromId, fromId, this.Name);
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      cardIds,
+      fromId,
+      fromId,
+      this.Name
+    );
 
-    await room.drawCards(2, toId, 'top', fromId, this.Name);
+    await room.drawCards(2, toId, "top", fromId, this.Name);
     room.insertPlayerPhase(toId, PlayerPhase.PlayCardStage);
 
     return true;

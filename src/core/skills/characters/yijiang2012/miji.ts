@@ -1,19 +1,36 @@
-import { MiJiSkillTrigger } from 'core/ai/skills/characters/yijiang2012/miji';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { AI, CommonSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { MiJiSkillTrigger } from "@/core/ai/skills/characters/yijiang2012/miji";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  AI,
+  CommonSkill,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
 @AI(MiJiSkillTrigger)
-@CommonSkill({ name: 'miji', description: 'miji_description' })
+@CommonSkill({ name: "miji", description: "miji_description" })
 export class MiJi extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -21,16 +38,20 @@ export class MiJi extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    return owner.Id === content.playerId && content.toStage === PlayerPhaseStages.FinishStageStart && owner.LostHp > 0;
+    return (
+      owner.Id === content.playerId &&
+      content.toStage === PlayerPhaseStages.FinishStageStart &&
+      owner.LostHp > 0
+    );
   }
 
   public getSkillLog(room: Room, owner: Player): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to draw {1} card(s)?',
+      "{0}: do you want to draw {1} card(s)?",
       this.Name,
-      owner.LostHp,
+      owner.LostHp
     ).extract();
   }
 
@@ -38,12 +59,15 @@ export class MiJi extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const from = room.getPlayerById(fromId);
     const x = from.LostHp;
 
-    await room.drawCards(x, fromId, 'top', fromId, this.Name);
+    await room.drawCards(x, fromId, "top", fromId, this.Name);
     if (from.getCardIds(PlayerCardsArea.HandArea).length >= x) {
       room.setFlag<number>(fromId, this.Name, x);
 
@@ -51,22 +75,29 @@ export class MiJi extends TriggerSkill {
         invokeSkillNames: [MiJiShadow.Name],
         toId: fromId,
         conversation: TranslationPack.translationJsonPatcher(
-          '{0}: do you want to give another player {1} hand card(s)?',
+          "{0}: do you want to give another player {1} hand card(s)?",
           this.Name,
-          x,
+          x
         ).extract(),
       };
-      room.notify(GameEventIdentifiers.AskForSkillUseEvent, skillUseEvent, fromId);
+      room.notify(
+        GameEventIdentifiers.AskForSkillUseEvent,
+        skillUseEvent,
+        fromId
+      );
 
       const { toIds, cardIds } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForSkillUseEvent,
-        fromId,
+        fromId
       );
       room.removeFlag(fromId, this.Name);
 
       if (toIds && cardIds) {
         await room.moveCards({
-          movingCards: cardIds.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+          movingCards: cardIds.map((card) => ({
+            card,
+            fromArea: CardMoveArea.HandArea,
+          })),
           fromId,
           toId: toIds[0],
           moveReason: CardMoveReason.ActivePrey,
@@ -100,7 +131,12 @@ export class MiJiShadow extends TriggerSkill {
     return 1;
   }
 
-  public isAvailableCard(owner: PlayerId, room: Room, cardId: CardId, selectedCards: CardId[]): boolean {
+  public isAvailableCard(
+    owner: PlayerId,
+    room: Room,
+    cardId: CardId,
+    selectedCards: CardId[]
+  ): boolean {
     const player = room.getPlayerById(owner);
     return selectedCards.length <= player.getFlag<number>(this.GeneralName);
   }
@@ -109,7 +145,11 @@ export class MiJiShadow extends TriggerSkill {
     return [PlayerCardsArea.HandArea];
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return owner !== target;
   }
 

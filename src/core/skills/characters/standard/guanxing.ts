@@ -1,28 +1,42 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhase, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhase,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'guanxing', description: 'guanxing_description' })
+@CommonSkill({ name: "guanxing", description: "guanxing_description" })
 export class GuanXing extends TriggerSkill {
   public get RelatedCharacters() {
-    return ['jiangwei', 'gexuan'];
+    return ["jiangwei", "gexuan"];
   }
 
   public audioIndex(characterName?: string): number {
     return characterName && characterName === this.RelatedCharacters[1] ? 1 : 2;
   }
 
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
     if (
       owner.Id !== content.playerId ||
-      ![PlayerPhaseStages.PrepareStage, PlayerPhaseStages.FinishStage].includes(content.toStage)
+      ![PlayerPhaseStages.PrepareStage, PlayerPhaseStages.FinishStage].includes(
+        content.toStage
+      )
     ) {
       return false;
     }
@@ -39,43 +53,57 @@ export class GuanXing extends TriggerSkill {
     return true;
   }
 
-  async onTrigger(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onTrigger(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const guanxingAmount = room.AlivePlayers.length >= 4 ? 5 : 3;
-    const cards = room.getCards(guanxingAmount, 'top');
-    const guanxingEvent: ServerEventFinder<GameEventIdentifiers.AskForPlaceCardsInDileEvent> = {
-      cardIds: cards,
-      top: guanxingAmount,
-      topStackName: 'draw stack top',
-      bottom: guanxingAmount,
-      bottomStackName: 'draw stack bottom',
-      toId: skillUseEvent.fromId,
-      movable: true,
-      triggeredBySkills: [this.Name],
-    };
+    const cards = room.getCards(guanxingAmount, "top");
+    const guanxingEvent: ServerEventFinder<GameEventIdentifiers.AskForPlaceCardsInDileEvent> =
+      {
+        cardIds: cards,
+        top: guanxingAmount,
+        topStackName: "draw stack top",
+        bottom: guanxingAmount,
+        bottomStackName: "draw stack bottom",
+        toId: skillUseEvent.fromId,
+        movable: true,
+        triggeredBySkills: [this.Name],
+      };
 
-    room.notify(GameEventIdentifiers.AskForPlaceCardsInDileEvent, guanxingEvent, skillUseEvent.fromId);
+    room.notify(
+      GameEventIdentifiers.AskForPlaceCardsInDileEvent,
+      guanxingEvent,
+      skillUseEvent.fromId
+    );
 
     const { top, bottom } = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForPlaceCardsInDileEvent,
-      skillUseEvent.fromId,
+      skillUseEvent.fromId
     );
 
     room.broadcast(GameEventIdentifiers.CustomGameDialog, {
       translationsMessage: TranslationPack.translationJsonPatcher(
-        'guanxing finished, {0} cards placed on the top and {1} cards placed at the bottom',
+        "guanxing finished, {0} cards placed on the top and {1} cards placed at the bottom",
         top.length,
-        bottom.length,
+        bottom.length
       ).extract(),
     });
 
-    room.putCards('top', ...top);
-    room.putCards('bottom', ...bottom);
+    room.putCards("top", ...top);
+    room.putCards("bottom", ...bottom);
 
-    if (top.length === 0 && room.CurrentPlayerPhase === PlayerPhase.PrepareStage) {
+    if (
+      top.length === 0 &&
+      room.CurrentPlayerPhase === PlayerPhase.PrepareStage
+    ) {
       room.getPlayerById(skillUseEvent.fromId).addInvisibleMark(this.Name, 1);
     }
 

@@ -1,14 +1,19 @@
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { PlayerPhase } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'anxu', description: 'anxu_description' })
+@CommonSkill({ name: "anxu", description: "anxu_description" })
 export class AnXu extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return !owner.hasUsedSkill(this.Name);
@@ -31,11 +36,14 @@ export class AnXu extends ActiveSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     return (
       target !== owner &&
-      (selectedTargets.length === 1 ? room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0 : true)
+      (selectedTargets.length === 1
+        ? room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea)
+            .length > 0
+        : true)
     );
   }
 
@@ -47,7 +55,9 @@ export class AnXu extends ActiveSkill {
     return true;
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = event;
     return [
       { from: fromId, tos: [toIds![0]] },
@@ -59,15 +69,22 @@ export class AnXu extends ActiveSkill {
     return false;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     const first = toIds![0];
     const second = toIds![1];
     const secondPlayer = room.getPlayerById(second);
 
     const options: CardChoosingOptions = {
-      [PlayerCardsArea.HandArea]: secondPlayer.getCardIds(PlayerCardsArea.HandArea).length,
-      [PlayerCardsArea.EquipArea]: secondPlayer.getCardIds(PlayerCardsArea.EquipArea),
+      [PlayerCardsArea.HandArea]: secondPlayer.getCardIds(
+        PlayerCardsArea.HandArea
+      ).length,
+      [PlayerCardsArea.EquipArea]: secondPlayer.getCardIds(
+        PlayerCardsArea.EquipArea
+      ),
     };
 
     const chooseCardEvent = {
@@ -79,22 +96,27 @@ export class AnXu extends ActiveSkill {
 
     room.notify(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(chooseCardEvent),
-      first,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
+        chooseCardEvent
+      ),
+      first
     );
 
     const response = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      first,
+      first
     );
 
     if (response.selectedCard === undefined) {
       const cardIds = secondPlayer.getCardIds(PlayerCardsArea.HandArea);
-      response.selectedCard = cardIds[Math.floor(Math.random() * cardIds.length)];
+      response.selectedCard =
+        cardIds[Math.floor(Math.random() * cardIds.length)];
     }
 
     await room.moveCards({
-      movingCards: [{ card: response.selectedCard, fromArea: response.fromArea }],
+      movingCards: [
+        { card: response.selectedCard, fromArea: response.fromArea },
+      ],
       fromId: chooseCardEvent.toId,
       toId: chooseCardEvent.fromId,
       toArea: CardMoveArea.HandArea,
@@ -104,11 +126,15 @@ export class AnXu extends ActiveSkill {
     });
 
     if (response.fromArea !== PlayerCardsArea.EquipArea) {
-      await room.drawCards(1, fromId, 'top', fromId, this.Name);
+      await room.drawCards(1, fromId, "top", fromId, this.Name);
     }
 
-    const firstHandNum = room.getPlayerById(first).getCardIds(PlayerCardsArea.HandArea).length;
-    const secondHandNum = secondPlayer.getCardIds(PlayerCardsArea.HandArea).length;
+    const firstHandNum = room
+      .getPlayerById(first)
+      .getCardIds(PlayerCardsArea.HandArea).length;
+    const secondHandNum = secondPlayer.getCardIds(
+      PlayerCardsArea.HandArea
+    ).length;
     let lessOne: PlayerId | undefined;
 
     if (firstHandNum > secondHandNum) {
@@ -118,23 +144,30 @@ export class AnXu extends ActiveSkill {
     }
 
     if (lessOne) {
-      const askForInvokeSkill: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-        toId: fromId,
-        options: ['yes', 'no'],
-        conversation: TranslationPack.translationJsonPatcher(
-          '{0}: do you want to let {1} draw a card?',
-          this.Name,
-          TranslationPack.patchPlayerInTranslation(room.getPlayerById(lessOne)),
-        ).extract(),
-        triggeredBySkills: [this.Name],
-      };
-      room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForInvokeSkill, fromId);
+      const askForInvokeSkill: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+        {
+          toId: fromId,
+          options: ["yes", "no"],
+          conversation: TranslationPack.translationJsonPatcher(
+            "{0}: do you want to let {1} draw a card?",
+            this.Name,
+            TranslationPack.patchPlayerInTranslation(
+              room.getPlayerById(lessOne)
+            )
+          ).extract(),
+          triggeredBySkills: [this.Name],
+        };
+      room.notify(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        askForInvokeSkill,
+        fromId
+      );
       const { selectedOption } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
-        fromId,
+        fromId
       );
-      if (selectedOption === 'yes') {
-        await room.drawCards(1, lessOne, 'top', fromId, this.Name);
+      if (selectedOption === "yes") {
+        await room.drawCards(1, lessOne, "top", fromId, this.Name);
       }
     }
 

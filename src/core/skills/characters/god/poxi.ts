@@ -1,15 +1,20 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Algorithm } from 'core/shares/libs/algorithm';
-import { System } from 'core/shares/libs/system';
-import { ActiveSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { PlayerPhase } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Algorithm } from "@/core/shares/libs/algorithm";
+import { System } from "@/core/shares/libs/system";
+import { ActiveSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'poxi', description: 'poxi_description' })
+@CommonSkill({ name: "poxi", description: "poxi_description" })
 export class PoXi extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name);
@@ -32,14 +37,17 @@ export class PoXi extends ActiveSkill {
   }
 
   public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId) {
-    return target !== owner && room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      target !== owner &&
+      room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public whenRefresh(room: Room, owner: Player) {
     if (owner.getFlag<boolean>(this.Name)) {
       owner.removeFlag(this.Name);
 
-      room.syncGameCommonRules(owner.Id, from => {
+      room.syncGameCommonRules(owner.Id, (from) => {
         room.CommonRules.addAdditionalHoldCardNumber(from, 1);
       });
     }
@@ -49,57 +57,79 @@ export class PoXi extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = skillUseEvent;
     const from = room.getPlayerById(fromId);
     const to = room.getPlayerById(toIds![0]);
 
-    const askForCards: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardWithConditionsEvent> = {
-      toId: to.Id,
-      cardFilter: System.AskForChoosingCardEventFilter.PoXi,
-      customCardFields: {
-        [from.Character.Name]: from.getCardIds(PlayerCardsArea.HandArea),
-        [to.Character.Name]: to.getCardIds(PlayerCardsArea.HandArea).filter(id => room.canDropCard(fromId, id)),
-      },
-      customTitle: this.Name,
-      amount: 4,
-      triggeredBySkills: [this.Name],
-    };
+    const askForCards: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardWithConditionsEvent> =
+      {
+        toId: to.Id,
+        cardFilter: System.AskForChoosingCardEventFilter.PoXi,
+        customCardFields: {
+          [from.Character.Name]: from.getCardIds(PlayerCardsArea.HandArea),
+          [to.Character.Name]: to
+            .getCardIds(PlayerCardsArea.HandArea)
+            .filter((id) => room.canDropCard(fromId, id)),
+        },
+        customTitle: this.Name,
+        amount: 4,
+        triggeredBySkills: [this.Name],
+      };
 
-    room.notify(GameEventIdentifiers.AskForChoosingCardWithConditionsEvent, askForCards, from.Id);
+    room.notify(
+      GameEventIdentifiers.AskForChoosingCardWithConditionsEvent,
+      askForCards,
+      from.Id
+    );
     const { selectedCards } = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingCardWithConditionsEvent,
-      from.Id,
+      from.Id
     );
     if (!selectedCards) {
       return false;
     }
 
-    const fromCards = Algorithm.intersection<CardId>(from.getCardIds(PlayerCardsArea.HandArea), selectedCards);
-    const toCards = Algorithm.intersection<CardId>(to.getCardIds(PlayerCardsArea.HandArea), selectedCards);
+    const fromCards = Algorithm.intersection<CardId>(
+      from.getCardIds(PlayerCardsArea.HandArea),
+      selectedCards
+    );
+    const toCards = Algorithm.intersection<CardId>(
+      to.getCardIds(PlayerCardsArea.HandArea),
+      selectedCards
+    );
 
     await room.moveCards(
       {
         moveReason: CardMoveReason.SelfDrop,
         fromId: from.Id,
-        movingCards: fromCards.map(card => ({ card, fromArea: PlayerCardsArea.HandArea })),
+        movingCards: fromCards.map((card) => ({
+          card,
+          fromArea: PlayerCardsArea.HandArea,
+        })),
         movedByReason: this.Name,
         toArea: CardMoveArea.DropStack,
       },
       {
         moveReason: CardMoveReason.PassiveDrop,
         fromId: to.Id,
-        movingCards: toCards.map(card => ({ card, fromArea: PlayerCardsArea.HandArea })),
+        movingCards: toCards.map((card) => ({
+          card,
+          fromArea: PlayerCardsArea.HandArea,
+        })),
         movedByReason: this.Name,
         toArea: CardMoveArea.DropStack,
-      },
+      }
     );
 
     if (fromCards.length === 0) {
       await room.changeMaxHp(from.Id, -1);
     } else if (fromCards.length === 1) {
       from.setFlag(this.Name, true);
-      room.syncGameCommonRules(from.Id, from => {
+      room.syncGameCommonRules(from.Id, (from) => {
         room.CommonRules.addAdditionalHoldCardNumber(from, -1);
       });
       room.endPhase(PlayerPhase.PlayCardStage);

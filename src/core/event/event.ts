@@ -1,7 +1,7 @@
-import { PlayerId } from 'core/player/player_props';
-import { PatchedTranslationObject } from 'core/translations/translation_json_tool';
-import { ClientEvent, WaitingRoomClientEvent } from './event.client';
-import { ServerEvent, WaitingRoomServerEvent } from './event.server';
+import { PlayerId } from "@/core/player/player_props";
+import { PatchedTranslationObject } from "@/core/translations/translation_json_tool";
+import { ClientEvent, WaitingRoomClientEvent } from "./event.client";
+import { ServerEvent, WaitingRoomServerEvent } from "./event.server";
 
 export const enum GameEventIdentifiers {
   UserMessageEvent = 100,
@@ -115,7 +115,7 @@ export type CardResponsiveEventIdentifiers =
   | GameEventIdentifiers.AskForCardUseEvent;
 
 export const isCardResponsiveIdentifier = (
-  identifier: GameEventIdentifiers,
+  identifier: GameEventIdentifiers
 ): identifier is CardResponsiveEventIdentifiers =>
   [
     GameEventIdentifiers.AskForPeachEvent,
@@ -231,7 +231,10 @@ export const serverActiveListenerEvents = [
   GameEventIdentifiers.ObserverRequestChangeEvent,
 ];
 
-export const clientAsyncEvents = [...serverActiveListenerEvents, GameEventIdentifiers.NotifyEvent];
+export const clientAsyncEvents = [
+  ...serverActiveListenerEvents,
+  GameEventIdentifiers.NotifyEvent,
+];
 
 export const serverResponsiveListenerEvents = [
   GameEventIdentifiers.AskForPlayCardsOrSkillsEvent,
@@ -256,8 +259,8 @@ export const serverResponsiveListenerEvents = [
 ];
 
 export const enum CardMovedBySpecifiedReason {
-  JudgeProcess = 'JudgeProcess',
-  GameRuleDrop = 'GameRuleDrop',
+  JudgeProcess = "JudgeProcess",
+  GameRuleDrop = "GameRuleDrop",
 }
 
 export const enum CardDrawReason {
@@ -310,7 +313,7 @@ export type BaseGameEvent = {
 };
 
 export type ClientBaseEvent = {
-  status?: 'online' | 'offline' | 'quit' | 'trusted' | 'player';
+  status?: "online" | "offline" | "quit" | "trusted" | "player";
 };
 
 export type EventProcessSteps = { from: PlayerId; tos: PlayerId[] }[];
@@ -319,22 +322,28 @@ export type EventUtilities = {
   [K in keyof typeof GameEventIdentifiers]: object;
 };
 
-export type EventPicker<I extends GameEventIdentifiers, E extends WorkPlace> = BaseGameEvent &
+export type EventPicker<
+  I extends GameEventIdentifiers,
+  E extends WorkPlace
+> = BaseGameEvent &
   (E extends WorkPlace.Client ? ClientEvent[I] : ServerEvent[I]);
 
-export type ClientEventFinder<I extends GameEventIdentifiers> = BaseGameEvent & ClientBaseEvent & ClientEvent[I];
-export type ServerEventFinder<I extends GameEventIdentifiers> = BaseGameEvent & ServerEvent[I];
+export type ClientEventFinder<I extends GameEventIdentifiers> = BaseGameEvent &
+  ClientBaseEvent &
+  ClientEvent[I];
+export type ServerEventFinder<I extends GameEventIdentifiers> = BaseGameEvent &
+  ServerEvent[I];
 
 export const enum WaitingRoomEvent {
-  SeatDisabled = 'SeatDisabled',
-  PlayerChatMessage = 'PlayerChatMessage',
-  GameInfoUpdate = 'GameInfoUpdate',
-  RoomCreated = 'RoomCreated',
-  PlayerEnter = 'PlayerEnter',
-  PlayerLeave = 'PlayerLeave',
-  PlayerReady = 'PlayerReady',
-  GameStart = 'GameStart',
-  ChangeHost = 'ChangeHost',
+  SeatDisabled = "SeatDisabled",
+  PlayerChatMessage = "PlayerChatMessage",
+  GameInfoUpdate = "GameInfoUpdate",
+  RoomCreated = "RoomCreated",
+  PlayerEnter = "PlayerEnter",
+  PlayerLeave = "PlayerLeave",
+  PlayerReady = "PlayerReady",
+  GameStart = "GameStart",
+  ChangeHost = "ChangeHost",
 }
 
 export const activeWaitingRoomListeningEvents = [
@@ -349,6 +358,11 @@ export const activeWaitingRoomListeningEvents = [
   WaitingRoomEvent.ChangeHost,
 ];
 
-export type WaitingRoomEventUtilities<Event extends object = object> = Record<WaitingRoomEvent, Event>;
-export type WaitingRoomClientEventFinder<I extends WaitingRoomEvent> = WaitingRoomClientEvent[I];
-export type WaitingRoomServerEventFinder<I extends WaitingRoomEvent> = WaitingRoomServerEvent[I];
+export type WaitingRoomEventUtilities<Event extends object = object> = Record<
+  WaitingRoomEvent,
+  Event
+>;
+export type WaitingRoomClientEventFinder<I extends WaitingRoomEvent> =
+  WaitingRoomClientEvent[I];
+export type WaitingRoomServerEventFinder<I extends WaitingRoomEvent> =
+  WaitingRoomServerEvent[I];

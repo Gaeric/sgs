@@ -1,18 +1,37 @@
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { BaGuaZhen } from 'core/cards/standard/baguazhen';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, JudgeEffectStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, OnDefineReleaseTiming, SkillType, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { BaZhen } from '../fire/bazhen';
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import { BaGuaZhen } from "@/core/cards/standard/baguazhen";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  JudgeEffectStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  OnDefineReleaseTiming,
+  SkillType,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import { BaZhen } from "../fire/bazhen";
 
 type JieZhenMapper = { [playerId: string]: string[] };
 
-@CommonSkill({ name: 'jiezhen', description: 'jiezhen_description' })
+@CommonSkill({ name: "jiezhen", description: "jiezhen_description" })
 export class JieZhen extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name);
@@ -26,7 +45,11 @@ export class JieZhen extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner;
   }
 
@@ -34,21 +57,34 @@ export class JieZhen extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     if (!event.toIds) {
       return false;
     }
 
     const toId = event.toIds[0];
     const skillsToLose: string[] = [];
-    for (const skill of room.getPlayerById(toId).getPlayerSkills(undefined, true)) {
+    for (const skill of room
+      .getPlayerById(toId)
+      .getPlayerSkills(undefined, true)) {
       if (
         !(
-          [SkillType.Compulsory, SkillType.Limit, SkillType.Awaken, SkillType.Quest].includes(skill.SkillType) ||
+          [
+            SkillType.Compulsory,
+            SkillType.Limit,
+            SkillType.Awaken,
+            SkillType.Quest,
+          ].includes(skill.SkillType) ||
           skill.isLordSkill() ||
           skill.isShadowSkill() ||
           skill.isStubbornSkill()
@@ -68,7 +104,8 @@ export class JieZhen extends ActiveSkill {
     originalMappers[event.fromId].push(...skillsToLose);
     room.setFlag<JieZhenMapper>(toId, this.Name, originalMappers, this.Name);
 
-    room.getPlayerById(toId).hasShadowSkill(JieZhenResume.Name) || (await room.obtainSkill(toId, JieZhenResume.Name));
+    room.getPlayerById(toId).hasShadowSkill(JieZhenResume.Name) ||
+      (await room.obtainSkill(toId, JieZhenResume.Name));
 
     return true;
   }
@@ -76,8 +113,14 @@ export class JieZhen extends ActiveSkill {
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: 's_jiezhen_resume', description: 's_jiezhen_resume_description' })
-export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: "s_jiezhen_resume",
+  description: "s_jiezhen_resume_description",
+})
+export class JieZhenResume
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public async whenLosingSkill(room: Room, player: Player) {
     room.removeFlag(player.Id, JieZhen.Name);
   }
@@ -90,25 +133,39 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
-    return stage === PhaseChangeStage.AfterPhaseChanged || stage === JudgeEffectStage.AfterJudgeEffect;
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
+    return (
+      stage === PhaseChangeStage.AfterPhaseChanged ||
+      stage === JudgeEffectStage.AfterJudgeEffect
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.JudgeEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.JudgeEvent
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      const phaseChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
       const jiezhenMapper = owner.getFlag<JieZhenMapper>(JieZhen.Name);
       return (
-        phaseChangeEvent.to === PlayerPhase.PhaseBegin && jiezhenMapper && !!jiezhenMapper[phaseChangeEvent.toPlayer]
+        phaseChangeEvent.to === PlayerPhase.PhaseBegin &&
+        jiezhenMapper &&
+        !!jiezhenMapper[phaseChangeEvent.toPlayer]
       );
     } else if (identifier === GameEventIdentifiers.JudgeEvent) {
-      const judgeEvent = event as ServerEventFinder<GameEventIdentifiers.JudgeEvent>;
-      return judgeEvent.toId === owner.Id && judgeEvent.bySkill === BaGuaZhen.name;
+      const judgeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.JudgeEvent>;
+      return (
+        judgeEvent.toId === owner.Id && judgeEvent.bySkill === BaGuaZhen.name
+      );
     }
 
     return false;
@@ -118,16 +175,27 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     await room.loseSkill(event.fromId, BaZhen.Name);
 
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.JudgeEvent
     >;
-    if (EventPacker.getIdentifier(unknownEvent) === GameEventIdentifiers.PhaseChangeEvent) {
-      const toPlayer = (unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>).toPlayer;
+    if (
+      EventPacker.getIdentifier(unknownEvent) ===
+      GameEventIdentifiers.PhaseChangeEvent
+    ) {
+      const toPlayer = (
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+      ).toPlayer;
 
-      const jiezhenMappers = room.getFlag<JieZhenMapper>(event.fromId, JieZhen.Name);
+      const jiezhenMappers = room.getFlag<JieZhenMapper>(
+        event.fromId,
+        JieZhen.Name
+      );
       for (const skill of jiezhenMappers[toPlayer]) {
         await room.obtainSkill(event.fromId, skill);
       }
@@ -135,9 +203,14 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
       const from = room.getPlayerById(event.fromId);
       if (from.getCardIds().length > 0) {
         const options: CardChoosingOptions = {
-          [PlayerCardsArea.JudgeArea]: from.getCardIds(PlayerCardsArea.JudgeArea),
-          [PlayerCardsArea.EquipArea]: from.getCardIds(PlayerCardsArea.EquipArea),
-          [PlayerCardsArea.HandArea]: from.getCardIds(PlayerCardsArea.HandArea).length,
+          [PlayerCardsArea.JudgeArea]: from.getCardIds(
+            PlayerCardsArea.JudgeArea
+          ),
+          [PlayerCardsArea.EquipArea]: from.getCardIds(
+            PlayerCardsArea.EquipArea
+          ),
+          [PlayerCardsArea.HandArea]: from.getCardIds(PlayerCardsArea.HandArea)
+            .length,
         };
 
         const chooseCardEvent = {
@@ -147,13 +220,20 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
           triggeredBySkills: [JieZhen.Name],
         };
 
-        const response = await room.askForChoosingPlayerCard(chooseCardEvent, chooseCardEvent.fromId, false, true);
+        const response = await room.askForChoosingPlayerCard(
+          chooseCardEvent,
+          chooseCardEvent.fromId,
+          false,
+          true
+        );
         if (!response) {
           return false;
         }
 
         await room.moveCards({
-          movingCards: [{ card: response.selectedCard!, fromArea: response.fromArea }],
+          movingCards: [
+            { card: response.selectedCard!, fromArea: response.fromArea },
+          ],
           fromId: chooseCardEvent.toId,
           toId: chooseCardEvent.fromId,
           toArea: CardMoveArea.HandArea,
@@ -164,9 +244,13 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
       }
 
       delete jiezhenMappers[toPlayer];
-      Object.keys(jiezhenMappers).length === 0 && (await room.loseSkill(event.fromId, this.Name));
+      Object.keys(jiezhenMappers).length === 0 &&
+        (await room.loseSkill(event.fromId, this.Name));
     } else {
-      const jiezhenMappers = room.getFlag<JieZhenMapper>(event.fromId, JieZhen.Name);
+      const jiezhenMappers = room.getFlag<JieZhenMapper>(
+        event.fromId,
+        JieZhen.Name
+      );
       if (jiezhenMappers) {
         const allUsers = Object.keys(jiezhenMappers);
         room.deadPlayerFilters(allUsers);
@@ -184,9 +268,15 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
           const from = room.getPlayerById(event.fromId);
           if (from.getCardIds().length > 0) {
             const options: CardChoosingOptions = {
-              [PlayerCardsArea.JudgeArea]: from.getCardIds(PlayerCardsArea.JudgeArea),
-              [PlayerCardsArea.EquipArea]: from.getCardIds(PlayerCardsArea.EquipArea),
-              [PlayerCardsArea.HandArea]: from.getCardIds(PlayerCardsArea.HandArea).length,
+              [PlayerCardsArea.JudgeArea]: from.getCardIds(
+                PlayerCardsArea.JudgeArea
+              ),
+              [PlayerCardsArea.EquipArea]: from.getCardIds(
+                PlayerCardsArea.EquipArea
+              ),
+              [PlayerCardsArea.HandArea]: from.getCardIds(
+                PlayerCardsArea.HandArea
+              ).length,
             };
 
             const chooseCardEvent = {
@@ -196,13 +286,20 @@ export class JieZhenResume extends TriggerSkill implements OnDefineReleaseTiming
               triggeredBySkills: [JieZhen.Name],
             };
 
-            const response = await room.askForChoosingPlayerCard(chooseCardEvent, chooseCardEvent.fromId, false, true);
+            const response = await room.askForChoosingPlayerCard(
+              chooseCardEvent,
+              chooseCardEvent.fromId,
+              false,
+              true
+            );
             if (!response) {
               return false;
             }
 
             await room.moveCards({
-              movingCards: [{ card: response.selectedCard!, fromArea: response.fromArea }],
+              movingCards: [
+                { card: response.selectedCard!, fromArea: response.fromArea },
+              ],
               fromId: chooseCardEvent.toId,
               toId: chooseCardEvent.fromId,
               toArea: CardMoveArea.HandArea,

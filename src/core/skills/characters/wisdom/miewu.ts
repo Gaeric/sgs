@@ -1,12 +1,18 @@
-import { CardType, VirtualCard } from 'core/cards/card';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardResponseStage, CardUseStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
+import { CardType, VirtualCard } from "@/core/cards/card";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  CardResponseStage,
+  CardUseStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
 import {
   CommonSkill,
   OnDefineReleaseTiming,
@@ -14,14 +20,17 @@ import {
   ShadowSkill,
   TriggerSkill,
   ViewAsSkill,
-} from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { WuKu } from './wuku';
+} from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { WuKu } from "./wuku";
 
-@CommonSkill({ name: 'miewu', description: 'miewu_description' })
+@CommonSkill({ name: "miewu", description: "miewu_description" })
 export class MieWu extends ViewAsSkill {
   public canViewAs(): string[] {
-    return Sanguosha.getCardNameByType(types => types.includes(CardType.Basic) || types.includes(CardType.Trick));
+    return Sanguosha.getCardNameByType(
+      (types) =>
+        types.includes(CardType.Basic) || types.includes(CardType.Trick)
+    );
   }
 
   isRefreshAt(room: Room, owner: Player, phase: PlayerPhase) {
@@ -30,14 +39,22 @@ export class MieWu extends ViewAsSkill {
 
   public canUse(room: Room, owner: Player): boolean {
     const wuku = owner.getFlag<number>(WuKu.Name) || 0;
-    return !owner.hasUsedSkill(this.Name) && wuku > 0 && owner.getPlayerCards().length > 0;
+    return (
+      !owner.hasUsedSkill(this.Name) &&
+      wuku > 0 &&
+      owner.getPlayerCards().length > 0
+    );
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
     return cards.length === 1;
   }
 
-  public isAvailableCard(room: Room, owner: Player, pendingCardId: CardId): boolean {
+  public isAvailableCard(
+    room: Room,
+    owner: Player,
+    pendingCardId: CardId
+  ): boolean {
     return true;
   }
 
@@ -45,14 +62,18 @@ export class MieWu extends ViewAsSkill {
     return [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea];
   }
 
-  public viewAs(selectedCards: CardId[], owner: Player, viewAs: string): VirtualCard {
-    Precondition.assert(!!viewAs, 'Unknown miewu card');
+  public viewAs(
+    selectedCards: CardId[],
+    owner: Player,
+    viewAs: string
+  ): VirtualCard {
+    Precondition.assert(!!viewAs, "Unknown miewu card");
     return VirtualCard.create(
       {
         cardName: viewAs,
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }
@@ -65,9 +86,12 @@ export class MieWuShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseBegin && stage === PhaseChangeStage.AfterPhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseBegin &&
+      stage === PhaseChangeStage.AfterPhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -79,8 +103,10 @@ export class MieWuShadow extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent
+    >,
+    stage?: AllStage
   ): boolean {
     return (
       stage === CardUseStage.BeforeCardUseEffect ||
@@ -93,8 +119,10 @@ export class MieWuShadow extends TriggerSkill implements OnDefineReleaseTiming {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent>,
-    stage?: AllStage,
+    content: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.CardResponseEvent
+    >,
+    stage?: AllStage
   ): boolean {
     const card = Sanguosha.getCardById(content.cardId);
     const canUse =
@@ -113,12 +141,20 @@ export class MieWuShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
-    const stage = room.getPlayerById(fromId).getFlag<AllStage>(this.GeneralName);
+    const stage = room
+      .getPlayerById(fromId)
+      .getFlag<AllStage>(this.GeneralName);
 
-    if (stage === CardUseStage.CardUseFinishedEffect || stage === CardResponseStage.AfterCardResponseEffect) {
-      await room.drawCards(1, fromId, 'top', fromId, this.GeneralName);
+    if (
+      stage === CardUseStage.CardUseFinishedEffect ||
+      stage === CardResponseStage.AfterCardResponseEffect
+    ) {
+      await room.drawCards(1, fromId, "top", fromId, this.GeneralName);
     } else {
       let wuku = room.getFlag<number>(fromId, WuKu.Name);
       if (wuku && wuku > 0) {
@@ -128,7 +164,7 @@ export class MieWuShadow extends TriggerSkill implements OnDefineReleaseTiming {
             fromId,
             WuKu.Name,
             wuku,
-            TranslationPack.translationJsonPatcher('wuku: {0}', wuku).toString(),
+            TranslationPack.translationJsonPatcher("wuku: {0}", wuku).toString()
           );
         } else {
           room.removeFlag(fromId, WuKu.Name);

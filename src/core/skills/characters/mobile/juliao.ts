@@ -1,10 +1,10 @@
-import { CharacterNationality } from 'core/characters/character';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { RulesBreakerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import { CharacterNationality } from "@/core/characters/character";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { RulesBreakerSkill } from "@/core/skills/skill";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'juliao', description: 'juliao_description' })
+@CompulsorySkill({ name: "juliao", description: "juliao_description" })
 export class JuLiao extends RulesBreakerSkill {
   public audioIndex(): number {
     return 0;

@@ -1,16 +1,20 @@
-import { GuanShiFuSkillTrigger } from 'core/ai/skills/cards/guanshifu';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardEffectStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { AI, CommonSkill, TriggerSkill } from 'core/skills/skill';
+import { GuanShiFuSkillTrigger } from "@/core/ai/skills/cards/guanshifu";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, CardEffectStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { AI, CommonSkill, TriggerSkill } from "@/core/skills/skill";
 
 @AI(GuanShiFuSkillTrigger)
-@CommonSkill({ name: 'guanshifu', description: 'guanshifu_description' })
+@CommonSkill({ name: "guanshifu", description: "guanshifu_description" })
 export class GuanShiFuSkill extends TriggerSkill {
   get Muted() {
     return true;
@@ -20,7 +24,10 @@ export class GuanShiFuSkill extends TriggerSkill {
     return false;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>,
+    stage?: AllStage
+  ) {
     return stage === CardEffectStage.CardEffectCancelledOut;
   }
 
@@ -34,20 +41,33 @@ export class GuanShiFuSkill extends TriggerSkill {
     cardId: CardId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard?: CardId,
+    containerCard?: CardId
   ): boolean {
     return cardId !== containerCard;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
-    return content.fromId === owner.Id && Sanguosha.getCardById(content.cardId).GeneralName === 'slash';
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
+    return (
+      content.fromId === owner.Id &&
+      Sanguosha.getCardById(content.cardId).GeneralName === "slash"
+    );
   }
 
-  async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { cardIds } = event;
     if (!cardIds) {
       return false;
@@ -57,7 +77,7 @@ export class GuanShiFuSkill extends TriggerSkill {
     const { triggeredOnEvent } = event;
     const slashEvent = Precondition.exists(
       triggeredOnEvent,
-      'Unable to get slash event',
+      "Unable to get slash event"
     ) as ServerEventFinder<GameEventIdentifiers.CardEffectEvent>;
     slashEvent.isCancelledOut = false;
     return true;

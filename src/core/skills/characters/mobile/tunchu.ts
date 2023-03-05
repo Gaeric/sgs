@@ -1,31 +1,38 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
 import {
   CardDrawReason,
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
 import {
   AllStage,
   DrawCardStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { FilterSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { FilterSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'tunchu', description: 'tunchu_description' })
+@CommonSkill({ name: "tunchu", description: "tunchu_description" })
 export class TunChu extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DrawCardStage.CardDrawing;
   }
 
@@ -33,7 +40,11 @@ export class TunChu extends TriggerSkill {
     return stage === PlayerPhase.DrawCardStage;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>
+  ): boolean {
     return (
       owner.Id === content.fromId &&
       room.CurrentPlayerPhase === PlayerPhase.DrawCardStage &&
@@ -49,10 +60,11 @@ export class TunChu extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { triggeredOnEvent } = skillUseEvent;
-    const drawCardEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+    const drawCardEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
 
     drawCardEvent.drawAmount += 2;
     return true;
@@ -67,39 +79,46 @@ export class TunChuDebuff extends FilterSkill {
     room: Room,
     owner: PlayerId,
     onResponse?: ServerEventFinder<GameEventIdentifiers>,
-    isCardResponse?: boolean,
+    isCardResponse?: boolean
   ): boolean {
     if (
-      room.getPlayerById(owner).getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName).length === 0 ||
+      room
+        .getPlayerById(owner)
+        .getCardIds(PlayerCardsArea.OutsideArea, this.GeneralName).length ===
+        0 ||
       isCardResponse
     ) {
       return true;
     }
 
     return cardId instanceof CardMatcher
-      ? !cardId.match(new CardMatcher({ generalName: ['slash'] }))
-      : Sanguosha.getCardById(cardId).GeneralName !== 'slash';
+      ? !cardId.match(new CardMatcher({ generalName: ["slash"] }))
+      : Sanguosha.getCardById(cardId).GeneralName !== "slash";
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: TunChuDebuff.Name, description: TunChuDebuff.Description })
-export class TunChuShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class TunChuShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
-      room.CurrentPlayerStage === PlayerPhaseStages.DrawCardStageEnd && stage === PhaseStageChangeStage.StageChanged
+      room.CurrentPlayerStage === PlayerPhaseStages.DrawCardStageEnd &&
+      stage === PhaseStageChangeStage.StageChanged
     );
   }
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -107,7 +126,7 @@ export class TunChuShadow extends TriggerSkill implements OnDefineReleaseTiming 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       owner.Id === content.playerId &&
@@ -131,8 +150,8 @@ export class TunChuShadow extends TriggerSkill implements OnDefineReleaseTiming 
 
   public getSkillLog(room: Room, owner: Player) {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to put at least 1 hand card on your general card as ‘liang’?',
-      this.GeneralName,
+      "{0}: do you want to put at least 1 hand card on your general card as ‘liang’?",
+      this.GeneralName
     ).extract();
   }
 
@@ -140,14 +159,20 @@ export class TunChuShadow extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     if (!event.cardIds) {
       return false;
     }
 
     event.cardIds.length > 0 &&
       (await room.moveCards({
-        movingCards: event.cardIds.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+        movingCards: event.cardIds.map((card) => ({
+          card,
+          fromArea: CardMoveArea.HandArea,
+        })),
         fromId: event.fromId,
         toId: event.fromId,
         toArea: CardMoveArea.OutsideArea,

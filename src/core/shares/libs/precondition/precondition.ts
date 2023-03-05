@@ -1,4 +1,4 @@
-import { Flavor } from 'core/shares/types/host_config';
+import { Flavor } from "@/core/shares/types/host_config";
 
 export class Precondition {
   public static alarm<T>(arg: T | null | undefined, errorMsg: string): T {
@@ -20,7 +20,7 @@ export class Precondition {
 
   public static assert(success: boolean, errorMsg: string) {
     if (!success) {
-      throw new Error('Assertion failed: ' + errorMsg);
+      throw new Error("Assertion failed: " + errorMsg);
     }
   }
 
@@ -28,7 +28,10 @@ export class Precondition {
     return new Error(`Unreachable error in switch case of argument ${arg}`);
   }
 
-  public static debugBlock(flavor: Flavor, debugExec: () => void | Promise<void>) {
+  public static debugBlock(
+    flavor: Flavor,
+    debugExec: () => void | Promise<void>
+  ) {
     if (flavor === Flavor.Dev) {
       debugExec();
     }

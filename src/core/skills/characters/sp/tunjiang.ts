@@ -1,17 +1,25 @@
-import { CharacterNationality } from 'core/characters/character';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhase, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { TargetGroupUtil } from 'core/shares/libs/utils/target_group';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CharacterNationality } from "@/core/characters/character";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhase,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'tunjiang', description: 'tunjiang_description' })
+@CommonSkill({ name: "tunjiang", description: "tunjiang_description" })
 export class TunJiang extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -19,35 +27,40 @@ export class TunJiang extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       content.playerId === owner.Id &&
       content.toStage === PlayerPhaseStages.FinishStageStart &&
       room.Analytics.getRecordEvents<GameEventIdentifiers.CardUseEvent>(
-        event =>
+        (event) =>
           event.fromId === owner.Id &&
           event.targetGroup !== undefined &&
-          TargetGroupUtil.getRealTargets(event.targetGroup).find(player => player !== owner.Id) !== undefined,
+          TargetGroupUtil.getRealTargets(event.targetGroup).find(
+            (player) => player !== owner.Id
+          ) !== undefined,
         owner.Id,
-        'round',
+        "round",
         [PlayerPhase.PlayCardStage],
-        1,
+        1
       ).length === 0
     );
   }
 
   public getSkillLog(room: Room, owner: Player): PatchedTranslationObject {
-    const nations = room.AlivePlayers.reduce<CharacterNationality[]>((allNations, player) => {
-      if (!allNations.includes(player.Nationality)) {
-        allNations.push(player.Nationality);
-      }
-      return allNations;
-    }, []);
+    const nations = room.AlivePlayers.reduce<CharacterNationality[]>(
+      (allNations, player) => {
+        if (!allNations.includes(player.Nationality)) {
+          allNations.push(player.Nationality);
+        }
+        return allNations;
+      },
+      []
+    );
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to draw {1} card(s) additionally?',
+      "{0}: do you want to draw {1} card(s) additionally?",
       this.Name,
-      nations.length,
+      nations.length
     ).extract();
   }
 
@@ -55,14 +68,26 @@ export class TunJiang extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
-    const nations = room.AlivePlayers.reduce<CharacterNationality[]>((allNations, player) => {
-      if (!allNations.includes(player.Nationality)) {
-        allNations.push(player.Nationality);
-      }
-      return allNations;
-    }, []);
-    await room.drawCards(nations.length, event.fromId, 'top', event.fromId, this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
+    const nations = room.AlivePlayers.reduce<CharacterNationality[]>(
+      (allNations, player) => {
+        if (!allNations.includes(player.Nationality)) {
+          allNations.push(player.Nationality);
+        }
+        return allNations;
+      },
+      []
+    );
+    await room.drawCards(
+      nations.length,
+      event.fromId,
+      "top",
+      event.fromId,
+      this.Name
+    );
 
     return true;
   }

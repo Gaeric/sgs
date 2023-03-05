@@ -1,29 +1,32 @@
-import { Card, CardType } from 'core/cards/card';
-import { CardColor, CardId, CardSuit } from 'core/cards/libs/card_props';
-import { CharacterEquipSections, CharacterNationality } from 'core/characters/character';
-import { Sanguosha } from 'core/game/engine';
-import { PlayerPhase } from 'core/game/stage_processor';
-import { PlayerCardsArea, PlayerRole } from 'core/player/player_props';
-import { GameMode } from 'core/shares/types/room_props';
-import { Precondition } from '../precondition/precondition';
+import { Card, CardType } from "@/core/cards/card";
+import { CardColor, CardId, CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CharacterEquipSections,
+  CharacterNationality,
+} from "@/core/characters/character";
+import { Sanguosha } from "@/core/game/engine";
+import { PlayerPhase } from "@/core/game/stage_processor";
+import { PlayerCardsArea, PlayerRole } from "@/core/player/player_props";
+import { GameMode } from "@/core/shares/types/room_props";
+import { Precondition } from "../precondition/precondition";
 
 export abstract class Functional {
   static getPlayerPhaseRawText(stage: PlayerPhase) {
     switch (stage) {
       case PlayerPhase.PhaseBegin:
       case PlayerPhase.PrepareStage:
-        return 'prepare stage';
+        return "prepare stage";
       case PlayerPhase.JudgeStage:
-        return 'judge stage';
+        return "judge stage";
       case PlayerPhase.DrawCardStage:
-        return 'draw stage';
+        return "draw stage";
       case PlayerPhase.PlayCardStage:
-        return 'play stage';
+        return "play stage";
       case PlayerPhase.DropCardStage:
-        return 'drop stage';
+        return "drop stage";
       case PlayerPhase.FinishStage:
       case PlayerPhase.PhaseFinish:
-        return 'finish stage';
+        return "finish stage";
       default:
         throw Precondition.UnreachableError(stage);
     }
@@ -32,25 +35,25 @@ export abstract class Functional {
   static getPlayerCardAreaText(area: PlayerCardsArea) {
     switch (area) {
       case PlayerCardsArea.EquipArea:
-        return 'equip area';
+        return "equip area";
       case PlayerCardsArea.HandArea:
-        return 'hand area';
+        return "hand area";
       case PlayerCardsArea.JudgeArea:
-        return 'judge area';
+        return "judge area";
       case PlayerCardsArea.OutsideArea:
-        return 'outside area';
+        return "outside area";
       default:
         throw Precondition.UnreachableError(area);
     }
   }
 
   static getCardSuitRawText(suit: CardSuit) {
-    const cardSuitRawText = ['nosuit', 'spade', 'heart', 'club', 'diamond'];
+    const cardSuitRawText = ["nosuit", "spade", "heart", "club", "diamond"];
     return cardSuitRawText[suit];
   }
 
   static getCardSuitCharText(suit: CardSuit) {
-    const cardSuitCharText = ['□', '♠', '♥', '♣', '♦'];
+    const cardSuitCharText = ["□", "♠", "♥", "♣", "♦"];
     return cardSuitCharText[suit];
   }
 
@@ -58,26 +61,32 @@ export abstract class Functional {
     switch (mode) {
       case GameMode.OneVersusTwo: {
         const playerRoleRawText = {
-          [PlayerRole.Lord]: 'landowners',
-          [PlayerRole.Rebel]: 'peasant',
+          [PlayerRole.Lord]: "landowners",
+          [PlayerRole.Rebel]: "peasant",
         };
         return playerRoleRawText[role];
       }
       case GameMode.TwoVersusTwo: {
         const playerRoleRawText = {
-          [PlayerRole.Loyalist]: 'dragon-team',
-          [PlayerRole.Rebel]: 'tiger-team',
+          [PlayerRole.Loyalist]: "dragon-team",
+          [PlayerRole.Rebel]: "tiger-team",
         };
         return playerRoleRawText[role];
       }
       default: {
-        const playerRoleRawText = ['unknown', 'lord', 'loyalist', 'rebel', 'renegade'];
+        const playerRoleRawText = [
+          "unknown",
+          "lord",
+          "loyalist",
+          "rebel",
+          "renegade",
+        ];
         return playerRoleRawText[role];
       }
     }
   }
   static getPlayerNationalityText(nationality: CharacterNationality) {
-    const playerRoleRawText = ['wei', 'shu', 'wu', 'qun', 'god'];
+    const playerRoleRawText = ["wei", "shu", "wu", "qun", "god"];
     return playerRoleRawText[nationality];
   }
 
@@ -92,7 +101,7 @@ export abstract class Functional {
   }
 
   static sortCards(cardIds: CardId[]) {
-    const cards = cardIds.map(id => Sanguosha.getCardById(id));
+    const cards = cardIds.map((id) => Sanguosha.getCardById(id));
     const sortedCards: CardId[] = [];
     const basicCards: Card[] = [];
     const trickCards: Card[] = [];
@@ -109,7 +118,9 @@ export abstract class Functional {
 
     for (const tpyeCards of [basicCards, trickCards, equipCards]) {
       for (const card of tpyeCards) {
-        const index = sortedCards.findIndex(id => Sanguosha.getCardById(id).Name === card.Name);
+        const index = sortedCards.findIndex(
+          (id) => Sanguosha.getCardById(id).Name === card.Name
+        );
         if (index >= 0) {
           sortedCards.splice(index, 0, card.Id);
         } else {
@@ -123,19 +134,19 @@ export abstract class Functional {
 
   static getPlayerNationalityEnum(nationality: string) {
     switch (nationality) {
-      case 'wei': {
+      case "wei": {
         return CharacterNationality.Wei;
       }
-      case 'shu': {
+      case "shu": {
         return CharacterNationality.Shu;
       }
-      case 'wu': {
+      case "wu": {
         return CharacterNationality.Wu;
       }
-      case 'qun': {
+      case "qun": {
         return CharacterNationality.Qun;
       }
-      case 'god': {
+      case "god": {
         return CharacterNationality.God;
       }
       default: {
@@ -147,23 +158,23 @@ export abstract class Functional {
   static getCardTypeRawText(type: CardType) {
     switch (type) {
       case CardType.Basic:
-        return 'basic card';
+        return "basic card";
       case CardType.Equip:
-        return 'equip card';
+        return "equip card";
       case CardType.Trick:
-        return 'trick card';
+        return "trick card";
       case CardType.DelayedTrick:
-        return 'delayed trick card';
+        return "delayed trick card";
       case CardType.Shield:
-        return 'armor card';
+        return "armor card";
       case CardType.Weapon:
-        return 'weapon card';
+        return "weapon card";
       case CardType.DefenseRide:
-        return 'defense ride card';
+        return "defense ride card";
       case CardType.OffenseRide:
-        return 'offense ride card';
+        return "offense ride card";
       case CardType.Precious:
-        return 'precious card';
+        return "precious card";
       default:
         throw Precondition.UnreachableError(type);
     }
@@ -172,24 +183,26 @@ export abstract class Functional {
   static getCardBaseTypeAbbrRawText(type: CardType) {
     switch (type) {
       case CardType.Basic:
-        return 'abbr:basic';
+        return "abbr:basic";
       case CardType.Trick:
-        return 'abbr:trick';
+        return "abbr:trick";
       case CardType.Equip:
-        return 'abbr:equip';
+        return "abbr:equip";
       default:
-        throw new Error(`Cannot get the abbreviated raw text of card type: ${type}`);
+        throw new Error(
+          `Cannot get the abbreviated raw text of card type: ${type}`
+        );
     }
   }
 
   static getCardColorRawText(color: CardColor) {
     switch (color) {
       case CardColor.Black:
-        return 'black';
+        return "black";
       case CardColor.Red:
-        return 'red';
+        return "red";
       case CardColor.None:
-        return 'none_color';
+        return "none_color";
       default:
         throw Precondition.UnreachableError(color);
     }
@@ -198,20 +211,20 @@ export abstract class Functional {
   static getCardNumberRawText(cardNumber: number) {
     switch (cardNumber) {
       case 1:
-        return 'A';
+        return "A";
       case 11:
-        return 'J';
+        return "J";
       case 12:
-        return 'Q';
+        return "Q";
       case 13:
-        return 'K';
+        return "K";
       default:
         return String(cardNumber);
     }
   }
 
   static convertEquipSectionAndCardType(
-    equipSectionOrCardType: CharacterEquipSections | CardType,
+    equipSectionOrCardType: CharacterEquipSections | CardType
   ): CardType | CharacterEquipSections {
     switch (equipSectionOrCardType) {
       case CharacterEquipSections.Weapon:
@@ -241,13 +254,13 @@ export abstract class Functional {
 
   static convertSuitStringToSuit(suitStr: string) {
     switch (suitStr) {
-      case 'spade':
+      case "spade":
         return CardSuit.Spade;
-      case 'club':
+      case "club":
         return CardSuit.Club;
-      case 'diamond':
+      case "diamond":
         return CardSuit.Diamond;
-      case 'heart':
+      case "heart":
         return CardSuit.Heart;
       default:
         throw new Error(`Cannot convert this value: ${suitStr}`);

@@ -1,12 +1,12 @@
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
 
 export const enum Languages {
-  EN_US = 'en-US',
-  ZH_CN = 'zh-CN',
-  ZH_HK = 'zh-HK',
-  ZH_TW = 'zh-TW',
+  EN_US = "en-US",
+  ZH_CN = "zh-CN",
+  ZH_HK = "zh-HK",
+  ZH_TW = "zh-TW",
 }
 
 export function getAllLanguages() {
@@ -28,11 +28,14 @@ export type TranslationsDictionary = {
 
 export class TranslationPack {
   private constructor(private translationJson: PatchedTranslationObject) {}
-  public static readonly translationObjectSign = '@@translate:';
-  public static readonly translateCardObjectSign = TranslationPack.translationObjectSign + 'card:';
-  public static readonly translatePlayerObjectSign = TranslationPack.translationObjectSign + 'player:';
-  public static readonly translateTextArraySign = TranslationPack.translationObjectSign + 'array:';
-  public static readonly pureTextSign = '@@pure:';
+  public static readonly translationObjectSign = "@@translate:";
+  public static readonly translateCardObjectSign =
+    TranslationPack.translationObjectSign + "card:";
+  public static readonly translatePlayerObjectSign =
+    TranslationPack.translationObjectSign + "player:";
+  public static readonly translateTextArraySign =
+    TranslationPack.translationObjectSign + "array:";
+  public static readonly pureTextSign = "@@pure:";
 
   static create(translationJon: PatchedTranslationObject) {
     return new TranslationPack(translationJon);
@@ -53,7 +56,10 @@ export class TranslationPack {
   }
 
   toString() {
-    return TranslationPack.translationObjectSign + JSON.stringify(this.translationJson);
+    return (
+      TranslationPack.translationObjectSign +
+      JSON.stringify(this.translationJson)
+    );
   }
 
   public translateTo(translationsDictionary: TranslationsDictionary) {
@@ -68,7 +74,10 @@ export class TranslationPack {
     if (this.translationJson.params.length > 0) {
       for (let i = 0; i < this.translationJson.params.length; i++) {
         const param = this.translationJson.params[i].toString();
-        target = target.replace(new RegExp(`\\{${i}\\}`, 'g'), translationsDictionary[param] || param);
+        target = target.replace(
+          new RegExp(`\\{${i}\\}`, "g"),
+          translationsDictionary[param] || param
+        );
       }
     }
 
@@ -79,10 +88,12 @@ export class TranslationPack {
     return (
       TranslationPack.translateCardObjectSign +
       JSON.stringify(
-        cardIds.map(cardId => {
+        cardIds.map((cardId) => {
           const card = Sanguosha.getCardById(cardId);
-          return `${card.Name} ${TranslationPack.patchEmojiOrImageInTranslation(card.Suit)} ${card.CardNumber}`;
-        }),
+          return `${card.Name} ${TranslationPack.patchEmojiOrImageInTranslation(
+            card.Suit
+          )} ${card.CardNumber}`;
+        })
       )
     );
   }
@@ -90,7 +101,9 @@ export class TranslationPack {
   public static patchPlayerInTranslation(...players: Player[]) {
     return (
       TranslationPack.translatePlayerObjectSign +
-      JSON.stringify(players.map(player => `${player.Character.Name} ${player.Position}`))
+      JSON.stringify(
+        players.map((player) => `${player.Character.Name} ${player.Position}`)
+      )
     );
   }
 
@@ -118,15 +131,21 @@ export class TranslationPack {
   }
 
   public static dispatchEmojiOrImageInTranslation(rawText: string): CardSuit {
-    return parseInt(rawText.slice(TranslationPack.translateCardObjectSign.length), 10);
+    return parseInt(
+      rawText.slice(TranslationPack.translateCardObjectSign.length),
+      10
+    );
   }
 
   public static dispatch(wrappedString: string) {
     try {
       const translateObject: TranslationPackPatchedObject = JSON.parse(
-        wrappedString.slice(TranslationPack.translationObjectSign.length),
+        wrappedString.slice(TranslationPack.translationObjectSign.length)
       );
-      if (!translateObject.tag || translateObject.tag !== TranslationPack.translationObjectSign) {
+      if (
+        !translateObject.tag ||
+        translateObject.tag !== TranslationPack.translationObjectSign
+      ) {
         return;
       }
 
@@ -137,10 +156,13 @@ export class TranslationPack {
   }
 
   public static wrapArrayParams(...params: string[]) {
-    return TranslationPack.translateTextArraySign + params.join(',');
+    return TranslationPack.translateTextArraySign + params.join(",");
   }
 
-  public static translationJsonPatcher(originalText: string, ...stringParams: (string | number)[]) {
+  public static translationJsonPatcher(
+    originalText: string,
+    ...stringParams: (string | number)[]
+  ) {
     const translationJson: TranslationPackPatchedObject = {
       tag: TranslationPack.translationObjectSign,
       original: originalText,
@@ -150,7 +172,10 @@ export class TranslationPack {
     return new TranslationPack(translationJson);
   }
 
-  public static translationJsonDispatcher(wrappedString: string, translationsDictionary: TranslationsDictionary) {
+  public static translationJsonDispatcher(
+    wrappedString: string,
+    translationsDictionary: TranslationsDictionary
+  ) {
     const dispatchedTranslationObject = this.dispatch(wrappedString);
     if (dispatchedTranslationObject === undefined) {
       return wrappedString;
@@ -171,14 +196,14 @@ export class TranslationPack {
         if (TranslationPack.isTextArrayText(param)) {
           parsedParam = param
             .slice(TranslationPack.translateTextArraySign.length)
-            .split(',')
-            .map(subParam => translationsDictionary[subParam] || subParam)
-            .join(',');
+            .split(",")
+            .map((subParam) => translationsDictionary[subParam] || subParam)
+            .join(",");
         } else {
           parsedParam = translationsDictionary[param] || param;
         }
 
-        target = target.replace(new RegExp(`\\{${i}\\}`, 'g'), parsedParam);
+        target = target.replace(new RegExp(`\\{${i}\\}`, "g"), parsedParam);
       }
     }
 

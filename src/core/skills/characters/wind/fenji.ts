@@ -1,20 +1,36 @@
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, CardMoveStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, TriggerSkill } from 'core/skills/skill';
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'fenji', description: 'fenji_description' })
+@CommonSkill({ name: "fenji", description: "fenji_description" })
 export class FenJi extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     return (
-      event.infos.find(info => {
-        if (!info.movingCards.find(card => card.fromArea === PlayerCardsArea.HandArea)) {
+      event.infos.find((info) => {
+        if (
+          !info.movingCards.find(
+            (card) => card.fromArea === PlayerCardsArea.HandArea
+          )
+        ) {
           return false;
         }
 
@@ -37,17 +53,22 @@ export class FenJi extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { triggeredOnEvent } = skillUseEvent;
-    const moveCardEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
+    const moveCardEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
     await room.loseHp(skillUseEvent.fromId, 1);
 
     const info =
       moveCardEvent.infos.length === 1
         ? moveCardEvent.infos[0]
-        : moveCardEvent.infos.find(info => {
-            if (!info.movingCards.find(card => card.fromArea === PlayerCardsArea.HandArea)) {
+        : moveCardEvent.infos.find((info) => {
+            if (
+              !info.movingCards.find(
+                (card) => card.fromArea === PlayerCardsArea.HandArea
+              )
+            ) {
               return false;
             }
 
@@ -61,7 +82,7 @@ export class FenJi extends TriggerSkill {
 
             return false;
           });
-    await room.drawCards(2, info!.fromId, 'top', undefined, this.Name);
+    await room.drawCards(2, info!.fromId, "top", undefined, this.Name);
 
     return true;
   }

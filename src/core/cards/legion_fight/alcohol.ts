@@ -1,9 +1,9 @@
-import { BasicCard } from 'core/cards/basic_card';
-import { GameCardExtensions } from 'core/game/game_props';
-import { SkillLoader } from 'core/game/package_loader/loader.skills';
-import { AlcoholSkill } from 'core/skills/cards/legion_fight/alcohol';
-import { Single } from '../card';
-import type { CardSuit, RealCardId } from '../libs/card_props';
+import { BasicCard } from "@/core/cards/basic_card";
+import { GameCardExtensions } from "@/core/game/game_props";
+import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { AlcoholSkill } from "@/core/skills/cards/legion_fight/alcohol";
+import { Single } from "../card";
+import type { CardSuit, RealCardId } from "../libs/card_props";
 
 @Single
 export class Alcohol extends BasicCard {
@@ -13,10 +13,10 @@ export class Alcohol extends BasicCard {
       cardNumber,
       suit,
       1,
-      'alcohol',
-      'alcohol_description',
+      "alcohol",
+      "alcohol_description",
       GameCardExtensions.LegionFight,
-      SkillLoader.getInstance().getSkillByName('alcohol'),
+      SkillLoader.getInstance().getSkillByName("alcohol")
     );
   }
 

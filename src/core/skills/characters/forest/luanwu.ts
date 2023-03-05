@@ -1,15 +1,19 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { INFINITE_DISTANCE } from 'core/game/game_props';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill } from 'core/skills/skill';
-import { LimitSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { INFINITE_DISTANCE } from "@/core/game/game_props";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill } from "@/core/skills/skill";
+import { LimitSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@LimitSkill({ name: 'luanwu', description: 'luanwu_description' })
+@LimitSkill({ name: "luanwu", description: "luanwu_description" })
 export class LuanWu extends ActiveSkill {
   public canUse() {
     return true;
@@ -23,7 +27,11 @@ export class LuanWu extends ActiveSkill {
     return cards.length === 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return false;
   }
 
@@ -31,27 +39,35 @@ export class LuanWu extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId } = skillUseEvent;
 
     for (const target of room.getOtherPlayers(fromId)) {
       let minDistance: number = INFINITE_DISTANCE;
-      room.getOtherPlayers(target.Id).forEach(player => {
+      room.getOtherPlayers(target.Id).forEach((player) => {
         const distance = room.distanceBetween(target, player);
         if (distance < minDistance) {
           minDistance = distance;
         }
       });
-      const targets = room.getOtherPlayers(target.Id).reduce<Player[]>((targets, player) => {
-        if (room.distanceBetween(target, player) === minDistance) {
-          targets.push(player);
-        }
-        return targets;
-      }, []);
+      const targets = room
+        .getOtherPlayers(target.Id)
+        .reduce<Player[]>((targets, player) => {
+          if (room.distanceBetween(target, player) === minDistance) {
+            targets.push(player);
+          }
+          return targets;
+        }, []);
       const toIds = targets.reduce<PlayerId[]>((toIds, player) => {
         toIds.push(player.Id);
         return toIds;
@@ -63,18 +79,20 @@ export class LuanWu extends ActiveSkill {
             toId: target.Id,
             cardUserId: target.Id,
             scopedTargets: toIds,
-            cardMatcher: new CardMatcher({ generalName: ['slash'] }).toSocketPassenger(),
+            cardMatcher: new CardMatcher({
+              generalName: ["slash"],
+            }).toSocketPassenger(),
             extraUse: true,
             commonUse: true,
             conversation: TranslationPack.translationJsonPatcher(
-              'please use a {0} to player {1} to response {2}',
-              'slash',
+              "please use a {0} to player {1} to response {2}",
+              "slash",
               TranslationPack.patchPlayerInTranslation(...targets),
-              this.Name,
+              this.Name
             ).extract(),
             triggeredBySkills: [this.Name],
           },
-          target.Id,
+          target.Id
         );
 
         if (response.cardId !== undefined) {

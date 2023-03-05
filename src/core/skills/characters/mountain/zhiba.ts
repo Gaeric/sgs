@@ -1,18 +1,29 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, GameStartStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { System } from 'core/shares/libs/system';
-import { ActiveSkill, CommonSkill, LordSkill, SideEffectSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { HunZi } from './hunzi';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { AllStage, GameStartStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { System } from "@/core/shares/libs/system";
+import {
+  ActiveSkill,
+  CommonSkill,
+  LordSkill,
+  SideEffectSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { HunZi } from "./hunzi";
 
 @LordSkill
-@CommonSkill({ name: 'zhiba', description: 'zhiba_description' })
+@CommonSkill({ name: "zhiba", description: "zhiba_description" })
 export class ZhiBa extends TriggerSkill implements OnDefineReleaseTiming {
   public isAutoTrigger() {
     return true;
@@ -27,21 +38,42 @@ export class ZhiBa extends TriggerSkill implements OnDefineReleaseTiming {
   }
 
   async whenObtainingSkill(room: Room, owner: Player) {
-    room.installSideEffectSkill(System.SideEffectSkillApplierEnum.ZhiBa, ZhiBaPindianCard.Name, owner.Id);
+    room.installSideEffectSkill(
+      System.SideEffectSkillApplierEnum.ZhiBa,
+      ZhiBaPindianCard.Name,
+      owner.Id
+    );
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.GameStartEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.GameStartEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === GameStartStage.BeforeGameStart;
   }
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers>
+  ): boolean {
     return true;
   }
-  public async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     event.translationsMessage = undefined;
     return true;
   }
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
-    room.installSideEffectSkill(System.SideEffectSkillApplierEnum.ZhiBa, ZhiBaPindianCard.Name, event.fromId);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
+    room.installSideEffectSkill(
+      System.SideEffectSkillApplierEnum.ZhiBa,
+      ZhiBaPindianCard.Name,
+      event.fromId
+    );
 
     return true;
   }
@@ -53,7 +85,9 @@ export class ZhiBaPindianCard extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return (
       owner.hasUsedSkillTimes(this.Name) <
-        room.getAlivePlayersFrom().filter(player => player.hasSkill(ZhiBa.GeneralName)).length &&
+        room
+          .getAlivePlayersFrom()
+          .filter((player) => player.hasSkill(ZhiBa.GeneralName)).length &&
       owner.getCardIds(PlayerCardsArea.HandArea).length > 0
     );
   }
@@ -70,84 +104,121 @@ export class ZhiBaPindianCard extends ActiveSkill {
     return false;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return (
       room.getPlayerById(target).hasSkill(ZhiBa.GeneralName) &&
       room.canPindian(owner, target) &&
       room.Analytics.getRecordEvents<GameEventIdentifiers.SkillEffectEvent>(
-        event =>
+        (event) =>
           event.skillName === this.Name &&
           event.fromId === owner &&
           event.toIds !== undefined &&
           event.toIds?.includes(target),
         owner,
-        'phase',
+        "phase",
         undefined,
-        1,
+        1
       ).length === 0
     );
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     const toId = toIds![0];
 
-    let selectedOption: string = 'yes';
+    let selectedOption: string = "yes";
     if (room.getPlayerById(toId).hasUsedSkill(HunZi.Name)) {
-      const options: string[] = ['yes', 'no'];
+      const options: string[] = ["yes", "no"];
 
-      const askForChooseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-        options,
-        conversation: TranslationPack.translationJsonPatcher(
-          '{0}: do you agree to pindian with {1}',
-          this.Name,
-          TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-        ).extract(),
-        toId,
-        triggeredBySkills: [this.Name],
-      });
+      const askForChooseEvent =
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          {
+            options,
+            conversation: TranslationPack.translationJsonPatcher(
+              "{0}: do you agree to pindian with {1}",
+              this.Name,
+              TranslationPack.patchPlayerInTranslation(
+                room.getPlayerById(fromId)
+              )
+            ).extract(),
+            toId,
+            triggeredBySkills: [this.Name],
+          }
+        );
 
-      room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForChooseEvent, toId);
+      room.notify(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        askForChooseEvent,
+        toId
+      );
 
-      const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, toId);
-      selectedOption = response.selectedOption || 'no';
+      const response = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        toId
+      );
+      selectedOption = response.selectedOption || "no";
     }
 
-    if (selectedOption === 'yes') {
-      const { pindianCardId, pindianRecord } = await room.pindian(fromId, toIds!, this.Name);
+    if (selectedOption === "yes") {
+      const { pindianCardId, pindianRecord } = await room.pindian(
+        fromId,
+        toIds!,
+        this.Name
+      );
       if (!pindianRecord.length) {
         return false;
       }
 
       if (pindianRecord[0].winner !== fromId) {
-        const options: string[] = ['confirm', 'cancel'];
+        const options: string[] = ["confirm", "cancel"];
         const pindianCardIds = [pindianCardId!, pindianRecord[0].cardId];
 
-        const askForChooseEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-          {
-            options,
-            conversation: TranslationPack.translationJsonPatcher(
-              '{0}: do you want to obtain pindian cards: {1}',
-              this.Name,
-              TranslationPack.patchCardInTranslation(...pindianCardIds),
-            ).extract(),
-            toId,
-            triggeredBySkills: [this.Name],
-          },
+        const askForChooseEvent =
+          EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+            {
+              options,
+              conversation: TranslationPack.translationJsonPatcher(
+                "{0}: do you want to obtain pindian cards: {1}",
+                this.Name,
+                TranslationPack.patchCardInTranslation(...pindianCardIds)
+              ).extract(),
+              toId,
+              triggeredBySkills: [this.Name],
+            }
+          );
+
+        room.notify(
+          GameEventIdentifiers.AskForChoosingOptionsEvent,
+          askForChooseEvent,
+          toId
         );
 
-        room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForChooseEvent, toId);
+        const response = await room.onReceivingAsyncResponseFrom(
+          GameEventIdentifiers.AskForChoosingOptionsEvent,
+          toId
+        );
+        response.selectedOption = response.selectedOption || "confirm";
 
-        const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, toId);
-        response.selectedOption = response.selectedOption || 'confirm';
-
-        if (response.selectedOption === 'confirm') {
+        if (response.selectedOption === "confirm") {
           await room.moveCards({
-            movingCards: pindianCardIds.map(card => ({ card, fromArea: CardMoveArea.DropStack })),
+            movingCards: pindianCardIds.map((card) => ({
+              card,
+              fromArea: CardMoveArea.DropStack,
+            })),
             toId,
             toArea: CardMoveArea.HandArea,
             moveReason: CardMoveReason.ActivePrey,

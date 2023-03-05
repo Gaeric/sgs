@@ -1,11 +1,15 @@
-import { AiLibrary } from 'core/ai/ai_lib';
-import type { CardId } from 'core/cards/libs/card_props';
-import { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import type { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import type { Room } from 'core/room/room';
-import type { HanBingJianSkill } from 'core/skills';
-import { TriggerSkillTriggerClass } from '../base/trigger_skill_trigger';
+import { AiLibrary } from "@/core/ai/ai_lib";
+import type { CardId } from "@/core/cards/libs/card_props";
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import type { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import type { Room } from "@/core/room/room";
+import type { HanBingJianSkill } from "@/core/skills";
+import { TriggerSkillTriggerClass } from "../base/trigger_skill_trigger";
 
 export class HanBingJianSkillTrigger extends TriggerSkillTriggerClass<
   HanBingJianSkill,
@@ -16,13 +20,15 @@ export class HanBingJianSkillTrigger extends TriggerSkillTriggerClass<
     ai: Player,
     skill: HanBingJianSkill,
     onEvent?: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>,
-    skillInCard?: CardId,
-  ): ClientEventFinder<GameEventIdentifiers.AskForSkillUseEvent> | undefined => {
+    skillInCard?: CardId
+  ):
+    | ClientEventFinder<GameEventIdentifiers.AskForSkillUseEvent>
+    | undefined => {
     if (!onEvent) {
       return;
     }
 
-    const drunkTag = ai.getInvisibleMark('drunk');
+    const drunkTag = ai.getInvisibleMark("drunk");
 
     return drunkTag
       ? undefined
@@ -34,13 +40,19 @@ export class HanBingJianSkillTrigger extends TriggerSkillTriggerClass<
 
   onAskForChoosingCardFromPlayerEvent = (
     content: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>,
-    room: Room,
-  ): ClientEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent> | undefined => {
+    room: Room
+  ):
+    | ClientEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>
+    | undefined => {
     const ai = room.getPlayerById(content.fromId);
     const to = room.getPlayerById(content.toId);
 
-    const handCards = content.options[PlayerCardsArea.HandArea] as number | undefined;
-    const equipCards = content.options[PlayerCardsArea.EquipArea] as CardId[] | undefined;
+    const handCards = content.options[PlayerCardsArea.HandArea] as
+      | number
+      | undefined;
+    const equipCards = content.options[PlayerCardsArea.EquipArea] as
+      | CardId[]
+      | undefined;
 
     if (equipCards && equipCards.length > 0) {
       return {

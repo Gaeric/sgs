@@ -1,36 +1,42 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Jink } from 'core/cards/standard/jink';
-import { Slash } from 'core/cards/standard/slash';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ViewAsSkill } from 'core/skills/skill';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Jink } from "@/core/cards/standard/jink";
+import { Slash } from "@/core/cards/standard/slash";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ViewAsSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'std_longdan', description: 'std_longdan_description' })
+@CommonSkill({ name: "std_longdan", description: "std_longdan_description" })
 export class StdLongDan extends ViewAsSkill {
   public get RelatedCharacters(): string[] {
-    return ['tongyuan_c'];
+    return ["tongyuan_c"];
   }
 
   public audioIndex(characterName?: string): number {
-    return characterName && this.RelatedCharacters.includes(characterName) ? 1 : 2;
+    return characterName && this.RelatedCharacters.includes(characterName)
+      ? 1
+      : 2;
   }
 
-  public canViewAs(room: Room, owner: Player, selectedCards?: CardId[]): string[] {
+  public canViewAs(
+    room: Room,
+    owner: Player,
+    selectedCards?: CardId[]
+  ): string[] {
     if (!selectedCards) {
-      return ['jink', 'slash'];
+      return ["jink", "slash"];
     } else {
       const card = Sanguosha.getCardById(selectedCards[0]);
-      if (card.GeneralName === 'slash') {
-        return ['jink'];
+      if (card.GeneralName === "slash") {
+        return ["jink"];
       }
-      if (card.GeneralName === 'jink') {
-        return ['slash'];
+      if (card.GeneralName === "jink") {
+        return ["slash"];
       }
 
       return [];
@@ -40,7 +46,10 @@ export class StdLongDan extends ViewAsSkill {
   public canUse(
     room: Room,
     owner: Player,
-    event?: ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent | GameEventIdentifiers.AskForCardResponseEvent>,
+    event?: ServerEventFinder<
+      | GameEventIdentifiers.AskForCardUseEvent
+      | GameEventIdentifiers.AskForCardResponseEvent
+    >
   ) {
     const identifier = event && EventPacker.getIdentifier(event);
     if (
@@ -48,12 +57,18 @@ export class StdLongDan extends ViewAsSkill {
       identifier === GameEventIdentifiers.AskForCardResponseEvent
     ) {
       return (
-        CardMatcher.match(event!.cardMatcher, new CardMatcher({ generalName: ['slash'] })) ||
-        CardMatcher.match(event!.cardMatcher, new CardMatcher({ name: ['jink'] }))
+        CardMatcher.match(
+          event!.cardMatcher,
+          new CardMatcher({ generalName: ["slash"] })
+        ) ||
+        CardMatcher.match(
+          event!.cardMatcher,
+          new CardMatcher({ name: ["jink"] })
+        )
       );
     }
 
-    return owner.canUseCard(room, new CardMatcher({ name: ['slash'] }));
+    return owner.canUseCard(room, new CardMatcher({ name: ["slash"] }));
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -66,20 +81,26 @@ export class StdLongDan extends ViewAsSkill {
     pendingCardId: CardId,
     selectedCards: CardId[],
     containerCard?: CardId,
-    cardMatcher?: CardMatcher,
+    cardMatcher?: CardMatcher
   ): boolean {
     if (cardMatcher) {
       let canUse = false;
-      if (cardMatcher.Matcher.name?.includes('jink')) {
-        canUse = Sanguosha.getCardById(pendingCardId).GeneralName === 'slash';
-      } else if (cardMatcher.Matcher.name?.includes('slash') || cardMatcher.Matcher.generalName?.includes('slash')) {
-        canUse = Sanguosha.getCardById(pendingCardId).GeneralName === 'jink';
+      if (cardMatcher.Matcher.name?.includes("jink")) {
+        canUse = Sanguosha.getCardById(pendingCardId).GeneralName === "slash";
+      } else if (
+        cardMatcher.Matcher.name?.includes("slash") ||
+        cardMatcher.Matcher.generalName?.includes("slash")
+      ) {
+        canUse = Sanguosha.getCardById(pendingCardId).GeneralName === "jink";
       }
 
       return canUse;
     } else {
       const card = Sanguosha.getCardById(pendingCardId);
-      return card.GeneralName === 'jink' && owner.canUseCard(room, new CardMatcher({ generalName: ['slash'] }));
+      return (
+        card.GeneralName === "jink" &&
+        owner.canUseCard(room, new CardMatcher({ generalName: ["slash"] }))
+      );
     }
   }
 
@@ -89,21 +110,21 @@ export class StdLongDan extends ViewAsSkill {
 
   public viewAs(selectedCards: CardId[]) {
     const card = Sanguosha.getCardById(selectedCards[0]);
-    if (card.GeneralName === 'slash') {
+    if (card.GeneralName === "slash") {
       return VirtualCard.create<Jink>(
         {
-          cardName: 'jink',
+          cardName: "jink",
           bySkill: this.Name,
         },
-        selectedCards,
+        selectedCards
       );
     } else {
       return VirtualCard.create<Slash>(
         {
-          cardName: 'slash',
+          cardName: "slash",
           bySkill: this.Name,
         },
-        selectedCards,
+        selectedCards
       );
     }
   }

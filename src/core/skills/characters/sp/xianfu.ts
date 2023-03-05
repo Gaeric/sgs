@@ -1,22 +1,39 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { DamageType } from 'core/game/game_props';
-import { AllStage, DamageEffectStage, GameBeginStage, RecoverEffectStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, CompulsorySkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { DamageType } from "@/core/game/game_props";
+import {
+  AllStage,
+  DamageEffectStage,
+  GameBeginStage,
+  RecoverEffectStage,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import {
+  CommonSkill,
+  CompulsorySkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'xianfu', description: 'xianfu_description' })
+@CompulsorySkill({ name: "xianfu", description: "xianfu_description" })
 export class XianFu extends TriggerSkill {
-  public static readonly XianFuPlayer = 'xianfu_player';
+  public static readonly XianFuPlayer = "xianfu_player";
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.GameBeginEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.GameBeginEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === GameBeginStage.AfterGameBegan;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.GameBeginEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.GameBeginEvent>
+  ): boolean {
     return true;
   }
 
@@ -24,25 +41,42 @@ export class XianFu extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const others = room.getOtherPlayers(event.fromId).map(player => player.Id);
-    const response = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
-      GameEventIdentifiers.AskForChoosingPlayerEvent,
-      {
-        players: others,
-        toId: event.fromId,
-        requiredAmount: 1,
-        conversation: 'xianfu: please choose another player to be your ‘Xian Fu’ player',
-        triggeredBySkills: [this.Name],
-      },
-      event.fromId,
-      true,
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const others = room
+      .getOtherPlayers(event.fromId)
+      .map((player) => player.Id);
+    const response =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+        GameEventIdentifiers.AskForChoosingPlayerEvent,
+        {
+          players: others,
+          toId: event.fromId,
+          requiredAmount: 1,
+          conversation:
+            "xianfu: please choose another player to be your ‘Xian Fu’ player",
+          triggeredBySkills: [this.Name],
+        },
+        event.fromId,
+        true
+      );
+
+    response.selectedPlayers = response.selectedPlayers || [
+      others[Math.floor(Math.random() * others.length)],
+    ];
+
+    room
+      .getPlayerById(event.fromId)
+      .setFlag<PlayerId>(this.Name, response.selectedPlayers[0]);
+    room.setFlag<boolean>(
+      response.selectedPlayers[0],
+      XianFu.XianFuPlayer,
+      false,
+      this.Name,
+      [event.fromId]
     );
-
-    response.selectedPlayers = response.selectedPlayers || [others[Math.floor(Math.random() * others.length)]];
-
-    room.getPlayerById(event.fromId).setFlag<PlayerId>(this.Name, response.selectedPlayers[0]);
-    room.setFlag<boolean>(response.selectedPlayers[0], XianFu.XianFuPlayer, false, this.Name, [event.fromId]);
 
     return true;
   }
@@ -57,23 +91,35 @@ export class XianFuChained extends TriggerSkill {
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.RecoverEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.RecoverEvent
+    >,
+    stage?: AllStage
   ): boolean {
-    return stage === DamageEffectStage.AfterDamagedEffect || stage === RecoverEffectStage.AfterRecoverEffect;
+    return (
+      stage === DamageEffectStage.AfterDamagedEffect ||
+      stage === RecoverEffectStage.AfterRecoverEffect
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.RecoverEvent>,
+    content: ServerEventFinder<
+      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.RecoverEvent
+    >
   ): boolean {
     return (
       !(
-        EventPacker.getIdentifier(content) === GameEventIdentifiers.DamageEvent && room.getPlayerById(content.toId).Dead
+        EventPacker.getIdentifier(content) ===
+          GameEventIdentifiers.DamageEvent &&
+        room.getPlayerById(content.toId).Dead
       ) &&
       owner.getFlag<PlayerId>(this.GeneralName) === content.toId &&
-      !(EventPacker.getIdentifier(content) === GameEventIdentifiers.RecoverEvent && owner.LostHp < 1)
+      !(
+        EventPacker.getIdentifier(content) ===
+          GameEventIdentifiers.RecoverEvent && owner.LostHp < 1
+      )
     );
   }
 
@@ -81,27 +127,39 @@ export class XianFuChained extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.DamageEvent | GameEventIdentifiers.RecoverEvent
     >;
     const identifier = EventPacker.getIdentifier(unknownEvent);
 
     if (!room.getFlag<boolean>(unknownEvent.toId, XianFu.XianFuPlayer)) {
-      room.setFlag<boolean>(unknownEvent.toId, XianFu.XianFuPlayer, true, this.GeneralName);
+      room.setFlag<boolean>(
+        unknownEvent.toId,
+        XianFu.XianFuPlayer,
+        true,
+        this.GeneralName
+      );
     }
 
     if (identifier === GameEventIdentifiers.DamageEvent) {
       await room.damage({
         toId: event.fromId,
-        damage: (unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>).damage,
+        damage: (
+          unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>
+        ).damage,
         damageType: DamageType.Normal,
         triggeredBySkills: [this.Name],
       });
     } else {
       await room.recover({
         toId: event.fromId,
-        recoveredHp: (unknownEvent as ServerEventFinder<GameEventIdentifiers.RecoverEvent>).recoveredHp,
+        recoveredHp: (
+          unknownEvent as ServerEventFinder<GameEventIdentifiers.RecoverEvent>
+        ).recoveredHp,
         recoverBy: event.fromId,
       });
     }

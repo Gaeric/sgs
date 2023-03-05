@@ -1,49 +1,70 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PlayerDyingStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CircleSkill, CommonSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { VirtualCard } from "@/core/cards/card";
+import { CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CircleSkill, CommonSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
 @CircleSkill
-@CommonSkill({ name: 'chenqing', description: 'chenqing_description' })
+@CommonSkill({ name: "chenqing", description: "chenqing_description" })
 export class ChenQing extends TriggerSkill {
   public isAutoTrigger(): boolean {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PlayerDyingStage.PlayerDying;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
+  ): boolean {
     return (
       !owner.hasUsedSkill(this.Name) &&
       room.getPlayerById(content.dying).Hp < 1 &&
-      room.getOtherPlayers(owner.Id).find(player => player.Id !== content.dying) !== undefined
+      room
+        .getOtherPlayers(owner.Id)
+        .find((player) => player.Id !== content.dying) !== undefined
     );
   }
 
-  public async beforeUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
-    const response = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
-      GameEventIdentifiers.AskForChoosingPlayerEvent,
-      {
-        players: room
-          .getOtherPlayers((event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>).dying)
-          .filter(player => player.Id !== event.fromId)
-          .map(player => player.Id),
-        toId: event.fromId,
-        requiredAmount: 1,
-        conversation: 'do you want to choose a target to use chenqing?',
-        triggeredBySkills: [this.Name],
-      },
-      event.fromId,
-    );
+  public async beforeUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
+    const response =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+        GameEventIdentifiers.AskForChoosingPlayerEvent,
+        {
+          players: room
+            .getOtherPlayers(
+              (
+                event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
+              ).dying
+            )
+            .filter((player) => player.Id !== event.fromId)
+            .map((player) => player.Id),
+          toId: event.fromId,
+          requiredAmount: 1,
+          conversation: "do you want to choose a target to use chenqing?",
+          triggeredBySkills: [this.Name],
+        },
+        event.fromId
+      );
 
     if (response.selectedPlayers && response.selectedPlayers.length > 0) {
       event.toIds = response.selectedPlayers;
@@ -57,15 +78,20 @@ export class ChenQing extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { toIds } = event;
     if (!toIds) {
       return false;
     }
 
-    await room.drawCards(4, toIds[0], 'top', event.fromId, this.Name);
+    await room.drawCards(4, toIds[0], "top", event.fromId, this.Name);
 
-    const dying = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>).dying;
+    const dying = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PlayerDyingEvent>
+    ).dying;
     const response = await room.askForCardDrop(
       toIds[0],
       4,
@@ -74,19 +100,28 @@ export class ChenQing extends TriggerSkill {
       undefined,
       this.Name,
       TranslationPack.translationJsonPatcher(
-        '{0}: please discard 4 cards, if these cards have different suit between each other, you use a virtual peach to {1}?',
+        "{0}: please discard 4 cards, if these cards have different suit between each other, you use a virtual peach to {1}?",
         this.Name,
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(dying)),
-      ).extract(),
+        TranslationPack.patchPlayerInTranslation(room.getPlayerById(dying))
+      ).extract()
     );
 
     if (response.droppedCards.length > 0) {
-      await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, toIds[0], toIds[0], this.Name);
+      await room.dropCards(
+        CardMoveReason.SelfDrop,
+        response.droppedCards,
+        toIds[0],
+        toIds[0],
+        this.Name
+      );
       if (response.droppedCards.length < 4) {
         return false;
       }
 
-      const virtualPeach = VirtualCard.create({ cardName: 'peach', bySkill: this.Name }).Id;
+      const virtualPeach = VirtualCard.create({
+        cardName: "peach",
+        bySkill: this.Name,
+      }).Id;
 
       const suits: CardSuit[] = [];
       for (const cardId of response.droppedCards) {
@@ -100,7 +135,9 @@ export class ChenQing extends TriggerSkill {
 
       if (
         suits.length === response.droppedCards.length &&
-        room.getPlayerById(toIds[0]).canUseCardTo(room, virtualPeach, dying, true)
+        room
+          .getPlayerById(toIds[0])
+          .canUseCardTo(room, virtualPeach, dying, true)
       ) {
         await room.useCard({
           fromId: toIds[0],

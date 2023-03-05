@@ -1,25 +1,41 @@
-import { JieYueSkillTrigger } from 'core/ai/skills/characters/yijiang2011/jieyue';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Algorithm } from 'core/shares/libs/algorithm';
-import { System } from 'core/shares/libs/system';
-import { TriggerSkill } from 'core/skills/skill';
-import { AI, CommonSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { JieYueSkillTrigger } from "@/core/ai/skills/characters/yijiang2011/jieyue";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Algorithm } from "@/core/shares/libs/algorithm";
+import { System } from "@/core/shares/libs/system";
+import { TriggerSkill } from "@/core/skills/skill";
+import { AI, CommonSkill } from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
 @AI(JieYueSkillTrigger)
-@CommonSkill({ name: 'jieyue', description: 'jieyue_description' })
+@CommonSkill({ name: "jieyue", description: "jieyue_description" })
 export class JieYue extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>, stage?: AllStage) {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>) {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+  ) {
     return (
       owner.Id === content.playerId &&
       content.toStage === PlayerPhaseStages.FinishStageStart &&
@@ -47,12 +63,18 @@ export class JieYue extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const yujinId = skillUseEvent.fromId;
     const yujin = room.getPlayerById(yujinId);
     const toId = skillUseEvent.toIds![0];
     await room.moveCards({
-      movingCards: skillUseEvent.cardIds!.map(card => ({ card, fromArea: yujin.cardFrom(card) })),
+      movingCards: skillUseEvent.cardIds!.map((card) => ({
+        card,
+        fromArea: yujin.cardFrom(card),
+      })),
       fromId: yujinId,
       toArea: CardMoveArea.HandArea,
       toId,
@@ -65,23 +87,33 @@ export class JieYue extends TriggerSkill {
     if (to.getPlayerCards().length <= 0) {
       await room.drawCards(3, yujinId, undefined, toId, this.Name);
     } else {
-      const askForChoice = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>({
-        options: ['option-one', 'option-two'],
-        askedBy: yujinId,
-        toId,
-        conversation: TranslationPack.translationJsonPatcher(
-          'jieyue: please choose jieyue options',
-          this.Name,
-          TranslationPack.patchPlayerInTranslation(yujin),
-        ).extract(),
-        triggeredBySkills: [this.Name],
-      });
+      const askForChoice =
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          {
+            options: ["option-one", "option-two"],
+            askedBy: yujinId,
+            toId,
+            conversation: TranslationPack.translationJsonPatcher(
+              "jieyue: please choose jieyue options",
+              this.Name,
+              TranslationPack.patchPlayerInTranslation(yujin)
+            ).extract(),
+            triggeredBySkills: [this.Name],
+          }
+        );
 
-      room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForChoice, toId);
+      room.notify(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        askForChoice,
+        toId
+      );
 
-      const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, toId);
+      const response = await room.onReceivingAsyncResponseFrom(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        toId
+      );
 
-      if (response.selectedOption === 'option-one') {
+      if (response.selectedOption === "option-one") {
         const customCardFields: {
           [x: number]: CardId[];
         } = {};
@@ -98,20 +130,26 @@ export class JieYue extends TriggerSkill {
         }
 
         const askForDiscards =
-          EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardWithConditionsEvent>({
-            toId,
-            customCardFields,
-            cardFilter: System.AskForChoosingCardEventFilter.JieYue,
-            involvedTargets: [toId],
-            customTitle: this.Name,
-            triggeredBySkills: [this.Name],
-          });
+          EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardWithConditionsEvent>(
+            {
+              toId,
+              customCardFields,
+              cardFilter: System.AskForChoosingCardEventFilter.JieYue,
+              involvedTargets: [toId],
+              customTitle: this.Name,
+              triggeredBySkills: [this.Name],
+            }
+          );
 
-        room.notify(GameEventIdentifiers.AskForChoosingCardWithConditionsEvent, askForDiscards, toId);
+        room.notify(
+          GameEventIdentifiers.AskForChoosingCardWithConditionsEvent,
+          askForDiscards,
+          toId
+        );
 
         const { selectedCards } = await room.onReceivingAsyncResponseFrom(
           GameEventIdentifiers.AskForChoosingCardWithConditionsEvent,
-          toId,
+          toId
         );
 
         let discards: CardId[];
@@ -121,12 +159,20 @@ export class JieYue extends TriggerSkill {
             Algorithm.randomPick(equipCards.length - 1, equipCards)[0],
           ];
         } else {
-          discards = to.getPlayerCards().filter(card => !selectedCards.includes(card));
+          discards = to
+            .getPlayerCards()
+            .filter((card) => !selectedCards.includes(card));
         }
 
-        discards = discards.filter(id => room.canDropCard(toId, id));
+        discards = discards.filter((id) => room.canDropCard(toId, id));
         if (discards.length > 0) {
-          await room.dropCards(CardMoveReason.SelfDrop, discards, toId, toId, this.Name);
+          await room.dropCards(
+            CardMoveReason.SelfDrop,
+            discards,
+            toId,
+            toId,
+            this.Name
+          );
         }
       } else {
         await room.drawCards(3, yujinId, undefined, toId, this.Name);

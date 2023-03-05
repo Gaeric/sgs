@@ -1,18 +1,24 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage, PhaseChangeStage, PlayerPhase, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  DamageEffectStage,
+  PhaseChangeStage,
+  PlayerPhase,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CommonSkill,
@@ -21,12 +27,12 @@ import {
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { UncompulsoryBlocker } from './uncompulsory_blocker';
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { UncompulsoryBlocker } from "./uncompulsory_blocker";
 
-@CommonSkill({ name: 'yijue', description: 'yijue_description' })
+@CommonSkill({ name: "yijue", description: "yijue_description" })
 export class YiJue extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name);
@@ -41,47 +47,69 @@ export class YiJue extends ActiveSkill {
   }
 
   isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
-    return owner !== target && room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      owner !== target &&
+      room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   isAvailableCard(owner: PlayerId, room: Room, cardId: CardId): boolean {
     return room.canDropCard(owner, cardId);
   }
 
-  async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds, cardIds } = skillUseEvent;
     const from = room.getPlayerById(fromId);
     const to = room.getPlayerById(toIds![0]);
 
-    await room.dropCards(CardMoveReason.SelfDrop, cardIds!, fromId, fromId, this.Name);
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      cardIds!,
+      fromId,
+      fromId,
+      this.Name
+    );
 
-    const askForDisplayCardEvent = EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardDisplayEvent>({
-      cardAmount: 1,
-      toId: to.Id,
-      triggeredBySkills: [this.Name],
-      conversation: TranslationPack.translationJsonPatcher(
-        '{0} used skill {1} to you, please present a hand card',
-        TranslationPack.patchPlayerInTranslation(from),
-        this.Name,
-      ).extract(),
-    });
-    room.notify(GameEventIdentifiers.AskForCardDisplayEvent, askForDisplayCardEvent, to.Id);
+    const askForDisplayCardEvent =
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForCardDisplayEvent>(
+        {
+          cardAmount: 1,
+          toId: to.Id,
+          triggeredBySkills: [this.Name],
+          conversation: TranslationPack.translationJsonPatcher(
+            "{0} used skill {1} to you, please present a hand card",
+            TranslationPack.patchPlayerInTranslation(from),
+            this.Name
+          ).extract(),
+        }
+      );
+    room.notify(
+      GameEventIdentifiers.AskForCardDisplayEvent,
+      askForDisplayCardEvent,
+      to.Id
+    );
     const { selectedCards } = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForCardDisplayEvent,
-      to.Id,
+      to.Id
     );
 
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, {
       displayCards: selectedCards,
       translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} display hand card {1} from {2}',
+        "{0} display hand card {1} from {2}",
         TranslationPack.patchPlayerInTranslation(from),
         TranslationPack.patchCardInTranslation(...selectedCards),
-        TranslationPack.patchPlayerInTranslation(to),
+        TranslationPack.patchPlayerInTranslation(to)
       ).extract(),
     });
 
@@ -89,10 +117,14 @@ export class YiJue extends ActiveSkill {
     if (card.isBlack()) {
       await room.obtainSkill(to.Id, YiJueBlocker.Name);
       room.setFlag(to.Id, this.Name, true, this.Name);
-      to.hasShadowSkill(UncompulsoryBlocker.Name) || (await room.obtainSkill(to.Id, UncompulsoryBlocker.Name));
+      to.hasShadowSkill(UncompulsoryBlocker.Name) ||
+        (await room.obtainSkill(to.Id, UncompulsoryBlocker.Name));
     } else {
       await room.moveCards({
-        movingCards: selectedCards.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+        movingCards: selectedCards.map((card) => ({
+          card,
+          fromArea: CardMoveArea.HandArea,
+        })),
         fromId: to.Id,
         toArea: CardMoveArea.HandArea,
         toId: from.Id,
@@ -102,22 +134,27 @@ export class YiJue extends ActiveSkill {
       });
 
       if (to.MaxHp > to.Hp) {
-        const askForChooseEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-          options: ['yijue:recover', 'yijue:cancel'],
-          toId: from.Id,
-          conversation: TranslationPack.translationJsonPatcher(
-            'recover {0} hp for {1}',
-            1,
-            TranslationPack.patchPlayerInTranslation(to),
-          ).extract(),
-          triggeredBySkills: [this.Name],
-        };
-        room.notify(GameEventIdentifiers.AskForChoosingOptionsEvent, askForChooseEvent, from.Id);
+        const askForChooseEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+          {
+            options: ["yijue:recover", "yijue:cancel"],
+            toId: from.Id,
+            conversation: TranslationPack.translationJsonPatcher(
+              "recover {0} hp for {1}",
+              1,
+              TranslationPack.patchPlayerInTranslation(to)
+            ).extract(),
+            triggeredBySkills: [this.Name],
+          };
+        room.notify(
+          GameEventIdentifiers.AskForChoosingOptionsEvent,
+          askForChooseEvent,
+          from.Id
+        );
         const { selectedOption } = await room.onReceivingAsyncResponseFrom(
           GameEventIdentifiers.AskForChoosingOptionsEvent,
-          from.Id,
+          from.Id
         );
-        if (selectedOption === 'yijue:recover') {
+        if (selectedOption === "yijue:recover") {
           await room.recover({
             recoveredHp: 1,
             recoverBy: from.Id,
@@ -139,47 +176,71 @@ export class YiJueShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public getPriority() {
     return StagePriority.High;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage) {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ) {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
   isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ) {
-    return stage === DamageEffectStage.DamageEffect || stage === PhaseChangeStage.PhaseChanged;
+    return (
+      stage === DamageEffectStage.DamageEffect ||
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    content: ServerEventFinder<
+      GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ) {
     const identifier = EventPacker.getIdentifier(content);
     if (identifier === GameEventIdentifiers.DamageEvent) {
       content = content as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
-      return room.getPlayerById(content.toId).getFlag<boolean>(this.GeneralName) && owner.Id === content.fromId;
+      return (
+        room.getPlayerById(content.toId).getFlag<boolean>(this.GeneralName) &&
+        owner.Id === content.fromId
+      );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      content = content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return owner.Id === content.fromPlayer && content.from === PlayerPhase.PhaseFinish;
+      content =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        owner.Id === content.fromPlayer &&
+        content.from === PlayerPhase.PhaseFinish
+      );
     }
     return false;
   }
@@ -188,24 +249,32 @@ export class YiJueShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent, fromId } = skillUseEvent;
     const identifier = EventPacker.getIdentifier(
-      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent>,
+      triggeredOnEvent as ServerEventFinder<
+        GameEventIdentifiers.DamageEvent | GameEventIdentifiers.PhaseChangeEvent
+      >
     );
     if (identifier === GameEventIdentifiers.DamageEvent) {
-      const content = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const content =
+        triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       const card = content.cardIds && Sanguosha.getCardById(content.cardIds[0]);
-      if (card?.GeneralName === 'slash' && card.Suit === CardSuit.Heart) {
+      if (card?.GeneralName === "slash" && card.Suit === CardSuit.Heart) {
         content.damage++;
         content.messages = content.messages || [];
         content.messages.push(
           TranslationPack.translationJsonPatcher(
-            '{0} used skill {1}, damage increases to {2}',
-            TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+            "{0} used skill {1}, damage increases to {2}",
+            TranslationPack.patchPlayerInTranslation(
+              room.getPlayerById(fromId)
+            ),
             this.Name,
-            content.damage,
-          ).toString(),
+            content.damage
+          ).toString()
         );
       }
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
@@ -214,7 +283,8 @@ export class YiJueShadow extends TriggerSkill implements OnDefineReleaseTiming {
         if (player.hasSkill(YiJueBlocker.Name)) {
           await room.loseSkill(player.Id, YiJueBlocker.Name);
         }
-        player.hasShadowSkill(UncompulsoryBlocker.Name) && (await room.loseSkill(player.Id, UncompulsoryBlocker.Name));
+        player.hasShadowSkill(UncompulsoryBlocker.Name) &&
+          (await room.loseSkill(player.Id, UncompulsoryBlocker.Name));
       }
     }
     return true;
@@ -223,7 +293,10 @@ export class YiJueShadow extends TriggerSkill implements OnDefineReleaseTiming {
 
 @ShadowSkill
 @PersistentSkill()
-@CompulsorySkill({ name: 'shadowYijueBlocker', description: 'shadowYijueBlocker_description' })
+@CompulsorySkill({
+  name: "shadowYijueBlocker",
+  description: "shadowYijueBlocker_description",
+})
 export class YiJueBlocker extends FilterSkill {
   canUseCard(cardId: CardId | CardMatcher, room: Room, owner: PlayerId) {
     return cardId instanceof CardMatcher

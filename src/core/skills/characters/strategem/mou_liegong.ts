@@ -1,43 +1,68 @@
-import { Card, CardType, VirtualCard } from 'core/cards/card';
-import { CardId, CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AimStage, AllStage, CardUseStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Algorithm } from 'core/shares/libs/algorithm';
-import { Functional } from 'core/shares/libs/functional';
-import { TransformSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { Card, CardType, VirtualCard } from "@/core/cards/card";
+import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AimStage,
+  AllStage,
+  CardUseStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Algorithm } from "@/core/shares/libs/algorithm";
+import { Functional } from "@/core/shares/libs/functional";
+import { TransformSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'mou_liegong', description: 'mou_liegong_description' })
+@CommonSkill({ name: "mou_liegong", description: "mou_liegong_description" })
 export class MouLieGong extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === AimStage.AfterAim;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.AimEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>
+  ): boolean {
     return (
       event.fromId === owner.Id &&
       !!owner.getFlag<CardSuit[]>(this.Name) &&
       owner.getFlag<CardSuit[]>(this.Name).length > 0 &&
-      Sanguosha.getCardById(event.byCardId).GeneralName === 'slash'
+      Sanguosha.getCardById(event.byCardId).GeneralName === "slash"
     );
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.AimEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.AimEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to use this skill to {1} ?',
+      "{0}: do you want to use this skill to {1} ?",
       this.Name,
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.toId)),
+      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.toId))
     ).extract();
   }
 
@@ -45,22 +70,30 @@ export class MouLieGong extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const aimEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const aimEvent =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>;
 
-    const mouLiegongSuits = room.getFlag<CardSuit[]>(event.fromId, this.Name) || [];
+    const mouLiegongSuits =
+      room.getFlag<CardSuit[]>(event.fromId, this.Name) || [];
     if (mouLiegongSuits.length > 1) {
-      const displayCards = room.getCards(mouLiegongSuits.length - 1, 'top');
-      const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-        displayCards,
-        fromId: event.fromId,
-        translationsMessage: TranslationPack.translationJsonPatcher(
-          '{0} used skill {1}, display cards: {2}',
-          TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.fromId!)),
-          this.Name,
-          TranslationPack.patchCardInTranslation(...displayCards),
-        ).extract(),
-      };
+      const displayCards = room.getCards(mouLiegongSuits.length - 1, "top");
+      const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+        {
+          displayCards,
+          fromId: event.fromId,
+          translationsMessage: TranslationPack.translationJsonPatcher(
+            "{0} used skill {1}, display cards: {2}",
+            TranslationPack.patchPlayerInTranslation(
+              room.getPlayerById(event.fromId!)
+            ),
+            this.Name,
+            TranslationPack.patchCardInTranslation(...displayCards)
+          ).extract(),
+        };
       room.broadcast(GameEventIdentifiers.CardDisplayEvent, cardDisplayEvent);
 
       const numberOfSameSuits = displayCards.reduce<number>((sum, cardId) => {
@@ -70,17 +103,24 @@ export class MouLieGong extends TriggerSkill {
       }, 0);
 
       await room.moveCards({
-        movingCards: displayCards.map(card => ({ card, fromArea: CardMoveArea.ProcessingArea })),
+        movingCards: displayCards.map((card) => ({
+          card,
+          fromArea: CardMoveArea.ProcessingArea,
+        })),
         moveReason: CardMoveReason.PlaceToDropStack,
         toArea: CardMoveArea.DropStack,
         hideBroadcast: true,
         movedByReason: this.Name,
       });
 
-      aimEvent.additionalDamage = (aimEvent.additionalDamage || 0) + numberOfSameSuits;
+      aimEvent.additionalDamage =
+        (aimEvent.additionalDamage || 0) + numberOfSameSuits;
     }
 
-    EventPacker.addMiddleware({ tag: this.Name, data: mouLiegongSuits }, aimEvent);
+    EventPacker.addMiddleware(
+      { tag: this.Name, data: mouLiegongSuits },
+      aimEvent
+    );
 
     return true;
   }
@@ -93,27 +133,36 @@ export class MouLieGongShadow extends TriggerSkill {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.CardUsing || stage === AimStage.AfterAimmed;
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.AimEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.AimEvent
+    >
   ): boolean {
     const mouLiegongSuits = owner.getFlag<CardSuit[]>(this.GeneralName) || [];
 
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       return (
         cardUseEvent.fromId === owner.Id &&
         Sanguosha.getCardById(cardUseEvent.cardId).Suit !== CardSuit.NoSuit &&
-        !mouLiegongSuits.includes(Sanguosha.getCardById(cardUseEvent.cardId).Suit)
+        !mouLiegongSuits.includes(
+          Sanguosha.getCardById(cardUseEvent.cardId).Suit
+        )
       );
     } else if (identifier === GameEventIdentifiers.AimEvent) {
-      const aimEvent = event as ServerEventFinder<GameEventIdentifiers.AimEvent>;
+      const aimEvent =
+        event as ServerEventFinder<GameEventIdentifiers.AimEvent>;
       return (
         aimEvent.toId === owner.Id &&
         aimEvent.fromId !== owner.Id &&
@@ -129,27 +178,36 @@ export class MouLieGongShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const mouLiegongSuits = room.getFlag<CardSuit[]>(event.fromId, this.GeneralName) || [];
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const mouLiegongSuits =
+      room.getFlag<CardSuit[]>(event.fromId, this.GeneralName) || [];
     mouLiegongSuits.push(
       Sanguosha.getCardById(
-        EventPacker.getIdentifier(event.triggeredOnEvent!) === GameEventIdentifiers.CardUseEvent
-          ? (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>).cardId
-          : (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>).byCardId,
-      ).Suit,
+        EventPacker.getIdentifier(event.triggeredOnEvent!) ===
+          GameEventIdentifiers.CardUseEvent
+          ? (
+              event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+            ).cardId
+          : (
+              event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.AimEvent>
+            ).byCardId
+      ).Suit
     );
 
-    let text = '{0}[';
+    let text = "{0}[";
     for (const suit of mouLiegongSuits) {
       text += Functional.getCardSuitCharText(suit);
     }
-    text += ']';
+    text += "]";
 
     room.setFlag<CardSuit[]>(
       event.fromId,
       this.GeneralName,
       mouLiegongSuits,
-      TranslationPack.translationJsonPatcher(text, this.GeneralName).toString(),
+      TranslationPack.translationJsonPatcher(text, this.GeneralName).toString()
     );
 
     return true;
@@ -157,14 +215,20 @@ export class MouLieGongShadow extends TriggerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: MouLieGongShadow.Name, description: MouLieGongShadow.Description })
-export class MouLieGongTransform extends TransformSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: MouLieGongShadow.Name,
+  description: MouLieGongShadow.Description,
+})
+export class MouLieGongTransform
+  extends TransformSkill
+  implements OnDefineReleaseTiming
+{
   async whenObtainingSkill(room: Room, owner: Player) {
     if (owner.getEquipment(CardType.Weapon)) {
       return;
     }
 
-    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map(cardId => {
+    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map((cardId) => {
       if (this.canTransform(owner, cardId, PlayerCardsArea.HandArea)) {
         return this.forceToTransformCardTo(cardId).Id;
       }
@@ -183,7 +247,7 @@ export class MouLieGongTransform extends TransformSkill implements OnDefineRelea
   }
 
   async whenLosingSkill(room: Room, owner: Player) {
-    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map(cardId => {
+    const cards = owner.getCardIds(PlayerCardsArea.HandArea).map((cardId) => {
       if (!Card.isVirtualCardId(cardId)) {
         return cardId;
       }
@@ -199,46 +263,62 @@ export class MouLieGongTransform extends TransformSkill implements OnDefineRelea
     owner.setupCards(PlayerCardsArea.HandArea, cards);
   }
 
-  public canTransform(owner: Player, cardId: CardId, area: PlayerCardsArea.HandArea): boolean {
+  public canTransform(
+    owner: Player,
+    cardId: CardId,
+    area: PlayerCardsArea.HandArea
+  ): boolean {
     if (owner.getEquipment(CardType.Weapon)) {
       return false;
     }
 
     const card = Sanguosha.getCardById(cardId);
-    return card.GeneralName === 'slash' && card.Name !== 'slash';
+    return card.GeneralName === "slash" && card.Name !== "slash";
   }
 
   public forceToTransformCardTo(cardId: CardId): VirtualCard {
     return VirtualCard.create(
       {
-        cardName: 'slash',
+        cardName: "slash",
         bySkill: this.GeneralName,
       },
-      [cardId],
+      [cardId]
     );
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: MouLieGongTransform.Name, description: MouLieGongTransform.Description })
-export class MouLieGongHandler extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: MouLieGongTransform.Name,
+  description: MouLieGongTransform.Description,
+})
+export class MouLieGongHandler
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseBegin && stage === PhaseChangeStage.BeforePhaseChange;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseBegin &&
+      stage === PhaseChangeStage.BeforePhaseChange
+    );
   }
 
   public afterDead(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseBegin && stage === PhaseChangeStage.BeforePhaseChange;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseBegin &&
+      stage === PhaseChangeStage.BeforePhaseChange
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -249,9 +329,13 @@ export class MouLieGongHandler extends TriggerSkill implements OnDefineReleaseTi
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return (
-      EventPacker.getIdentifier(event) === GameEventIdentifiers.AskForCardUseEvent ||
+      EventPacker.getIdentifier(event) ===
+        GameEventIdentifiers.AskForCardUseEvent ||
       stage === CardUseStage.CardUseFinishedEffect
     );
   }
@@ -259,22 +343,34 @@ export class MouLieGongHandler extends TriggerSkill implements OnDefineReleaseTi
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent | GameEventIdentifiers.CardUseEvent>,
+    event: ServerEventFinder<
+      | GameEventIdentifiers.AskForCardUseEvent
+      | GameEventIdentifiers.CardUseEvent
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.AskForCardUseEvent) {
-      const askForCardUseEvent = event as ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>;
+      const askForCardUseEvent =
+        event as ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>;
       const cardEffectEvent = askForCardUseEvent.triggeredOnEvent;
       return (
         !!cardEffectEvent &&
-        EventPacker.getIdentifier(cardEffectEvent) === GameEventIdentifiers.CardEffectEvent &&
-        !!EventPacker.getMiddleware<CardSuit[]>(this.GeneralName, cardEffectEvent)
+        EventPacker.getIdentifier(cardEffectEvent) ===
+          GameEventIdentifiers.CardEffectEvent &&
+        !!EventPacker.getMiddleware<CardSuit[]>(
+          this.GeneralName,
+          cardEffectEvent
+        )
       );
     } else if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       return (
         cardUseEvent.fromId === owner.Id &&
-        !!EventPacker.getMiddleware<CardSuit[]>(this.GeneralName, cardUseEvent) &&
+        !!EventPacker.getMiddleware<CardSuit[]>(
+          this.GeneralName,
+          cardUseEvent
+        ) &&
         !!owner.getFlag<CardSuit[]>(this.GeneralName)
       );
     }
@@ -286,17 +382,36 @@ export class MouLieGongHandler extends TriggerSkill implements OnDefineReleaseTi
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
-      GameEventIdentifiers.AskForCardUseEvent | GameEventIdentifiers.CardUseEvent
+      | GameEventIdentifiers.AskForCardUseEvent
+      | GameEventIdentifiers.CardUseEvent
     >;
-    if (EventPacker.getIdentifier(unknownEvent) === GameEventIdentifiers.AskForCardUseEvent) {
-      const askForCardUseEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>;
+    if (
+      EventPacker.getIdentifier(unknownEvent) ===
+      GameEventIdentifiers.AskForCardUseEvent
+    ) {
+      const askForCardUseEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>;
       const availableSuits = Algorithm.unique(
-        [CardSuit.Spade, CardSuit.Club, CardSuit.Diamond, CardSuit.Heart, CardSuit.NoSuit],
-        EventPacker.getMiddleware<CardSuit[]>(this.GeneralName, askForCardUseEvent.triggeredOnEvent!)!,
+        [
+          CardSuit.Spade,
+          CardSuit.Club,
+          CardSuit.Diamond,
+          CardSuit.Heart,
+          CardSuit.NoSuit,
+        ],
+        EventPacker.getMiddleware<CardSuit[]>(
+          this.GeneralName,
+          askForCardUseEvent.triggeredOnEvent!
+        )!
       );
-      askForCardUseEvent.cardMatcher.suit = (askForCardUseEvent.cardMatcher.suit || []).concat(...availableSuits);
+      askForCardUseEvent.cardMatcher.suit = (
+        askForCardUseEvent.cardMatcher.suit || []
+      ).concat(...availableSuits);
     } else {
       room.removeFlag(event.fromId, this.GeneralName);
     }

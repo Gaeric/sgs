@@ -1,29 +1,47 @@
-import { CardType } from 'core/cards/card';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardMoveStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import { CardType } from "@/core/cards/card";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'tianren', description: 'tianren_description' })
+@CompulsorySkill({ name: "tianren", description: "tianren_description" })
 export class TianRen extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardMoveStage.AfterCardMoved;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>
+  ): boolean {
     return (
-      content.infos.find(info => {
-        if (info.moveReason === CardMoveReason.CardUse || info.toArea !== CardMoveArea.DropStack) {
+      content.infos.find((info) => {
+        if (
+          info.moveReason === CardMoveReason.CardUse ||
+          info.toArea !== CardMoveArea.DropStack
+        ) {
           return false;
         }
 
-        return info.movingCards.find(move => {
+        return info.movingCards.find((move) => {
           const card = Sanguosha.getCardById(move.card);
-          return card.is(CardType.Basic) || (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick));
+          return (
+            card.is(CardType.Basic) ||
+            (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick))
+          );
         });
       }) !== undefined
     );
@@ -33,15 +51,22 @@ export class TianRen extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const content = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const content =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
     const player = room.getPlayerById(event.fromId);
     let coundMatchedCards = 0;
 
     for (const info of content.infos) {
-      coundMatchedCards += info.movingCards.filter(move => {
+      coundMatchedCards += info.movingCards.filter((move) => {
         const card = Sanguosha.getCardById(move.card);
-        return card.is(CardType.Basic) || (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick));
+        return (
+          card.is(CardType.Basic) ||
+          (card.is(CardType.Trick) && !card.is(CardType.DelayedTrick))
+        );
       }).length;
     }
 

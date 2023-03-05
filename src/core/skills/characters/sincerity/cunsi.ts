@@ -1,11 +1,16 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, CardUseStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { AllStage, CardUseStage } from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CommonSkill,
@@ -13,10 +18,10 @@ import {
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'cunsi', description: 'cunsi_description' })
+@CommonSkill({ name: "cunsi", description: "cunsi_description" })
 export class CunSi extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name) && owner.isFaceUp();
@@ -30,7 +35,11 @@ export class CunSi extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return true;
   }
 
@@ -38,26 +47,45 @@ export class CunSi extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
     }
     room.getPlayerById(fromId).isFaceUp() && (await room.turnOver(fromId));
 
-    const cards = room.findCardsByMatcherFrom(new CardMatcher({ generalName: ['slash'] }));
+    const cards = room.findCardsByMatcherFrom(
+      new CardMatcher({ generalName: ["slash"] })
+    );
     const index = cards.length;
-    cards.concat(room.findCardsByMatcherFrom(new CardMatcher({ generalName: ['slash'] }), false));
+    cards.concat(
+      room.findCardsByMatcherFrom(
+        new CardMatcher({ generalName: ["slash"] }),
+        false
+      )
+    );
 
     if (cards.length > 0) {
       const random = Math.floor(Math.random() * cards.length);
       const slash = cards[random];
       await room.moveCards({
-        movingCards: [{ card: slash, fromArea: random < index ? CardMoveArea.DrawStack : CardMoveArea.DropStack }],
+        movingCards: [
+          {
+            card: slash,
+            fromArea:
+              random < index ? CardMoveArea.DrawStack : CardMoveArea.DropStack,
+          },
+        ],
         toId: toIds[0],
         toArea: CardMoveArea.HandArea,
         moveReason: CardMoveReason.ActiveMove,
@@ -70,10 +98,14 @@ export class CunSi extends ActiveSkill {
         toIds[0],
         this.Name,
         originalDamage + 1,
-        TranslationPack.translationJsonPatcher('cunsi damage: {0}', originalDamage + 1).toString(),
+        TranslationPack.translationJsonPatcher(
+          "cunsi damage: {0}",
+          originalDamage + 1
+        ).toString()
       );
 
-      room.getPlayerById(toIds[0]).hasShadowSkill(CunSiBuff.Name) || (await room.obtainSkill(toIds[0], CunSiBuff.Name));
+      room.getPlayerById(toIds[0]).hasShadowSkill(CunSiBuff.Name) ||
+        (await room.obtainSkill(toIds[0], CunSiBuff.Name));
     }
 
     return true;
@@ -82,7 +114,7 @@ export class CunSi extends ActiveSkill {
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: 's_cunsi_buff', description: 's_cunsi_buff_description' })
+@CommonSkill({ name: "s_cunsi_buff", description: "s_cunsi_buff_description" })
 export class CunSiBuff extends TriggerSkill implements OnDefineReleaseTiming {
   public async whenDead(room: Room, player: Player) {
     await room.loseSkill(player.Id, this.Name);
@@ -96,20 +128,34 @@ export class CunSiBuff extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.BeforeCardUseEffect;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>): boolean {
-    return event.fromId === owner.Id && Sanguosha.getCardById(event.cardId).GeneralName === 'slash';
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ): boolean {
+    return (
+      event.fromId === owner.Id &&
+      Sanguosha.getCardById(event.cardId).GeneralName === "slash"
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const cardUseEvent = event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const cardUseEvent =
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
     const additionalDMG = room.getFlag<number>(event.fromId, CunSi.Name);
     if (additionalDMG) {
       cardUseEvent.additionalDamage = cardUseEvent.additionalDamage

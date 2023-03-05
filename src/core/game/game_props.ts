@@ -1,8 +1,8 @@
-import { CardMatcherSocketPassenger } from 'core/cards/libs/card_matcher';
-import { CharacterId } from 'core/characters/character';
-import { PlayerId, PlayerRole } from 'core/player/player_props';
-import { Flavor } from 'core/shares/types/host_config';
-import { GameMode } from 'core/shares/types/room_props';
+import { CardMatcherSocketPassenger } from "@/core/cards/libs/card_matcher";
+import { CharacterId } from "@/core/characters/character";
+import { PlayerId, PlayerRole } from "@/core/player/player_props";
+import { Flavor } from "@/core/shares/types/host_config";
+import { GameMode } from "@/core/shares/types/room_props";
 
 export const INFINITE_TRIGGERING_TIMES = 1000;
 export const NONE_TRIGGERING_TIMES = -9999;
@@ -12,40 +12,40 @@ export const INFINITE_ATTACK_RANGE = 1000;
 export const UPPER_LIMIT_OF_ARMOR = 5;
 
 export const enum GameCharacterExtensions {
-  Standard = 'standard',
-  Wind = 'wind',
-  Fire = 'fire',
-  Forest = 'forest',
-  Mountain = 'mountain',
-  Shadow = 'shadow',
-  Thunder = 'thunder',
+  Standard = "standard",
+  Wind = "wind",
+  Fire = "fire",
+  Forest = "forest",
+  Mountain = "mountain",
+  Shadow = "shadow",
+  Thunder = "thunder",
   // SP,
   // NewStandard,
-  God = 'god',
-  YiJiang2011 = 'yijiang2011',
-  YiJiang2012 = 'yijiang2012',
-  YiJiang2013 = 'yijiang2013',
-  YiJiang2014 = 'yijiang2014',
-  YiJiang2015 = 'yijiang2015',
-  Yuan6 = 'yuan6',
-  Yuan7 = 'yuan7',
-  SP = 'sp',
-  Spark = 'spark',
-  Decade = 'decade',
-  Limited = 'limited',
-  Biographies = 'biographies',
-  Mobile = 'mobile',
-  Wisdom = 'wisdom',
-  Sincerity = 'sincerity',
-  Benevolence = 'benevolence',
-  Strategem = 'strategem',
-  Pve = 'pve',
+  God = "god",
+  YiJiang2011 = "yijiang2011",
+  YiJiang2012 = "yijiang2012",
+  YiJiang2013 = "yijiang2013",
+  YiJiang2014 = "yijiang2014",
+  YiJiang2015 = "yijiang2015",
+  Yuan6 = "yuan6",
+  Yuan7 = "yuan7",
+  SP = "sp",
+  Spark = "spark",
+  Decade = "decade",
+  Limited = "limited",
+  Biographies = "biographies",
+  Mobile = "mobile",
+  Wisdom = "wisdom",
+  Sincerity = "sincerity",
+  Benevolence = "benevolence",
+  Strategem = "strategem",
+  Pve = "pve",
 }
 
 export const enum GameCardExtensions {
-  Standard = 'standard',
-  LegionFight = 'legion_fight',
-  CharacterSkills = 'character_skills',
+  Standard = "standard",
+  LegionFight = "legion_fight",
+  CharacterSkills = "character_skills",
 }
 
 export type GameInfo = {
@@ -94,9 +94,9 @@ export type GameRunningInfo = {
 };
 
 export const enum DamageType {
-  Normal = 'normal_property',
-  Fire = 'fire_property',
-  Thunder = 'thunder_property',
+  Normal = "normal_property",
+  Fire = "fire_property",
+  Thunder = "thunder_property",
 }
 
 export type FinalPlayersData = {
@@ -121,5 +121,8 @@ export type GameCommonRuleObject = {
 
 export type WaitingRoomGameSettings = Pick<
   TemporaryRoomCreationInfo,
-  Exclude<keyof TemporaryRoomCreationInfo, 'roomName' | 'campaignMode' | 'coreVersion' | 'hostPlayerId'>
+  Exclude<
+    keyof TemporaryRoomCreationInfo,
+    "roomName" | "campaignMode" | "@/coreVersion" | "hostPlayerId"
+  >
 > & { pveNumberOfPlayers: number };

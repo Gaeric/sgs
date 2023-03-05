@@ -1,14 +1,14 @@
-import { CardType } from 'core/cards/card';
-import { CardId } from 'core/cards/libs/card_props';
+import { CardType } from "@/core/cards/card";
+import { CardId } from "@/core/cards/libs/card_props";
 import {
   CardDrawReason,
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
 import {
   AllStage,
   DamageEffectStage,
@@ -16,24 +16,37 @@ import {
   PhaseChangeStage,
   PlayerPhase,
   StagePriority,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, CompulsorySkill, OnDefineReleaseTiming, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  CommonSkill,
+  CompulsorySkill,
+  OnDefineReleaseTiming,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'luoyi', description: 'luoyi_description' })
+@CommonSkill({ name: "luoyi", description: "luoyi_description" })
 export class LuoYi extends TriggerSkill {
   public isAutoTrigger(): boolean {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DrawCardStage.BeforeDrawCardEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>
+  ): boolean {
     return (
       owner.Id === content.fromId &&
       room.CurrentPlayerPhase === PlayerPhase.DrawCardStage &&
@@ -48,55 +61,70 @@ export class LuoYi extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
-    const displayCards = room.getCards(3, 'top');
-    const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-      displayCards,
-      fromId: skillUseEvent.fromId,
-      translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} used skill {1}, display cards: {2}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(skillUseEvent.fromId!)),
-        this.Name,
-        TranslationPack.patchCardInTranslation(...displayCards),
-      ).extract(),
-    };
+    const displayCards = room.getCards(3, "top");
+    const cardDisplayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+      {
+        displayCards,
+        fromId: skillUseEvent.fromId,
+        translationsMessage: TranslationPack.translationJsonPatcher(
+          "{0} used skill {1}, display cards: {2}",
+          TranslationPack.patchPlayerInTranslation(
+            room.getPlayerById(skillUseEvent.fromId!)
+          ),
+          this.Name,
+          TranslationPack.patchCardInTranslation(...displayCards)
+        ).extract(),
+      };
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, cardDisplayEvent);
 
     let luoyiObtain: CardId[] = [];
     for (const cardId of displayCards) {
       const card = Sanguosha.getCardById(cardId);
-      if (card.is(CardType.Basic) || card.is(CardType.Weapon) || card.GeneralName === 'duel') {
+      if (
+        card.is(CardType.Basic) ||
+        card.is(CardType.Weapon) ||
+        card.GeneralName === "duel"
+      ) {
         luoyiObtain.push(cardId);
       }
     }
 
     if (luoyiObtain.length > 0) {
-      const askForChooseOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-        options: ['luoyi:obtain', 'luoyi:cancel'],
-        toId: skillUseEvent.fromId,
-        conversation: 'Obtain Basic Card, Equip Card and Duel in display cards?',
-        triggeredBySkills: [this.Name],
-      };
+      const askForChooseOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+        {
+          options: ["luoyi:obtain", "luoyi:cancel"],
+          toId: skillUseEvent.fromId,
+          conversation:
+            "Obtain Basic Card, Equip Card and Duel in display cards?",
+          triggeredBySkills: [this.Name],
+        };
 
       room.notify(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
-        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(askForChooseOptionsEvent),
-        skillUseEvent.fromId,
+        EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+          askForChooseOptionsEvent
+        ),
+        skillUseEvent.fromId
       );
 
       const { selectedOption } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
-        skillUseEvent.fromId,
+        skillUseEvent.fromId
       );
 
-      if (selectedOption === 'luoyi:obtain') {
+      if (selectedOption === "luoyi:obtain") {
         const { triggeredOnEvent } = skillUseEvent;
-        const drawCardEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+        const drawCardEvent =
+          triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
         drawCardEvent.drawAmount = 0;
 
         await room.moveCards({
-          movingCards: luoyiObtain.map(card => ({ card, fromArea: CardMoveArea.ProcessingArea })),
+          movingCards: luoyiObtain.map((card) => ({
+            card,
+            fromArea: CardMoveArea.ProcessingArea,
+          })),
           toId: skillUseEvent.fromId,
           toArea: CardMoveArea.HandArea,
           moveReason: CardMoveReason.ActivePrey,
@@ -110,8 +138,8 @@ export class LuoYi extends TriggerSkill {
 
     await room.moveCards({
       movingCards: displayCards
-        .filter(id => !luoyiObtain.includes(id))
-        .map(card => ({ card, fromArea: CardMoveArea.ProcessingArea })),
+        .filter((id) => !luoyiObtain.includes(id))
+        .map((card) => ({ card, fromArea: CardMoveArea.ProcessingArea })),
       moveReason: CardMoveReason.PlaceToDropStack,
       toArea: CardMoveArea.DropStack,
       hideBroadcast: true,
@@ -129,7 +157,7 @@ export class LuoYiShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       room.CurrentPlayer.Id === owner &&
@@ -142,27 +170,42 @@ export class LuoYiShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return StagePriority.High;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage) {
-    return event.to === PlayerPhase.PhaseBegin && stage === PhaseChangeStage.AfterPhaseChanged;
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ) {
+    return (
+      event.to === PlayerPhase.PhaseBegin &&
+      stage === PhaseChangeStage.AfterPhaseChanged
+    );
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.DamageEvent>,
-    stage: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.DamageEvent
+    >,
+    stage: AllStage
   ): boolean {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const currentEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return currentEvent.to === PlayerPhase.PhaseBegin && stage === PhaseChangeStage.AfterPhaseChanged;
+      const currentEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        currentEvent.to === PlayerPhase.PhaseBegin &&
+        stage === PhaseChangeStage.AfterPhaseChanged
+      );
     } else {
-      const currentEvent = event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const currentEvent =
+        event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       return (
         stage === DamageEffectStage.DamageEffect &&
         !currentEvent.isFromChainedDamage &&
         !!currentEvent.cardIds &&
         currentEvent.cardIds.length === 1 &&
-        (Sanguosha.getCardById(currentEvent.cardIds[0]).GeneralName === 'slash' ||
-          Sanguosha.getCardById(currentEvent.cardIds[0]).GeneralName === 'duel')
+        (Sanguosha.getCardById(currentEvent.cardIds[0]).GeneralName ===
+          "slash" ||
+          Sanguosha.getCardById(currentEvent.cardIds[0]).GeneralName === "duel")
       );
     }
   }
@@ -170,7 +213,9 @@ export class LuoYiShadow extends TriggerSkill implements OnDefineReleaseTiming {
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.DamageEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.DamageEvent
+    >
   ): boolean {
     if (!room.getFlag<boolean>(owner.Id, this.GeneralName)) {
       return false;
@@ -178,7 +223,8 @@ export class LuoYiShadow extends TriggerSkill implements OnDefineReleaseTiming {
 
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.DamageEvent) {
-      const currentEvent = event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const currentEvent =
+        event as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       return !!currentEvent.fromId && currentEvent.fromId === owner.Id;
     }
 
@@ -189,7 +235,10 @@ export class LuoYiShadow extends TriggerSkill implements OnDefineReleaseTiming {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { triggeredOnEvent } = event;
     const unknownEvent = triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.PhaseChangeEvent | GameEventIdentifiers.DamageEvent
@@ -197,19 +246,24 @@ export class LuoYiShadow extends TriggerSkill implements OnDefineReleaseTiming {
     const identifier = EventPacker.getIdentifier(unknownEvent);
 
     if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const currentEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      currentEvent.toPlayer && room.removeFlag(currentEvent.toPlayer, this.GeneralName);
+      const currentEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      currentEvent.toPlayer &&
+        room.removeFlag(currentEvent.toPlayer, this.GeneralName);
     } else if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damgeEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damgeEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       damgeEvent.damage++;
       damgeEvent.messages = damgeEvent.messages || [];
       damgeEvent.messages.push(
         TranslationPack.translationJsonPatcher(
-          '{0} used skill {1}, damage increases to {2}',
-          TranslationPack.patchPlayerInTranslation(room.getPlayerById(damgeEvent.fromId!)),
+          "{0} used skill {1}, damage increases to {2}",
+          TranslationPack.patchPlayerInTranslation(
+            room.getPlayerById(damgeEvent.fromId!)
+          ),
           this.Name,
-          damgeEvent.damage,
-        ).toString(),
+          damgeEvent.damage
+        ).toString()
       );
     }
 

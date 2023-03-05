@@ -1,19 +1,37 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, CommonSkill, CompulsorySkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  CommonSkill,
+  CompulsorySkill,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
 
-@CommonSkill({ name: 'qingnang', description: 'qingnang_description' })
+@CommonSkill({ name: "qingnang", description: "qingnang_description" })
 export class QingNang extends ActiveSkill {
-  public static readonly exUse = 'QingNang_ExUse';
+  public static readonly exUse = "QingNang_ExUse";
 
   public canUse(room: Room, owner: Player) {
-    return !owner.hasUsedSkill(this.Name) || room.getFlag<boolean>(owner.Id, QingNang.exUse) === true;
+    return (
+      !owner.hasUsedSkill(this.Name) ||
+      room.getFlag<boolean>(owner.Id, QingNang.exUse) === true
+    );
   }
 
   public numberOfTargets() {
@@ -29,7 +47,7 @@ export class QingNang extends ActiveSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     return (
       room.getPlayerById(target).Hp < room.getPlayerById(target).MaxHp &&
@@ -45,20 +63,23 @@ export class QingNang extends ActiveSkill {
     return [PlayerCardsArea.HandArea];
   }
 
-  public async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     return true;
   }
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     await room.dropCards(
       CardMoveReason.SelfDrop,
       skillUseEvent.cardIds!,
       skillUseEvent.fromId,
       skillUseEvent.fromId,
-      this.Name,
+      this.Name
     );
 
     const recoverContent = {
@@ -82,26 +103,49 @@ export class QingNang extends ActiveSkill {
 }
 
 @ShadowSkill
-@CompulsorySkill({ name: QingNang.GeneralName, description: QingNang.Description })
-export class QingNangShadow extends TriggerSkill implements OnDefineReleaseTiming {
+@CompulsorySkill({
+  name: QingNang.GeneralName,
+  description: QingNang.Description,
+})
+export class QingNangShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage: AllStage): boolean {
-    return event.from === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage: AllStage
+  ): boolean {
+    return (
+      event.from === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return room.getFlag<boolean>(owner.Id, QingNang.exUse) !== undefined;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage) {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ) {
     return true;
   }
 
@@ -109,11 +153,16 @@ export class QingNangShadow extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { triggeredOnEvent } = event;
-    const phaseChangeEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+    const phaseChangeEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
 
-    phaseChangeEvent.fromPlayer && room.removeFlag(phaseChangeEvent.fromPlayer, QingNang.exUse);
+    phaseChangeEvent.fromPlayer &&
+      room.removeFlag(phaseChangeEvent.fromPlayer, QingNang.exUse);
     for (const player of room.AlivePlayers) {
       room.removeFlag(player.Id, this.GeneralName);
     }

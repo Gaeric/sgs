@@ -1,5 +1,5 @@
-import { Flavor } from 'core/shares/types/host_config';
-import { TranslationModule } from 'core/translations/translation_module';
+import { Flavor } from "@/core/shares/types/host_config";
+import { TranslationModule } from "@/core/translations/translation_module";
 
 export abstract class Logger {
   protected translator: TranslationModule | undefined;
@@ -11,7 +11,9 @@ export abstract class Logger {
 
   translate(args: any[]) {
     if (this.translator) {
-      return args.map(arg => (typeof arg === 'string' ? this.translator!.tr(arg) : arg));
+      return args.map((arg) =>
+        typeof arg === "string" ? this.translator!.tr(arg) : arg
+      );
     }
 
     return args;

@@ -1,26 +1,49 @@
-import { CardDrawReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, DrawCardStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { CompulsorySkill, RulesBreakerSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
+import {
+  CardDrawReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import {
+  AllStage,
+  DrawCardStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import {
+  CompulsorySkill,
+  RulesBreakerSkill,
+  ShadowSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
 
-@CompulsorySkill({ name: 'yingzi', description: 'yingzi_description' })
+@CompulsorySkill({ name: "yingzi", description: "yingzi_description" })
 export class YingZi extends TriggerSkill {
   public get RelatedCharacters(): string[] {
-    return ['sunce', 'gexuan', 'heqi', 'sunyi'];
+    return ["sunce", "gexuan", "heqi", "sunyi"];
   }
 
   public audioIndex(characterName?: string): number {
-    return characterName && this.RelatedCharacters.slice(1, this.RelatedCharacters.length).includes(characterName)
+    return characterName &&
+      this.RelatedCharacters.slice(1, this.RelatedCharacters.length).includes(
+        characterName
+      )
       ? 1
       : 2;
   }
 
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>,
+    stage?: AllStage
+  ) {
     return stage === DrawCardStage.CardDrawing;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent>
+  ) {
     return (
       owner.Id === content.fromId &&
       room.CurrentPlayerPhase === PlayerPhase.DrawCardStage &&
@@ -32,9 +55,13 @@ export class YingZi extends TriggerSkill {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent } = skillUseEvent;
-    const drawCardEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+    const drawCardEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
     drawCardEvent.drawAmount += 1;
 
     return true;

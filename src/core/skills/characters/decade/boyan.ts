@@ -1,14 +1,27 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, FilterSkill, OnDefineReleaseTiming, TriggerSkill } from 'core/skills/skill';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  FilterSkill,
+  OnDefineReleaseTiming,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'boyan', description: 'boyan_description' })
+@CommonSkill({ name: "boyan", description: "boyan_description" })
 export class BoYan extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name);
@@ -22,7 +35,11 @@ export class BoYan extends ActiveSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner;
   }
 
@@ -30,25 +47,40 @@ export class BoYan extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     if (!event.toIds) {
       return false;
     }
 
     const drawNum = Math.min(
       room.getPlayerById(event.toIds[0]).MaxHp -
-        room.getPlayerById(event.toIds[0]).getCardIds(PlayerCardsArea.HandArea).length,
-      5,
+        room.getPlayerById(event.toIds[0]).getCardIds(PlayerCardsArea.HandArea)
+          .length,
+      5
     );
-    drawNum && (await room.drawCards(drawNum, event.toIds[0], 'top', event.fromId, this.Name));
+    drawNum &&
+      (await room.drawCards(
+        drawNum,
+        event.toIds[0],
+        "top",
+        event.fromId,
+        this.Name
+      ));
 
     room.setFlag<boolean>(event.toIds[0], this.Name, true, this.Name);
     for (const skill of [BoYanBlocker.Name, BoYanRemover.Name]) {
-      room.getPlayerById(event.toIds[0]).hasShadowSkill(skill) || (await room.obtainSkill(event.toIds[0], skill));
+      room.getPlayerById(event.toIds[0]).hasShadowSkill(skill) ||
+        (await room.obtainSkill(event.toIds[0], skill));
     }
 
     return true;
@@ -57,21 +89,38 @@ export class BoYan extends ActiveSkill {
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: 's_boyan_blocker', description: 's_boyan_blocker_description' })
+@CommonSkill({
+  name: "s_boyan_blocker",
+  description: "s_boyan_blocker_description",
+})
 export class BoYanBlocker extends FilterSkill {
-  public canUseCard(cardId: CardId | CardMatcher, room: Room, owner: PlayerId): boolean {
-    return cardId instanceof CardMatcher || room.getPlayerById(owner).cardFrom(cardId) !== PlayerCardsArea.HandArea;
+  public canUseCard(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: PlayerId
+  ): boolean {
+    return (
+      cardId instanceof CardMatcher ||
+      room.getPlayerById(owner).cardFrom(cardId) !== PlayerCardsArea.HandArea
+    );
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: 's_boyan_remover', description: 's_boyan_remover_description' })
-export class BoYanRemover extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: "s_boyan_remover",
+  description: "s_boyan_remover_description",
+})
+export class BoYanRemover
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public async whenDead(room: Room, player: Player) {
     room.removeFlag(player.Id, BoYan.Name);
     await room.loseSkill(player.Id, this.Name);
-    player.hasShadowSkill(BoYanBlocker.Name) && (await room.loseSkill(player.Id, BoYanBlocker.Name));
+    player.hasShadowSkill(BoYanBlocker.Name) &&
+      (await room.loseSkill(player.Id, BoYanBlocker.Name));
   }
 
   public isAutoTrigger(): boolean {
@@ -82,19 +131,32 @@ export class BoYanRemover extends TriggerSkill implements OnDefineReleaseTiming 
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
-    return event.from === PlayerPhase.PhaseFinish && owner.getFlag<boolean>(BoYan.Name) !== undefined;
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
+    return (
+      event.from === PlayerPhase.PhaseFinish &&
+      owner.getFlag<boolean>(BoYan.Name) !== undefined
+    );
   }
 
   public async onTrigger(): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     room.removeFlag(event.fromId, BoYan.Name);
     await room.loseSkill(event.fromId, this.Name);
     room.getPlayerById(event.fromId).hasShadowSkill(BoYanBlocker.Name) &&

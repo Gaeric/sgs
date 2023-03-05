@@ -1,10 +1,14 @@
-import { CardSuit } from 'core/cards/libs/card_props';
-import { Player } from 'core/player/player';
-import { Algorithm } from 'core/shares/libs/algorithm/index';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import * as React from 'react';
-import { Languages, TranslationPack, TranslationsDictionary } from './translation_json_tool';
-import { TranslationModule } from './translation_module';
+import { CardSuit } from "@/core/cards/libs/card_props";
+import { Player } from "@/core/player/player";
+import { Algorithm } from "@/core/shares/libs/algorithm/index";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import * as React from "react";
+import {
+  Languages,
+  TranslationPack,
+  TranslationsDictionary,
+} from "./translation_json_tool";
+import { TranslationModule } from "./translation_module";
 
 export type TranslatedCardObject = {
   cardSuit: CardSuit;
@@ -20,7 +24,10 @@ export class ClientTranslationModule extends TranslationModule {
   private currentPlayer: Player | undefined;
   private emojiOrImageTextDict: EmojiOrImageTranslationDictionary = {};
 
-  public static setup(currentLanguage: Languages, ...dictionaries: [Languages, TranslationsDictionary][]) {
+  public static setup(
+    currentLanguage: Languages,
+    ...dictionaries: [Languages, TranslationsDictionary][]
+  ) {
     const translator = new ClientTranslationModule(...dictionaries);
     translator.currentLanguage = currentLanguage;
 
@@ -32,25 +39,28 @@ export class ClientTranslationModule extends TranslationModule {
   }
 
   public get Dictionary(): Readonly<TranslationsDictionary> {
-    return Precondition.exists(this.dictionary.get(this.currentLanguage), 'ClientTranslationModule is not initialized');
+    return Precondition.exists(
+      this.dictionary.get(this.currentLanguage),
+      "ClientTranslationModule is not initialized"
+    );
   }
 
   private commonTextStyle: React.CSSProperties = {
-    padding: '0 4px',
+    padding: "0 4px",
   };
   private boldTextStyle: React.CSSProperties = {
     fontWeight: 600,
   };
   private playerStyle: React.CSSProperties = {
-    color: '#C65719',
+    color: "#C65719",
   };
 
   private static readonly uniquNumberOnCard = {
-    0: '',
-    1: 'A',
-    11: 'J',
-    12: 'Q',
-    13: 'K',
+    0: "",
+    1: "A",
+    11: "J",
+    12: "Q",
+    13: "K",
   };
 
   public static getCardNumber(cardNumber: number): string {
@@ -62,35 +72,45 @@ export class ClientTranslationModule extends TranslationModule {
     this.currentPlayer = player;
   }
 
-  public addEmojiOrImageSymbolText(...symbolTextPair: [string | number, JSX.Element][]) {
+  public addEmojiOrImageSymbolText(
+    ...symbolTextPair: [string | number, JSX.Element][]
+  ) {
     for (const [rawText, translatePath] of symbolTextPair) {
-      this.emojiOrImageTextDict[TranslationPack.patchEmojiOrImageInTranslation(rawText)] = translatePath;
+      this.emojiOrImageTextDict[
+        TranslationPack.patchEmojiOrImageInTranslation(rawText)
+      ] = translatePath;
     }
   }
   public getEmojiOrImageSymbolText(symbolText: string | number) {
     return this.emojiOrImageTextDict[symbolText];
   }
 
-  public translatePatchedCardText(text: string, dictionary: TranslationsDictionary): JSX.Element {
+  public translatePatchedCardText(
+    text: string,
+    dictionary: TranslationsDictionary
+  ): JSX.Element {
     const getCardNumberStyle = (cardSuit: CardSuit): React.CSSProperties => {
       if (cardSuit === CardSuit.Heart || cardSuit === CardSuit.Diamond) {
         return {
           ...this.boldTextStyle,
-          color: 'red',
+          color: "red",
         };
       }
       return {
         ...this.boldTextStyle,
-        color: 'black',
+        color: "black",
       };
     };
 
-    const cardTextArray: string[] = JSON.parse(text.slice(TranslationPack.translateCardObjectSign.length));
+    const cardTextArray: string[] = JSON.parse(
+      text.slice(TranslationPack.translateCardObjectSign.length)
+    );
 
-    const translatedCardObject = cardTextArray.map(cardText => {
-      const [cardName, cardSuitString, cardNumber] = cardText.split(' ');
+    const translatedCardObject = cardTextArray.map((cardText) => {
+      const [cardName, cardSuitString, cardNumber] = cardText.split(" ");
       return {
-        cardSuit: TranslationPack.dispatchEmojiOrImageInTranslation(cardSuitString),
+        cardSuit:
+          TranslationPack.dispatchEmojiOrImageInTranslation(cardSuitString),
         suitElement: this.getEmojiOrImageSymbolText(cardSuitString),
         cardNumber,
         cardName: dictionary[cardName] || cardName,
@@ -101,7 +121,7 @@ export class ClientTranslationModule extends TranslationModule {
       <>
         {translatedCardObject.map((cardObject, index) => (
           <span key={index}>
-            <span>{this.tr('[')}</span>
+            <span>{this.tr("[")}</span>
             <span
               style={{
                 ...this.boldTextStyle,
@@ -111,25 +131,40 @@ export class ClientTranslationModule extends TranslationModule {
               {cardObject.cardName}
             </span>
             {cardObject.suitElement}
-            <span style={getCardNumberStyle(cardObject.cardSuit)} className={'textShadow'}>
-              {ClientTranslationModule.getCardNumber(parseInt(cardObject.cardNumber, 10))}
+            <span
+              style={getCardNumberStyle(cardObject.cardSuit)}
+              className={"textShadow"}
+            >
+              {ClientTranslationModule.getCardNumber(
+                parseInt(cardObject.cardNumber, 10)
+              )}
             </span>
-            <span>{this.tr(']')}</span>
+            <span>{this.tr("]")}</span>
           </span>
         ))}
       </>
     );
   }
 
-  public translatePatchedPlayerText(text: string, dictionary: TranslationsDictionary): JSX.Element {
-    const playerObjectArray: string[] = JSON.parse(text.slice(TranslationPack.translatePlayerObjectSign.length));
+  public translatePatchedPlayerText(
+    text: string,
+    dictionary: TranslationsDictionary
+  ): JSX.Element {
+    const playerObjectArray: string[] = JSON.parse(
+      text.slice(TranslationPack.translatePlayerObjectSign.length)
+    );
 
-    const translatedPlayerObject = playerObjectArray.map(playerText => {
-      const [characterName, position] = playerText.split(' ');
+    const translatedPlayerObject = playerObjectArray.map((playerText) => {
+      const [characterName, position] = playerText.split(" ");
       const formattedPosition = `seat ${position}`;
       return (
-        `${dictionary[characterName] || characterName}(${dictionary[formattedPosition] || formattedPosition})` +
-        (this.currentPlayer && this.currentPlayer.Position.toString() === position ? `(${dictionary['you']})` : '')
+        `${dictionary[characterName] || characterName}(${
+          dictionary[formattedPosition] || formattedPosition
+        })` +
+        (this.currentPlayer &&
+        this.currentPlayer.Position.toString() === position
+          ? `(${dictionary["you"]})`
+          : "")
       );
     });
 
@@ -141,13 +176,17 @@ export class ClientTranslationModule extends TranslationModule {
           ...this.commonTextStyle,
         }}
       >
-        {translatedPlayerObject.join(',')}
+        {translatedPlayerObject.join(",")}
       </span>
     );
   }
 
   public disPatchedPureText(text: string): JSX.Element {
-    return <span style={this.boldTextStyle}>{text.slice(TranslationPack.pureTextSign.length)}</span>;
+    return (
+      <span style={this.boldTextStyle}>
+        {text.slice(TranslationPack.pureTextSign.length)}
+      </span>
+    );
   }
 
   public trx(rawText: string): JSX.Element {
@@ -157,7 +196,9 @@ export class ClientTranslationModule extends TranslationModule {
     if (!dispatchedObject) {
       if (dictionary) {
         if (TranslationPack.isCardObjectText(rawText)) {
-          return <span>{this.translatePatchedCardText(rawText, dictionary)}</span>;
+          return (
+            <span>{this.translatePatchedCardText(rawText, dictionary)}</span>
+          );
         } else if (TranslationPack.isPlayerObjectText(rawText)) {
           return this.translatePatchedPlayerText(rawText, dictionary);
         }
@@ -171,49 +212,69 @@ export class ClientTranslationModule extends TranslationModule {
       : dispatchedObject.original;
     const paramIndex = translatedOriginalText
       .match(/\{[0-9]\}/g)
-      ?.map(indexString => parseInt(indexString.replace(/(\{|\})/g, ''), 10));
+      ?.map((indexString) => parseInt(indexString.replace(/(\{|\})/g, ""), 10));
     if (!paramIndex) {
       return <span>{this.tr(rawText)}</span>;
     }
 
-    const textCombinations: JSX.Element[] = dispatchedObject.params.map(param => {
-      if (typeof param === 'string' && dictionary) {
-        if (TranslationPack.isCardObjectText(param)) {
-          return <span key={Algorithm.generateUUID()}>{this.translatePatchedCardText(param, dictionary)}</span>;
-        } else if (TranslationPack.isPlayerObjectText(param)) {
-          return <span key={Algorithm.generateUUID()}>{this.translatePatchedPlayerText(param, dictionary)}</span>;
-        } else if (TranslationPack.isPureTextParameter(param)) {
-          return <span key={Algorithm.generateUUID()}>{this.disPatchedPureText(param)}</span>;
+    const textCombinations: JSX.Element[] = dispatchedObject.params.map(
+      (param) => {
+        if (typeof param === "string" && dictionary) {
+          if (TranslationPack.isCardObjectText(param)) {
+            return (
+              <span key={Algorithm.generateUUID()}>
+                {this.translatePatchedCardText(param, dictionary)}
+              </span>
+            );
+          } else if (TranslationPack.isPlayerObjectText(param)) {
+            return (
+              <span key={Algorithm.generateUUID()}>
+                {this.translatePatchedPlayerText(param, dictionary)}
+              </span>
+            );
+          } else if (TranslationPack.isPureTextParameter(param)) {
+            return (
+              <span key={Algorithm.generateUUID()}>
+                {this.disPatchedPureText(param)}
+              </span>
+            );
+          }
         }
-      }
 
-      if (typeof param === 'string' && dictionary && TranslationPack.isTextArrayText(param)) {
-        if (TranslationPack.isTextArrayText(param)) {
-          param = param
-            .slice(TranslationPack.translateTextArraySign.length)
-            .split(',')
-            .map(subParam => dictionary[subParam] || subParam)
-            .join(',');
-        } else {
-          param = dictionary[param] || param;
+        if (
+          typeof param === "string" &&
+          dictionary &&
+          TranslationPack.isTextArrayText(param)
+        ) {
+          if (TranslationPack.isTextArrayText(param)) {
+            param = param
+              .slice(TranslationPack.translateTextArraySign.length)
+              .split(",")
+              .map((subParam) => dictionary[subParam] || subParam)
+              .join(",");
+          } else {
+            param = dictionary[param] || param;
+          }
         }
-      }
 
-      return (
-        <span
-          key={Algorithm.generateUUID()}
-          style={{
-            ...this.boldTextStyle,
-            ...this.commonTextStyle,
-          }}
-        >
-          {dictionary ? dictionary[param] || param : param}
-        </span>
-      );
-    });
+        return (
+          <span
+            key={Algorithm.generateUUID()}
+            style={{
+              ...this.boldTextStyle,
+              ...this.commonTextStyle,
+            }}
+          >
+            {dictionary ? dictionary[param] || param : param}
+          </span>
+        );
+      }
+    );
 
     const translatedReactComponents: JSX.Element[] = [];
-    const splitRawText = translatedOriginalText.split(/\{[0-9]\}/).map(splitStr => splitStr.trim());
+    const splitRawText = translatedOriginalText
+      .split(/\{[0-9]\}/)
+      .map((splitStr) => splitStr.trim());
     for (let i = 0; i < splitRawText.length; i++) {
       if (splitRawText[i]) {
         translatedReactComponents.push(<span key={i}>{splitRawText[i]}</span>);

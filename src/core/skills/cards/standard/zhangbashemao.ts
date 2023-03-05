@@ -1,23 +1,26 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { Slash } from 'core/cards/standard/slash';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ViewAsSkill } from 'core/skills/skill';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { Slash } from "@/core/cards/standard/slash";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ViewAsSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'zhangbashemao', description: 'zhangbashemao_description' })
+@CommonSkill({
+  name: "zhangbashemao",
+  description: "zhangbashemao_description",
+})
 export class ZhangBaSheMaoSkill extends ViewAsSkill {
   get Muted() {
     return true;
   }
 
   public canViewAs(): string[] {
-    return ['slash'];
+    return ["slash"];
   }
   public canUse(room: Room, owner: Player) {
-    return owner.canUseCard(room, new CardMatcher({ generalName: ['slash'] }));
+    return owner.canUseCard(room, new CardMatcher({ generalName: ["slash"] }));
   }
 
   public cardFilter(room: Room, owner: Player, cards: CardId[]): boolean {
@@ -28,7 +31,7 @@ export class ZhangBaSheMaoSkill extends ViewAsSkill {
     owner: Player,
     pendingCardId: CardId,
     selectedCards: CardId[],
-    containerCard?: CardId | undefined,
+    containerCard?: CardId | undefined
   ): boolean {
     return pendingCardId !== containerCard;
   }
@@ -40,10 +43,10 @@ export class ZhangBaSheMaoSkill extends ViewAsSkill {
   public viewAs(selectedCards: CardId[]) {
     return VirtualCard.create<Slash>(
       {
-        cardName: 'slash',
+        cardName: "slash",
         bySkill: this.Name,
       },
-      selectedCards,
+      selectedCards
     );
   }
 }

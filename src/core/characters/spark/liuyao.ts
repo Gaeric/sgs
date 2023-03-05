@@ -1,13 +1,20 @@
-import { GameCharacterExtensions } from 'core/game/game_props';
-import { SkillLoader } from 'core/game/package_loader/loader.skills';
-import { Character, CharacterGender, CharacterNationality } from '../character';
+import { GameCharacterExtensions } from "@/core/game/game_props";
+import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { Character, CharacterGender, CharacterNationality } from "../character";
 
 const skillLorderInstance = SkillLoader.getInstance();
 
 export class LiuYao extends Character {
   constructor(id: number) {
-    super(id, 'liuyao', CharacterGender.Male, CharacterNationality.Qun, 4, 4, GameCharacterExtensions.Spark, [
-      ...skillLorderInstance.getSkillsByName('kannan'),
-    ]);
+    super(
+      id,
+      "liuyao",
+      CharacterGender.Male,
+      CharacterNationality.Qun,
+      4,
+      4,
+      GameCharacterExtensions.Spark,
+      [...skillLorderInstance.getSkillsByName("kannan")]
+    );
   }
 }

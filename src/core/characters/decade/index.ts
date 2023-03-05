@@ -1,38 +1,38 @@
-import { Character } from 'core/characters/character';
-import { CaiMaoZhangYun } from './caimaozhangyun';
-import { CaoXing } from './caoxing';
-import { DecadeDengZhi } from './decade_dengzhi';
+import { Character } from "@/core/characters/character";
+import { CaiMaoZhangYun } from "./caimaozhangyun";
+import { CaoXing } from "./caoxing";
+import { DecadeDengZhi } from "./decade_dengzhi";
 //import { DecadeHuangChengYan } from './decade_huangchengyan';
-import { DecadeLiuBa } from './decade_liuba';
-import { DecadeMiHeng } from './decade_miheng';
-import { DuanWei } from './duanwei';
-import { DuFuRen } from './dufuren';
-import { FanChou } from './fanchou';
-import { FengXi } from './fengxi';
-import { GuoSi } from './guosi';
-import { HuaXin } from './huaxin';
-import { LiangXing } from './liangxing';
-import { LiCaiWei } from './licaiwei';
-import { LiJue } from './lijue';
-import { LuYuSheng } from './luyusheng';
-import { LvLingQi } from './lvlingqi';
-import { MaMiDi } from './mamidi';
-import { MiFangFuShiRen } from './mifangfushiren';
-import { NiuJin } from './niujin';
-import { PanFeng } from './panfeng';
-import { TongYuanC } from './tongyuan';
-import { WanNianGongZhu } from './wanniangongzhu';
-import { XiaHouJie } from './xiahoujie';
-import { XingDaoRong } from './xingdaorong';
-import { XuGong } from './xugong';
-import { XunChen } from './xunchen';
-import { ZhangHeng } from './zhangheng';
-import { ZhangHu } from './zhanghu';
-import { ZhangJi } from './zhangji';
-import { ZhangWen } from './zhangwen';
-import { ZhaoZhong } from './zhaozhong';
+import { DecadeLiuBa } from "./decade_liuba";
+import { DecadeMiHeng } from "./decade_miheng";
+import { DuanWei } from "./duanwei";
+import { DuFuRen } from "./dufuren";
+import { FanChou } from "./fanchou";
+import { FengXi } from "./fengxi";
+import { GuoSi } from "./guosi";
+import { HuaXin } from "./huaxin";
+import { LiangXing } from "./liangxing";
+import { LiCaiWei } from "./licaiwei";
+import { LiJue } from "./lijue";
+import { LuYuSheng } from "./luyusheng";
+import { LvLingQi } from "./lvlingqi";
+import { MaMiDi } from "./mamidi";
+import { MiFangFuShiRen } from "./mifangfushiren";
+import { NiuJin } from "./niujin";
+import { PanFeng } from "./panfeng";
+import { TongYuanC } from "./tongyuan";
+import { WanNianGongZhu } from "./wanniangongzhu";
+import { XiaHouJie } from "./xiahoujie";
+import { XingDaoRong } from "./xingdaorong";
+import { XuGong } from "./xugong";
+import { XunChen } from "./xunchen";
+import { ZhangHeng } from "./zhangheng";
+import { ZhangHu } from "./zhanghu";
+import { ZhangJi } from "./zhangji";
+import { ZhangWen } from "./zhangwen";
+import { ZhaoZhong } from "./zhaozhong";
 
-export const DecadePackage: (index: number) => Character[] = index => [
+export const DecadePackage: (index: number) => Character[] = (index) => [
   new NiuJin(index++),
   new HuaXin(index++),
   new ZhangHu(index++),

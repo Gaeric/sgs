@@ -1,9 +1,9 @@
-import { GameCardExtensions } from 'core/game/game_props';
-import { SkillLoader } from 'core/game/package_loader/loader.skills';
-import { TaoYuanJieYiSkill } from 'core/skills';
-import { Globe } from '../card';
-import type { CardSuit, RealCardId } from '../libs/card_props';
-import { TrickCard } from '../trick_card';
+import { GameCardExtensions } from "@/core/game/game_props";
+import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { TaoYuanJieYiSkill } from "@/core/skills";
+import { Globe } from "../card";
+import type { CardSuit, RealCardId } from "../libs/card_props";
+import { TrickCard } from "../trick_card";
 
 @Globe
 export class TaoYuanJieYi extends TrickCard {
@@ -13,10 +13,10 @@ export class TaoYuanJieYi extends TrickCard {
       cardNumber,
       suit,
       0,
-      'taoyuanjieyi',
-      'taoyuanjieyi_description',
+      "taoyuanjieyi",
+      "taoyuanjieyi_description",
       GameCardExtensions.Standard,
-      SkillLoader.getInstance().getSkillByName('taoyuanjieyi'),
+      SkillLoader.getInstance().getSkillByName("taoyuanjieyi")
     );
   }
 

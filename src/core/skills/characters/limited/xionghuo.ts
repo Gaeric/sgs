@@ -1,9 +1,14 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { DamageType } from 'core/game/game_props';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { DamageType } from "@/core/game/game_props";
 import {
   AllStage,
   DamageEffectStage,
@@ -12,16 +17,20 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { MarkEnum } from 'core/shares/types/mark_list';
-import { ActiveSkill, FilterSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { MarkEnum } from "@/core/shares/types/mark_list";
+import { ActiveSkill, FilterSkill, TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
 
-@CommonSkill({ name: 'xionghuo', description: 'xionghuo_description' })
+@CommonSkill({ name: "xionghuo", description: "xionghuo_description" })
 export class XiongHuo extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
     return owner.getMark(MarkEnum.BaoLi) > 0;
@@ -35,7 +44,11 @@ export class XiongHuo extends ActiveSkill {
     return cards.length === 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return target !== owner && room.getMark(target, MarkEnum.BaoLi) === 0;
   }
 
@@ -47,7 +60,10 @@ export class XiongHuo extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     if (!event.toIds) {
       return false;
     }
@@ -72,7 +88,7 @@ export class XiongHuoShadow extends TriggerSkill {
       | GameEventIdentifiers.PhaseStageChangeEvent
       | GameEventIdentifiers.DamageEvent
     >,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return (
       stage === GameBeginStage.AfterGameBegan ||
@@ -88,18 +104,23 @@ export class XiongHuoShadow extends TriggerSkill {
       | GameEventIdentifiers.GameBeginEvent
       | GameEventIdentifiers.PhaseStageChangeEvent
       | GameEventIdentifiers.DamageEvent
-    >,
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(content);
     if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {
-      const phaseStageChangeEvent = content as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
+      const phaseStageChangeEvent =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>;
       return (
         phaseStageChangeEvent.playerId !== owner.Id &&
-        phaseStageChangeEvent.toStage === PlayerPhaseStages.PlayCardStageStart &&
-        room.getPlayerById(phaseStageChangeEvent.playerId).getMark(MarkEnum.BaoLi) > 0
+        phaseStageChangeEvent.toStage ===
+          PlayerPhaseStages.PlayCardStageStart &&
+        room
+          .getPlayerById(phaseStageChangeEvent.playerId)
+          .getMark(MarkEnum.BaoLi) > 0
       );
     } else if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = content as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        content as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       return (
         damageEvent.fromId === owner.Id &&
         damageEvent.toId !== owner.Id &&
@@ -114,7 +135,10 @@ export class XiongHuoShadow extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       | GameEventIdentifiers.GameBeginEvent
@@ -124,10 +148,12 @@ export class XiongHuoShadow extends TriggerSkill {
 
     const identifier = EventPacker.getIdentifier(unknownEvent);
     if (identifier === GameEventIdentifiers.PhaseStageChangeEvent) {
-      const playerId = (unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>).playerId;
+      const playerId = (
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
+      ).playerId;
       room.removeMark(playerId, MarkEnum.BaoLi);
 
-      const options = ['fire', 'lose', 'prey'];
+      const options = ["fire", "lose", "prey"];
       const randomOption = options[Math.floor(Math.random() * options.length)];
       if (randomOption === options[0]) {
         await room.damage({
@@ -142,16 +168,24 @@ export class XiongHuoShadow extends TriggerSkill {
       } else if (randomOption === options[1]) {
         await room.loseHp(playerId, 1);
 
-        room.syncGameCommonRules(playerId, user => {
+        room.syncGameCommonRules(playerId, (user) => {
           room.CommonRules.addAdditionalHoldCardNumber(user, -1);
           user.addInvisibleMark(this.GeneralName, 1);
         });
       } else {
-        for (const area of [PlayerCardsArea.EquipArea, PlayerCardsArea.HandArea]) {
+        for (const area of [
+          PlayerCardsArea.EquipArea,
+          PlayerCardsArea.HandArea,
+        ]) {
           const cards = room.getPlayerById(playerId).getCardIds(area);
           cards.length > 0 &&
             (await room.moveCards({
-              movingCards: [{ card: cards[Math.floor(Math.random() * cards.length)], fromArea: area }],
+              movingCards: [
+                {
+                  card: cards[Math.floor(Math.random() * cards.length)],
+                  fromArea: area,
+                },
+              ],
               fromId: playerId,
               toId: fromId,
               toArea: CardMoveArea.HandArea,
@@ -162,7 +196,8 @@ export class XiongHuoShadow extends TriggerSkill {
         }
       }
     } else if (identifier === GameEventIdentifiers.DamageEvent) {
-      const damageEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+      const damageEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
       damageEvent.damage++;
     } else {
       room.addMark(fromId, MarkEnum.BaoLi, 3);
@@ -174,18 +209,32 @@ export class XiongHuoShadow extends TriggerSkill {
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: XiongHuoShadow.Name, description: XiongHuoShadow.Description })
-export class XiongHuoFilter extends FilterSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: XiongHuoShadow.Name,
+  description: XiongHuoShadow.Description,
+})
+export class XiongHuoFilter
+  extends FilterSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
-  public canBeUsedCard(cardId: CardId | CardMatcher, room: Room, owner: PlayerId, attacker?: PlayerId): boolean {
+  public canBeUsedCard(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: PlayerId,
+    attacker?: PlayerId
+  ): boolean {
     if (
       room.getFlag<PlayerId>(owner, this.GeneralName) === undefined ||
       room.getFlag<PlayerId>(owner, this.GeneralName) !== attacker
@@ -194,33 +243,45 @@ export class XiongHuoFilter extends FilterSkill implements OnDefineReleaseTiming
     }
 
     if (cardId instanceof CardMatcher) {
-      return !new CardMatcher({ generalName: ['slash'] }).match(cardId);
+      return !new CardMatcher({ generalName: ["slash"] }).match(cardId);
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName !== 'slash';
+      return Sanguosha.getCardById(cardId).GeneralName !== "slash";
     }
   }
 }
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: XiongHuoFilter.Name, description: XiongHuoFilter.Description })
-export class XiongHuoRemover extends TriggerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: XiongHuoFilter.Name,
+  description: XiongHuoFilter.Description,
+})
+export class XiongHuoRemover
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public afterDead(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public get Muted() {
@@ -235,15 +296,25 @@ export class XiongHuoRemover extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
       event.from === PlayerPhase.PhaseFinish &&
       (room.getFlag<PlayerId>(owner.Id, this.GeneralName) !== undefined ||
-        (event.fromPlayer !== undefined && room.getPlayerById(event.fromPlayer).getInvisibleMark(this.GeneralName) > 0))
+        (event.fromPlayer !== undefined &&
+          room
+            .getPlayerById(event.fromPlayer)
+            .getInvisibleMark(this.GeneralName) > 0))
     );
   }
 
@@ -251,13 +322,21 @@ export class XiongHuoRemover extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     room.removeFlag(event.fromId, this.GeneralName);
 
-    const toId = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>).fromPlayer;
+    const toId = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+    ).fromPlayer;
     toId &&
-      room.syncGameCommonRules(toId, user => {
-        room.CommonRules.addAdditionalHoldCardNumber(user, user.getInvisibleMark(this.GeneralName));
+      room.syncGameCommonRules(toId, (user) => {
+        room.CommonRules.addAdditionalHoldCardNumber(
+          user,
+          user.getInvisibleMark(this.GeneralName)
+        );
         user.removeInvisibleMark(this.GeneralName);
       });
 

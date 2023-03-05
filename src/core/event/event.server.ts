@@ -1,6 +1,11 @@
-import { CardMatcherSocketPassenger } from 'core/cards/libs/card_matcher';
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CharacterEquipSections, CharacterGender, CharacterId, CharacterNationality } from 'core/characters/character';
+import { CardMatcherSocketPassenger } from "@/core/cards/libs/card_matcher";
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CharacterEquipSections,
+  CharacterGender,
+  CharacterId,
+  CharacterNationality,
+} from "@/core/characters/character";
 import {
   DamageType,
   GameCommonRuleObject,
@@ -8,16 +13,21 @@ import {
   GameRunningInfo,
   TemporaryRoomCreationInfo,
   WaitingRoomGameSettings,
-} from 'core/game/game_props';
-import { PlayerPhase, PlayerPhaseStages } from 'core/game/stage_processor';
-import { PlayerCardsArea, PlayerId, PlayerInfo, PlayerShortcutInfo } from 'core/player/player_props';
-import { RoomId } from 'core/room/room';
-import { JudgeMatcherEnum } from 'core/shares/libs/judge_matchers';
-import { System } from 'core/shares/libs/system';
-import { AimGroup } from 'core/shares/libs/utils/aim_group';
-import { TargetGroup } from 'core/shares/libs/utils/target_group';
-import { RoomInfo, RoomShortcutInfo } from 'core/shares/types/server_types';
-import { PatchedTranslationObject } from 'core/translations/translation_json_tool';
+} from "@/core/game/game_props";
+import { PlayerPhase, PlayerPhaseStages } from "@/core/game/stage_processor";
+import {
+  PlayerCardsArea,
+  PlayerId,
+  PlayerInfo,
+  PlayerShortcutInfo,
+} from "@/core/player/player_props";
+import { RoomId } from "@/core/room/room";
+import { JudgeMatcherEnum } from "@/core/shares/libs/judge_matchers";
+import { System } from "@/core/shares/libs/system";
+import { AimGroup } from "@/core/shares/libs/utils/aim_group";
+import { TargetGroup } from "@/core/shares/libs/utils/target_group";
+import { RoomInfo, RoomShortcutInfo } from "@/core/shares/types/server_types";
+import { PatchedTranslationObject } from "@/core/translations/translation_json_tool";
 import {
   BaseGameEvent,
   CardDrawReason,
@@ -29,7 +39,7 @@ import {
   ServerEventFinder,
   WaitingRoomEvent,
   WaitingRoomEventUtilities,
-} from './event';
+} from "./event";
 
 export type MovingCardProps = {
   card: CardId;
@@ -146,7 +156,7 @@ export interface ServerEvent extends EventUtilities {
     drawAmount: number;
     askedBy: PlayerId;
     bySpecialReason?: CardDrawReason;
-    from?: 'top' | 'bottom';
+    from?: "top" | "bottom";
   };
   [GameEventIdentifiers.MoveCardEvent]: {
     infos: MoveCardEventInfos[];
@@ -194,7 +204,7 @@ export interface ServerEvent extends EventUtilities {
     fromId?: PlayerId;
     toId: PlayerId;
     amount: number;
-    byReaon: 'damage' | 'lostHp' | 'recover';
+    byReaon: "damage" | "lostHp" | "recover";
     byCardIds?: CardId[];
     beginnerOfTheDamage?: PlayerId;
     damageType?: DamageType;
@@ -482,7 +492,7 @@ export interface ServerEvent extends EventUtilities {
     notificationTime: number;
   };
   [GameEventIdentifiers.PlayerStatusEvent]: {
-    status: 'online' | 'offline' | 'quit' | 'trusted' | 'player' | 'smart-ai';
+    status: "online" | "offline" | "quit" | "trusted" | "player" | "smart-ai";
     toId: PlayerId;
   };
   [GameEventIdentifiers.PhaseSkippedEvent]: {
@@ -588,7 +598,12 @@ export interface WaitingRoomServerEvent extends WaitingRoomEventUtilities {
   };
   [WaitingRoomEvent.PlayerEnter]: {
     hostPlayerId: PlayerId;
-    playerInfo: { playerId: PlayerId; avatarId: number; playerName: string; seatId: number };
+    playerInfo: {
+      playerId: PlayerId;
+      avatarId: number;
+      playerName: string;
+      seatId: number;
+    };
     otherPlayersInfo: {
       playerId: PlayerId;
       avatarId: number;

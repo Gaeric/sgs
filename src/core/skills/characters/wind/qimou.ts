@@ -1,17 +1,30 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill, LimitSkill, RulesBreakerSkill, TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, ShadowSkill } from 'core/skills/skill_wrappers';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import {
+  ActiveSkill,
+  LimitSkill,
+  RulesBreakerSkill,
+  TriggerSkill,
+} from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
 
-@LimitSkill({ name: 'qimou', description: 'qimou_description' })
+@LimitSkill({ name: "qimou", description: "qimou_description" })
 export class QiMou extends ActiveSkill {
   public canUse(room: Room, owner: Player) {
     return !owner.hasUsedSkill(this.Name);
@@ -33,11 +46,17 @@ export class QiMou extends ActiveSkill {
     return false;
   }
 
-  async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId } = skillUseEvent;
     const from = room.getPlayerById(fromId);
 
@@ -46,19 +65,25 @@ export class QiMou extends ActiveSkill {
       options.push((i + 1).toString());
     }
 
-    const askForLosingHpAmount: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-      toId: fromId,
-      options,
-      conversation: 'please choose the amount of hp to lose',
-      triggeredBySkills: [this.Name],
-    };
+    const askForLosingHpAmount: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+      {
+        toId: fromId,
+        options,
+        conversation: "please choose the amount of hp to lose",
+        triggeredBySkills: [this.Name],
+      };
     room.notify(
       GameEventIdentifiers.AskForChoosingOptionsEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(askForLosingHpAmount),
-      fromId,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        askForLosingHpAmount
+      ),
+      fromId
     );
 
-    const response = await room.onReceivingAsyncResponseFrom(GameEventIdentifiers.AskForChoosingOptionsEvent, fromId);
+    const response = await room.onReceivingAsyncResponseFrom(
+      GameEventIdentifiers.AskForChoosingOptionsEvent,
+      fromId
+    );
     const lostHp = parseInt(response.selectedOption!, 10);
 
     await room.loseHp(fromId, lostHp);
@@ -76,32 +101,55 @@ export class QiMouShadow extends TriggerSkill implements OnDefineReleaseTiming {
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PhaseFinish && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PhaseFinish &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   isAutoTrigger() {
     return true;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage) {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ) {
     return true;
   }
 
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage: AllStage) {
-    return stage === PhaseChangeStage.PhaseChanged && event.from === PlayerPhase.PhaseFinish;
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage: AllStage
+  ) {
+    return (
+      stage === PhaseChangeStage.PhaseChanged &&
+      event.from === PlayerPhase.PhaseFinish
+    );
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>) {
-    return content.toPlayer === owner.Id && room.getFlag(owner.Id, this.GeneralName) !== undefined;
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ) {
+    return (
+      content.toPlayer === owner.Id &&
+      room.getFlag(owner.Id, this.GeneralName) !== undefined
+    );
   }
 
   async onTrigger() {
     return true;
   }
 
-  async onEffect(room: Room, content: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    content: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     room.removeFlag(content.fromId, this.GeneralName);
     return true;
   }
@@ -114,12 +162,21 @@ export class QiMouBlocker extends RulesBreakerSkill {
     return room.getFlag<number>(owner.Id, this.GeneralName) || 0;
   }
 
-  breakCardUsableTimes(cardId: CardId | CardMatcher, room: Room, owner: Player) {
-    const additionalTimes = room.getFlag<number>(owner.Id, this.GeneralName) || 0;
+  breakCardUsableTimes(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player
+  ) {
+    const additionalTimes =
+      room.getFlag<number>(owner.Id, this.GeneralName) || 0;
     if (cardId instanceof CardMatcher) {
-      return cardId.match(new CardMatcher({ generalName: ['slash'] })) ? additionalTimes : 0;
+      return cardId.match(new CardMatcher({ generalName: ["slash"] }))
+        ? additionalTimes
+        : 0;
     } else {
-      return Sanguosha.getCardById(cardId).GeneralName === 'slash' ? additionalTimes : 0;
+      return Sanguosha.getCardById(cardId).GeneralName === "slash"
+        ? additionalTimes
+        : 0;
     }
   }
 }

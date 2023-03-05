@@ -1,6 +1,11 @@
-import { ClientEventFinder, GameEventIdentifiers, ServerEventFinder, WorkPlace } from 'core/event/event';
-import { Socket } from 'core/network/socket';
-import IOSocketClient, { Manager } from 'socket.io-client';
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+  WorkPlace,
+} from "@/core/event/event";
+import { Socket } from "@/core/network/socket";
+import IOSocketClient, { Manager } from "socket.io-client";
 
 export class ClientSocket extends Socket<WorkPlace.Client> {
   private socketIO: SocketIOClient.Socket;
@@ -20,16 +25,22 @@ export class ClientSocket extends Socket<WorkPlace.Client> {
       timeout: 60000,
       autoConnect: true,
     });
-    this.socketIO.on('reconnect', () => {
+    this.socketIO.on("reconnect", () => {
       this.reconnecting = true;
     });
   }
 
-  public notify<I extends GameEventIdentifiers>(type: I, content: ClientEventFinder<I>) {
+  public notify<I extends GameEventIdentifiers>(
+    type: I,
+    content: ClientEventFinder<I>
+  ) {
     this.socketIO.emit(type.toString(), content);
   }
 
-  public on<T extends GameEventIdentifiers>(type: T, receiver: (event: ServerEventFinder<T>) => void): ClientSocket {
+  public on<T extends GameEventIdentifiers>(
+    type: T,
+    receiver: (event: ServerEventFinder<T>) => void
+  ): ClientSocket {
     this.socketIO.on(type.toString(), receiver);
 
     return this;
@@ -46,7 +57,7 @@ export class ClientSocket extends Socket<WorkPlace.Client> {
   }
 
   public onReconnected(callback: () => void) {
-    this.socketIO.on('connect', () => {
+    this.socketIO.on("connect", () => {
       if (this.reconnecting) {
         this.reconnecting = false;
         callback();

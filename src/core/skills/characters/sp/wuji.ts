@@ -1,27 +1,39 @@
-import { VirtualCard } from 'core/cards/card';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { QingLongYanYueDao } from 'core/cards/standard/qinglongdao';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { AwakeningSkill } from 'core/skills/skill_wrappers';
-import { HuXiao } from './huxiao';
+import { VirtualCard } from "@/core/cards/card";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { QingLongYanYueDao } from "@/core/cards/standard/qinglongdao";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { AwakeningSkill } from "@/core/skills/skill_wrappers";
+import { HuXiao } from "./huxiao";
 
-@AwakeningSkill({ name: 'wuji', description: 'wuji_description' })
+@AwakeningSkill({ name: "wuji", description: "wuji_description" })
 export class WuJi extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       content.playerId === owner.Id &&
@@ -34,7 +46,10 @@ export class WuJi extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     await room.changeMaxHp(event.fromId, 1);
     await room.recover({
       toId: event.fromId,
@@ -48,7 +63,10 @@ export class WuJi extends TriggerSkill {
       room
         .getPlayerById(event.fromId)
         .getCardIds(PlayerCardsArea.HandArea)
-        .find(cardId => Sanguosha.getCardById(cardId).Name === QingLongYanYueDao.name)
+        .find(
+          (cardId) =>
+            Sanguosha.getCardById(cardId).Name === QingLongYanYueDao.name
+        )
     ) {
       return true;
     }
@@ -61,7 +79,10 @@ export class WuJi extends TriggerSkill {
       let currentQinglong: CardId | undefined;
       currentQinglong = player
         .getCardIds(PlayerCardsArea.EquipArea)
-        .find(cardId => Sanguosha.getCardById(cardId).Name === QingLongYanYueDao.name);
+        .find(
+          (cardId) =>
+            Sanguosha.getCardById(cardId).Name === QingLongYanYueDao.name
+        );
       if (currentQinglong) {
         fromArea = CardMoveArea.EquipArea;
       } else {
@@ -71,8 +92,15 @@ export class WuJi extends TriggerSkill {
 
         const actualCards = player
           .getCardIds(PlayerCardsArea.JudgeArea)
-          .reduce<CardId[]>((cardIds, cardId) => cardIds.concat(...VirtualCard.getActualCards([cardId])), []);
-        currentQinglong = actualCards.find(cardId => Sanguosha.getCardById(cardId).Name === QingLongYanYueDao.name);
+          .reduce<CardId[]>(
+            (cardIds, cardId) =>
+              cardIds.concat(...VirtualCard.getActualCards([cardId])),
+            []
+          );
+        currentQinglong = actualCards.find(
+          (cardId) =>
+            Sanguosha.getCardById(cardId).Name === QingLongYanYueDao.name
+        );
         if (currentQinglong) {
           fromArea = CardMoveArea.JudgeArea;
         }
@@ -86,9 +114,14 @@ export class WuJi extends TriggerSkill {
     }
 
     if (qinglongdao.length === 0) {
-      qinglongdao = room.findCardsByMatcherFrom(new CardMatcher({ name: [QingLongYanYueDao.name] }));
+      qinglongdao = room.findCardsByMatcherFrom(
+        new CardMatcher({ name: [QingLongYanYueDao.name] })
+      );
       if (qinglongdao.length === 0) {
-        qinglongdao = room.findCardsByMatcherFrom(new CardMatcher({ name: [QingLongYanYueDao.name] }), false);
+        qinglongdao = room.findCardsByMatcherFrom(
+          new CardMatcher({ name: [QingLongYanYueDao.name] }),
+          false
+        );
         qinglongdao.length > 0 && (fromArea = CardMoveArea.DropStack);
       } else {
         fromArea = CardMoveArea.DrawStack;

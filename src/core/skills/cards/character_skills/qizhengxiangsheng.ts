@@ -1,19 +1,30 @@
-import { QiZhengXiangShengSkillTrigger } from 'core/ai/skills/cards/qizhengxiangsheng';
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { Sanguosha } from 'core/game/engine';
-import { DamageType } from 'core/game/game_props';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Precondition } from 'core/shares/libs/precondition/precondition';
-import { ActiveSkill, AI, CommonSkill } from 'core/skills/skill';
-import { TranslationPack } from 'core/translations/translation_json_tool';
-import { ExtralCardSkillProperty } from '../interface/extral_property';
+import { QiZhengXiangShengSkillTrigger } from "@/core/ai/skills/cards/qizhengxiangsheng";
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { Sanguosha } from "@/core/game/engine";
+import { DamageType } from "@/core/game/game_props";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(QiZhengXiangShengSkillTrigger)
-@CommonSkill({ name: 'qizhengxiangsheng', description: 'qizhengxiangsheng_description' })
-export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSkillProperty {
+@CommonSkill({
+  name: "qizhengxiangsheng",
+  description: "qizhengxiangsheng_description",
+})
+export class QiZhengXiangShengSkill
+  extends ActiveSkill
+  implements ExtralCardSkillProperty
+{
   public canUse() {
     return true;
   }
@@ -35,9 +46,12 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard: CardId,
+    containerCard: CardId
   ): boolean {
-    return target !== owner && room.getPlayerById(owner).canUseCardTo(room, containerCard, target);
+    return (
+      target !== owner &&
+      room.getPlayerById(owner).canUseCardTo(room, containerCard, target)
+    );
   }
 
   public isAvailableTarget(
@@ -46,55 +60,83 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard: CardId,
+    containerCard: CardId
   ): boolean {
-    return this.isCardAvailableTarget(owner, room, target, selectedCards, selectedTargets, containerCard);
+    return this.isCardAvailableTarget(
+      owner,
+      room,
+      target,
+      selectedCards,
+      selectedTargets,
+      containerCard
+    );
   }
 
-  public async onUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>) {
-    const toId = Precondition.exists(event.toIds, 'Unknown targets in guohechaiqiao')[0];
-    const fromId = Precondition.exists(event.fromId, 'Unknown targets in guohechaiqiao');
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.CardEffectEvent>
+  ) {
+    const toId = Precondition.exists(
+      event.toIds,
+      "Unknown targets in guohechaiqiao"
+    )[0];
+    const fromId = Precondition.exists(
+      event.fromId,
+      "Unknown targets in guohechaiqiao"
+    );
     const { cardId } = event;
     if (toId === fromId) {
       return true;
     }
 
-    const askForChoosingOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-      options: ['qibing', 'zhengbing'],
-      toId: fromId,
-      conversation: 'please choose',
-    };
+    const askForChoosingOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+      {
+        options: ["qibing", "zhengbing"],
+        toId: fromId,
+        conversation: "please choose",
+      };
 
     const { selectedOption } = await room.doAskForCommonly(
       GameEventIdentifiers.AskForChoosingOptionsEvent,
       askForChoosingOptionsEvent,
       fromId,
-      true,
+      true
     );
 
-    const isQiBingSelected = selectedOption === 'qibing';
+    const isQiBingSelected = selectedOption === "qibing";
 
     const askForCardEvent = {
       cardMatcher: new CardMatcher({
-        generalName: ['slash', 'jink'],
+        generalName: ["slash", "jink"],
       }).toSocketPassenger(),
       byCardId: cardId,
       cardUserId: fromId,
       conversation:
         fromId !== undefined
           ? TranslationPack.translationJsonPatcher(
-              '{0} used {1} to you, please response a {2} or {3} card',
-              TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+              "{0} used {1} to you, please response a {2} or {3} card",
+              TranslationPack.patchPlayerInTranslation(
+                room.getPlayerById(fromId)
+              ),
               TranslationPack.patchCardInTranslation(cardId),
-              'slash',
-              'jink',
+              "slash",
+              "jink"
             ).extract()
-          : TranslationPack.translationJsonPatcher('please response a {0} or {1} card', 'slash', 'jink').extract(),
-      triggeredBySkills: event.triggeredBySkills ? [...event.triggeredBySkills, this.Name] : [this.Name],
+          : TranslationPack.translationJsonPatcher(
+              "please response a {0} or {1} card",
+              "slash",
+              "jink"
+            ).extract(),
+      triggeredBySkills: event.triggeredBySkills
+        ? [...event.triggeredBySkills, this.Name]
+        : [this.Name],
     };
 
     const response = await room.askForCardResponse(
@@ -103,22 +145,29 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
         toId,
         triggeredBySkills: [this.Name],
       },
-      toId,
+      toId
     );
 
     const responseCard = response.cardId;
     if (responseCard) {
-      const cardResponsedEvent: ServerEventFinder<GameEventIdentifiers.CardResponseEvent> = {
-        fromId: toId,
-        cardId: responseCard,
-        responseToEvent: event,
-        triggeredBySkills: [this.Name],
-      };
+      const cardResponsedEvent: ServerEventFinder<GameEventIdentifiers.CardResponseEvent> =
+        {
+          fromId: toId,
+          cardId: responseCard,
+          responseToEvent: event,
+          triggeredBySkills: [this.Name],
+        };
       await room.responseCard(cardResponsedEvent);
 
-      if (isQiBingSelected && Sanguosha.getCardById(responseCard).GeneralName !== 'slash') {
+      if (
+        isQiBingSelected &&
+        Sanguosha.getCardById(responseCard).GeneralName !== "slash"
+      ) {
         await this.doQiBingSelection(fromId, toId, room, cardId);
-      } else if (!isQiBingSelected && Sanguosha.getCardById(responseCard).GeneralName !== 'jink') {
+      } else if (
+        !isQiBingSelected &&
+        Sanguosha.getCardById(responseCard).GeneralName !== "jink"
+      ) {
         await this.doZhengBingSelection(fromId, toId, room);
       }
     } else {
@@ -132,7 +181,12 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
     return true;
   }
 
-  private async doQiBingSelection(from: PlayerId, to: PlayerId, room: Room, cardId: CardId) {
+  private async doQiBingSelection(
+    from: PlayerId,
+    to: PlayerId,
+    room: Room,
+    cardId: CardId
+  ) {
     const fromPlayer = room.getPlayerById(from);
     const toPlayer = room.getPlayerById(to);
 
@@ -144,10 +198,10 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
       triggeredBySkills: [this.Name],
       cardIds: [cardId],
       translationsMessage: TranslationPack.translationJsonPatcher(
-        'player {0} selected {1}, {2} get 1 damage hit from {0}',
+        "player {0} selected {1}, {2} get 1 damage hit from {0}",
         TranslationPack.patchPlayerInTranslation(fromPlayer),
-        'qibing',
-        TranslationPack.patchPlayerInTranslation(toPlayer),
+        "qibing",
+        TranslationPack.patchPlayerInTranslation(toPlayer)
       ).extract(),
     });
   }
@@ -160,8 +214,11 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
     }
 
     const options: CardChoosingOptions = {
-      [PlayerCardsArea.EquipArea]: toPlayer.getCardIds(PlayerCardsArea.EquipArea),
-      [PlayerCardsArea.HandArea]: toPlayer.getCardIds(PlayerCardsArea.HandArea).length,
+      [PlayerCardsArea.EquipArea]: toPlayer.getCardIds(
+        PlayerCardsArea.EquipArea
+      ),
+      [PlayerCardsArea.HandArea]: toPlayer.getCardIds(PlayerCardsArea.HandArea)
+        .length,
     };
 
     const chooseCardEvent = {
@@ -170,14 +227,21 @@ export class QiZhengXiangShengSkill extends ActiveSkill implements ExtralCardSki
       options,
       triggeredBySkills: [this.Name],
     };
-    const response = await room.askForChoosingPlayerCard(chooseCardEvent, chooseCardEvent.fromId, false, true);
+    const response = await room.askForChoosingPlayerCard(
+      chooseCardEvent,
+      chooseCardEvent.fromId,
+      false,
+      true
+    );
 
     if (!response) {
       return false;
     }
 
     await room.moveCards({
-      movingCards: [{ card: response.selectedCard!, fromArea: response.fromArea }],
+      movingCards: [
+        { card: response.selectedCard!, fromArea: response.fromArea },
+      ],
       fromId: chooseCardEvent.toId,
       toId: chooseCardEvent.fromId,
       moveReason: CardMoveReason.ActivePrey,

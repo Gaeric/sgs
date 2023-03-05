@@ -1,17 +1,33 @@
-import { CardChoosingOptions, CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, PhaseChangeStage, PlayerPhase, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Functional } from 'core/shares/libs/functional';
-import { CommonSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Functional } from "@/core/shares/libs/functional";
+import { CommonSkill, ShadowSkill, TriggerSkill } from "@/core/skills/skill";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'qiaobian', description: 'qiaobian_description' })
+@CommonSkill({ name: "qiaobian", description: "qiaobian_description" })
 export class QiaoBian extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return (
       stage === PhaseChangeStage.AfterPhaseChanged &&
       [
@@ -23,7 +39,11 @@ export class QiaoBian extends TriggerSkill {
     );
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     if (content.toPlayer !== owner.Id) {
       return false;
     }
@@ -46,12 +66,12 @@ export class QiaoBian extends TriggerSkill {
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
   ): PatchedTranslationObject | string {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to drop a hand card to skip {1} ?',
+      "{0}: do you want to drop a hand card to skip {1} ?",
       this.Name,
-      Functional.getPlayerPhaseRawText(event.to),
+      Functional.getPlayerPhaseRawText(event.to)
     ).extract();
   }
 
@@ -61,16 +81,23 @@ export class QiaoBian extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { triggeredOnEvent, fromId, cardIds } = skillUseEvent;
-    const phaseChangeEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+    const phaseChangeEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
 
     if (!cardIds || cardIds.length < 1) {
       return false;
     }
 
-    await room.dropCards(CardMoveReason.SelfDrop, cardIds, fromId, fromId, this.Name);
+    await room.dropCards(
+      CardMoveReason.SelfDrop,
+      cardIds,
+      fromId,
+      fromId,
+      this.Name
+    );
 
     const from = room.getPlayerById(fromId);
     from.setFlag(this.Name, true);
@@ -84,9 +111,12 @@ export class QiaoBian extends TriggerSkill {
 @ShadowSkill
 @CommonSkill({ name: QiaoBian.Name, description: QiaoBian.Description })
 export class QiaoBianSkipDraw extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>
+  ): boolean {
     return (
-      EventPacker.getIdentifier(event) === GameEventIdentifiers.PhaseSkippedEvent &&
+      EventPacker.getIdentifier(event) ===
+        GameEventIdentifiers.PhaseSkippedEvent &&
       event.skippedPhase === PlayerPhase.DrawCardStage
     );
   }
@@ -94,9 +124,12 @@ export class QiaoBianSkipDraw extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>
   ): boolean {
-    return owner.Id === content.playerId && owner.getFlag<boolean>(this.GeneralName) === true;
+    return (
+      owner.Id === content.playerId &&
+      owner.getFlag<boolean>(this.GeneralName) === true
+    );
   }
 
   public get Priority() {
@@ -107,15 +140,24 @@ export class QiaoBianSkipDraw extends TriggerSkill {
     return targets.length >= 1 && targets.length <= 2;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     const to = room.getPlayerById(target);
-    return target !== owner && to.getCardIds(PlayerCardsArea.HandArea).length > 0;
+    return (
+      target !== owner && to.getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
-  public getSkillLog(room: Room, owner: Player): PatchedTranslationObject | string {
+  public getSkillLog(
+    room: Room,
+    owner: Player
+  ): PatchedTranslationObject | string {
     return TranslationPack.translationJsonPatcher(
-      '{0}: please choose one or two targets to obtain a hand card from each of them',
-      this.GeneralName,
+      "{0}: please choose one or two targets to obtain a hand card from each of them",
+      this.GeneralName
     ).extract();
   }
 
@@ -125,33 +167,39 @@ export class QiaoBianSkipDraw extends TriggerSkill {
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { fromId, toIds } = skillUseEvent;
 
     for (const toId of toIds!) {
-      const cardIds = room.getPlayerById(toId).getCardIds(PlayerCardsArea.HandArea);
-      const askForChoosingCard: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent> = {
-        fromId,
-        toId,
-        options: {
-          [PlayerCardsArea.HandArea]: cardIds.length,
-        },
-        triggeredBySkills: [this.GeneralName],
-      };
+      const cardIds = room
+        .getPlayerById(toId)
+        .getCardIds(PlayerCardsArea.HandArea);
+      const askForChoosingCard: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent> =
+        {
+          fromId,
+          toId,
+          options: {
+            [PlayerCardsArea.HandArea]: cardIds.length,
+          },
+          triggeredBySkills: [this.GeneralName],
+        };
 
       room.notify(
         GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
         EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
-          askForChoosingCard,
+          askForChoosingCard
         ),
-        fromId,
+        fromId
       );
       let { selectedCard } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-        fromId,
+        fromId
       );
-      selectedCard = selectedCard !== undefined ? selectedCard : cardIds[Math.floor(Math.random() * cardIds.length)];
+      selectedCard =
+        selectedCard !== undefined
+          ? selectedCard
+          : cardIds[Math.floor(Math.random() * cardIds.length)];
 
       await room.moveCards({
         movingCards: [{ card: selectedCard, fromArea: CardMoveArea.HandArea }],
@@ -169,11 +217,17 @@ export class QiaoBianSkipDraw extends TriggerSkill {
 }
 
 @ShadowSkill
-@CommonSkill({ name: QiaoBianSkipDraw.Name, description: QiaoBianSkipDraw.Description })
+@CommonSkill({
+  name: QiaoBianSkipDraw.Name,
+  description: QiaoBianSkipDraw.Description,
+})
 export class QiaoBianSkipPlay extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>
+  ): boolean {
     return (
-      EventPacker.getIdentifier(event) === GameEventIdentifiers.PhaseSkippedEvent &&
+      EventPacker.getIdentifier(event) ===
+        GameEventIdentifiers.PhaseSkippedEvent &&
       event.skippedPhase === PlayerPhase.PlayCardStage
     );
   }
@@ -181,9 +235,12 @@ export class QiaoBianSkipPlay extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseSkippedEvent>
   ): boolean {
-    return owner.Id === content.playerId && owner.getFlag<boolean>(this.GeneralName) === true;
+    return (
+      owner.Id === content.playerId &&
+      owner.getFlag<boolean>(this.GeneralName) === true
+    );
   }
 
   public get Priority() {
@@ -199,7 +256,7 @@ export class QiaoBianSkipPlay extends TriggerSkill {
     room: Room,
     target: PlayerId,
     selectedCards: CardId[],
-    selectedTargets: PlayerId[],
+    selectedTargets: PlayerId[]
   ): boolean {
     const to = room.getPlayerById(target);
     const equiprCardIds = to.getCardIds(PlayerCardsArea.EquipArea);
@@ -212,10 +269,16 @@ export class QiaoBianSkipPlay extends TriggerSkill {
       const from = room.getPlayerById(selectedTargets[0]);
 
       const fromEquipArea = from.getCardIds(PlayerCardsArea.EquipArea);
-      canBeTarget = canBeTarget || fromEquipArea.find(id => room.canPlaceCardTo(id, target)) !== undefined;
+      canBeTarget =
+        canBeTarget ||
+        fromEquipArea.find((id) => room.canPlaceCardTo(id, target)) !==
+          undefined;
 
       const fromJudgeArea = from.getCardIds(PlayerCardsArea.JudgeArea);
-      canBeTarget = canBeTarget || fromJudgeArea.find(id => room.canPlaceCardTo(id, target)) !== undefined;
+      canBeTarget =
+        canBeTarget ||
+        fromJudgeArea.find((id) => room.canPlaceCardTo(id, target)) !==
+          undefined;
 
       return canBeTarget;
     }
@@ -223,7 +286,9 @@ export class QiaoBianSkipPlay extends TriggerSkill {
     return false;
   }
 
-  public getAnimationSteps(event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public getAnimationSteps(
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     const { fromId, toIds } = event;
     return [
       { from: fromId, tos: [toIds![0]] },
@@ -235,21 +300,27 @@ export class QiaoBianSkipPlay extends TriggerSkill {
     return false;
   }
 
-  public getSkillLog(room: Room, owner: Player): PatchedTranslationObject | string {
+  public getSkillLog(
+    room: Room,
+    owner: Player
+  ): PatchedTranslationObject | string {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to move a card in the battlefield?',
-      this.GeneralName,
+      "{0}: do you want to move a card in the battlefield?",
+      this.GeneralName
     ).extract();
   }
 
-  public async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     event.animation = this.getAnimationSteps(event);
     return true;
   }
 
   public async onEffect(
     room: Room,
-    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
   ): Promise<boolean> {
     const { fromId, toIds } = skillUseEvent;
 
@@ -259,10 +330,14 @@ export class QiaoBianSkipPlay extends TriggerSkill {
     const canMovedJudgeCardIds: CardId[] = [];
 
     const fromEquipArea = moveFrom.getCardIds(PlayerCardsArea.EquipArea);
-    canMovedEquipCardIds.push(...fromEquipArea.filter(id => room.canPlaceCardTo(id, moveTo.Id)));
+    canMovedEquipCardIds.push(
+      ...fromEquipArea.filter((id) => room.canPlaceCardTo(id, moveTo.Id))
+    );
 
     const fromJudgeArea = moveFrom.getCardIds(PlayerCardsArea.JudgeArea);
-    canMovedJudgeCardIds.push(...fromJudgeArea.filter(id => room.canPlaceCardTo(id, moveTo.Id)));
+    canMovedJudgeCardIds.push(
+      ...fromJudgeArea.filter((id) => room.canPlaceCardTo(id, moveTo.Id))
+    );
 
     const options: CardChoosingOptions = {
       [PlayerCardsArea.JudgeArea]: canMovedJudgeCardIds,
@@ -278,17 +353,21 @@ export class QiaoBianSkipPlay extends TriggerSkill {
 
     room.notify(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(chooseCardEvent),
-      fromId,
+      EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
+        chooseCardEvent
+      ),
+      fromId
     );
 
     const response = await room.onReceivingAsyncResponseFrom(
       GameEventIdentifiers.AskForChoosingCardFromPlayerEvent,
-      fromId,
+      fromId
     );
 
     await room.moveCards({
-      movingCards: [{ card: response.selectedCard!, fromArea: response.fromArea }],
+      movingCards: [
+        { card: response.selectedCard!, fromArea: response.fromArea },
+      ],
       moveReason: CardMoveReason.PassiveMove,
       toId: moveTo.Id,
       fromId: moveFrom.Id,

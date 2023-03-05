@@ -1,30 +1,41 @@
-import { AiLibrary } from 'core/ai/ai_lib';
-import { ActiveSkillTriggerClass } from 'core/ai/skills/base/active_skill_trigger';
-import type { CardId } from 'core/cards/libs/card_props';
-import type { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import type { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import type { Room } from 'core/room/room';
-import { GuoHeChaiQiaoSkill } from 'core/skills';
+import { AiLibrary } from "@/core/ai/ai_lib";
+import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
+import type { CardId } from "@/core/cards/libs/card_props";
+import type {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import type { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import type { Room } from "@/core/room/room";
+import { GuoHeChaiQiaoSkill } from "@/core/skills";
 
 export class GuoHeChaiQiaoSkillTrigger extends ActiveSkillTriggerClass<GuoHeChaiQiaoSkill> {
   skillTrigger = (
     room: Room,
     ai: Player,
     skill: GuoHeChaiQiaoSkill,
-    skillInCard?: CardId,
+    skillInCard?: CardId
   ): ClientEventFinder<GameEventIdentifiers.CardUseEvent> | undefined => {
     const friends = AiLibrary.sortFriendsFromWeakToStrong(room, ai).filter(
-      f => f.getCardIds(PlayerCardsArea.JudgeArea).length > 0,
+      (f) => f.getCardIds(PlayerCardsArea.JudgeArea).length > 0
     );
     const enemies = AiLibrary.sortEnemiesByRole(room, ai);
 
     const availableTargets = [...friends, ...enemies].filter(
-      target =>
-        target.getPlayerCards().length > 0 && skill.isAvailableTarget(ai.Id, room, target.Id, [], [], skillInCard!),
+      (target) =>
+        target.getPlayerCards().length > 0 &&
+        skill.isAvailableTarget(ai.Id, room, target.Id, [], [], skillInCard!)
     );
 
-    const targets = this.filterTargets(room, ai, skill, skillInCard!, availableTargets);
+    const targets = this.filterTargets(
+      room,
+      ai,
+      skill,
+      skillInCard!,
+      availableTargets
+    );
     if (targets.length === 0) {
       return;
     }
@@ -38,18 +49,27 @@ export class GuoHeChaiQiaoSkillTrigger extends ActiveSkillTriggerClass<GuoHeChai
 
   onAskForChoosingCardFromPlayerEvent = (
     content: ServerEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>,
-    room: Room,
-  ): ClientEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent> | undefined => {
+    room: Room
+  ):
+    | ClientEventFinder<GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>
+    | undefined => {
     const ai = room.getPlayerById(content.fromId);
     const to = room.getPlayerById(content.toId);
 
-    const judgeCards = content.options[PlayerCardsArea.JudgeArea] as CardId[] | undefined;
-    const handCards = content.options[PlayerCardsArea.HandArea] as number | undefined;
-    const equipCards = content.options[PlayerCardsArea.EquipArea] as CardId[] | undefined;
+    const judgeCards = content.options[PlayerCardsArea.JudgeArea] as
+      | CardId[]
+      | undefined;
+    const handCards = content.options[PlayerCardsArea.HandArea] as
+      | number
+      | undefined;
+    const equipCards = content.options[PlayerCardsArea.EquipArea] as
+      | CardId[]
+      | undefined;
 
     if (AiLibrary.areTheyFriendly(ai, to, room.Info.gameMode)) {
       if (judgeCards) {
-        const availablecard = AiLibrary.sortByJudgeCardsThreatenValue(judgeCards)[0];
+        const availablecard =
+          AiLibrary.sortByJudgeCardsThreatenValue(judgeCards)[0];
         return {
           fromId: ai.Id,
           selectedCard: availablecard,
@@ -90,7 +110,8 @@ export class GuoHeChaiQiaoSkillTrigger extends ActiveSkillTriggerClass<GuoHeChai
         };
       }
       if (judgeCards) {
-        const availablecards = AiLibrary.sortByJudgeCardsThreatenValue(judgeCards);
+        const availablecards =
+          AiLibrary.sortByJudgeCardsThreatenValue(judgeCards);
         return {
           fromId: ai.Id,
           selectedCard: availablecards[availablecards.length - 1],

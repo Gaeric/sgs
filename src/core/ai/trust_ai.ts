@@ -1,13 +1,17 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { System } from 'core/shares/libs/system';
-import { PlayerAI } from './ai';
-import { AiLibrary } from './ai_lib';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { System } from "@/core/shares/libs/system";
+import { PlayerAI } from "./ai";
+import { AiLibrary } from "./ai_lib";
 
 export class TrustAI extends PlayerAI {
   public static get Instance() {
@@ -18,96 +22,125 @@ export class TrustAI extends PlayerAI {
     return this.instance;
   }
 
-  protected onAskForPlayCardsOrSkillsEvent<T extends GameEventIdentifiers.AskForPlayCardsOrSkillsEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
-    const { toId: fromId } = content as ServerEventFinder<GameEventIdentifiers.AskForPlayCardsOrSkillsEvent>;
-    const endEvent: ClientEventFinder<GameEventIdentifiers.AskForPlayCardsOrSkillsEvent> = {
-      fromId,
-      end: true,
-    };
+  protected onAskForPlayCardsOrSkillsEvent<
+    T extends GameEventIdentifiers.AskForPlayCardsOrSkillsEvent
+  >(content: ServerEventFinder<T>, room: Room) {
+    const { toId: fromId } =
+      content as ServerEventFinder<GameEventIdentifiers.AskForPlayCardsOrSkillsEvent>;
+    const endEvent: ClientEventFinder<GameEventIdentifiers.AskForPlayCardsOrSkillsEvent> =
+      {
+        fromId,
+        end: true,
+      };
     return endEvent;
   }
 
-  protected onAskForSkillUseEvent<T extends GameEventIdentifiers.AskForSkillUseEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
-    const { invokeSkillNames, toId } = content as ServerEventFinder<GameEventIdentifiers.AskForSkillUseEvent>;
+  protected onAskForSkillUseEvent<
+    T extends GameEventIdentifiers.AskForSkillUseEvent
+  >(content: ServerEventFinder<T>, room: Room) {
+    const { invokeSkillNames, toId } =
+      content as ServerEventFinder<GameEventIdentifiers.AskForSkillUseEvent>;
     if (!EventPacker.isUncancellableEvent(content)) {
-      const skillUse: ClientEventFinder<GameEventIdentifiers.AskForSkillUseEvent> = {
-        invoke: invokeSkillNames !== undefined && invokeSkillNames[0] !== undefined ? invokeSkillNames[0] : undefined,
-        fromId: toId,
-      };
+      const skillUse: ClientEventFinder<GameEventIdentifiers.AskForSkillUseEvent> =
+        {
+          invoke:
+            invokeSkillNames !== undefined && invokeSkillNames[0] !== undefined
+              ? invokeSkillNames[0]
+              : undefined,
+          fromId: toId,
+        };
       return skillUse;
     }
 
-    const skillUse: ClientEventFinder<GameEventIdentifiers.AskForSkillUseEvent> = {
-      fromId: toId,
-      invoke: invokeSkillNames[0],
-    };
+    const skillUse: ClientEventFinder<GameEventIdentifiers.AskForSkillUseEvent> =
+      {
+        fromId: toId,
+        invoke: invokeSkillNames[0],
+      };
     return skillUse;
   }
 
-  protected onAskForCardResponseEvent<T extends GameEventIdentifiers.AskForCardResponseEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForCardResponseEvent<
+    T extends GameEventIdentifiers.AskForCardResponseEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     // const logs: string =
     //   `AskForCardResponseEvent, ask Card ${content.cardMatcher.name} or ${content.cardMatcher.generalName} ` +
     //   (content !== undefined && content!.byCardId !== undefined
     //     ? `for Reponse ${Sanguosha.getCardById(content!.byCardId).Name}`
     //     : '');
 
-    const { toId, cardMatcher } = content as ServerEventFinder<GameEventIdentifiers.AskForCardResponseEvent>;
+    const { toId, cardMatcher } =
+      content as ServerEventFinder<GameEventIdentifiers.AskForCardResponseEvent>;
     if (EventPacker.isUncancellableEvent(content)) {
-      const cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardResponseEvent> = {
-        fromId: toId,
-        cardId: room
-          .getPlayerById(toId)
-          .getCardIds(PlayerCardsArea.HandArea)
-          .find(cardId => CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId))),
-      };
+      const cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardResponseEvent> =
+        {
+          fromId: toId,
+          cardId: room
+            .getPlayerById(toId)
+            .getCardIds(PlayerCardsArea.HandArea)
+            .find((cardId) =>
+              CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId))
+            ),
+        };
       return cardResponse;
     } else {
       // just handle nanmanruqin and duel, not enough for another judge
       let cardId: CardId | undefined;
-      if (cardMatcher.generalName && cardMatcher.generalName.includes('slash')) {
+      if (
+        cardMatcher.generalName &&
+        cardMatcher.generalName.includes("slash")
+      ) {
         cardId = room
           .getPlayerById(toId)
           .getCardIds(PlayerCardsArea.HandArea)
-          .find(cardId => CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId)));
+          .find((cardId) =>
+            CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId))
+          );
       }
-      const cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardResponseEvent> = {
-        fromId: toId,
-        cardId,
-      };
+      const cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardResponseEvent> =
+        {
+          fromId: toId,
+          cardId,
+        };
       return cardResponse;
     }
   }
 
-  protected onAskForCardUseEvent<T extends GameEventIdentifiers.AskForCardUseEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
-    const { toId, cardMatcher } = content as ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>;
+  protected onAskForCardUseEvent<
+    T extends GameEventIdentifiers.AskForCardUseEvent
+  >(content: ServerEventFinder<T>, room: Room) {
+    const { toId, cardMatcher } =
+      content as ServerEventFinder<GameEventIdentifiers.AskForCardUseEvent>;
 
     const toPlayer = room.getPlayerById(toId);
-    const availableCards = AiLibrary.findAvailableCardsToUse(room, toPlayer, new CardMatcher(cardMatcher));
+    const availableCards = AiLibrary.findAvailableCardsToUse(
+      room,
+      toPlayer,
+      new CardMatcher(cardMatcher)
+    );
 
     if (EventPacker.isUncancellableEvent(content)) {
-      const cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardUseEvent> = {
-        fromId: toId,
-        cardId: availableCards[0],
-      };
+      const cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardUseEvent> =
+        {
+          fromId: toId,
+          cardId: availableCards[0],
+        };
       return cardResponse;
     } else {
-      let cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardUseEvent> = { fromId: toId };
-      const cardIds = AiLibrary.askAiUseCard(room, toId, availableCards, cardMatcher, content!.byCardId);
+      let cardResponse: ClientEventFinder<GameEventIdentifiers.AskForCardUseEvent> =
+        { fromId: toId };
+      const cardIds = AiLibrary.askAiUseCard(
+        room,
+        toId,
+        availableCards,
+        cardMatcher,
+        content!.byCardId
+      );
       if (cardIds.length > 0) {
         const responseCardId = cardIds.sort(
-          (a, b) => AiLibrary.getCardValueofCard(a).value - AiLibrary.getCardValueofCard(b).value,
+          (a, b) =>
+            AiLibrary.getCardValueofCard(a).value -
+            AiLibrary.getCardValueofCard(b).value
         )[0];
         cardResponse = {
           cardId: responseCardId,
@@ -120,29 +153,37 @@ export class TrustAI extends PlayerAI {
     }
   }
 
-  protected onAskForCardDropEvent<T extends GameEventIdentifiers.AskForCardDropEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForCardDropEvent<
+    T extends GameEventIdentifiers.AskForCardDropEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { toId, cardAmount, fromArea, except } =
       content as ServerEventFinder<GameEventIdentifiers.AskForCardDropEvent>;
     const to = room.getPlayerById(toId);
-    const cardDrop: ClientEventFinder<GameEventIdentifiers.AskForCardDropEvent> = {
-      fromId: toId,
-      droppedCards: [],
-    };
+    const cardDrop: ClientEventFinder<GameEventIdentifiers.AskForCardDropEvent> =
+      {
+        fromId: toId,
+        droppedCards: [],
+      };
 
-    if (EventPacker.isUncancellableEvent(content) || content.triggeredBySkills !== undefined) {
+    if (
+      EventPacker.isUncancellableEvent(content) ||
+      content.triggeredBySkills !== undefined
+    ) {
       let cards = fromArea.reduce<CardId[]>(
-        (allCards, area) => [...allCards, ...to.getCardIds(area).filter(cardId => !except?.includes(cardId))],
-        [],
+        (allCards, area) => [
+          ...allCards,
+          ...to.getCardIds(area).filter((cardId) => !except?.includes(cardId)),
+        ],
+        []
       );
 
       if (cards.length === 0) {
         return cardDrop;
       }
 
-      const holdAmount = cards.length - (cardAmount instanceof Array ? cardAmount[0] : cardAmount);
+      const holdAmount =
+        cards.length -
+        (cardAmount instanceof Array ? cardAmount[0] : cardAmount);
       cards = AiLibrary.sortCardbyValue(cards);
       cardDrop.droppedCards = cards.slice(holdAmount);
     }
@@ -151,17 +192,16 @@ export class TrustAI extends PlayerAI {
 
   protected onAskForPeachEvent<T extends GameEventIdentifiers.AskForPeachEvent>(
     content: ServerEventFinder<T>,
-    room: Room,
+    room: Room
   ) {
     const usePeach: ClientEventFinder<T> = {
       fromId: content.toId,
     };
     return usePeach;
   }
-  protected onAskForCardDisplayEvent<T extends GameEventIdentifiers.AskForCardDisplayEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForCardDisplayEvent<
+    T extends GameEventIdentifiers.AskForCardDisplayEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { cardAmount, cardMatcher, toId } = content;
     const to = room.getPlayerById(toId);
     const handCards = to.getCardIds(PlayerCardsArea.HandArea);
@@ -169,7 +209,9 @@ export class TrustAI extends PlayerAI {
       cardMatcher === undefined
         ? handCards.slice(0, cardAmount)
         : handCards
-            .filter(cardId => CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId)))
+            .filter((cardId) =>
+              CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId))
+            )
             .slice(0, cardAmount);
 
     const displayCards: ClientEventFinder<T> = {
@@ -181,16 +223,21 @@ export class TrustAI extends PlayerAI {
   }
   protected onAskForCardEvent<T extends GameEventIdentifiers.AskForCardEvent>(
     content: ServerEventFinder<T>,
-    room: Room,
+    room: Room
   ) {
-    const { cardAmount, cardAmountRange, cardMatcher, toId, fromArea } = content;
+    const { cardAmount, cardAmountRange, cardMatcher, toId, fromArea } =
+      content;
     const amount = cardAmount || (cardAmountRange && cardAmountRange[0]);
     const to = room.getPlayerById(toId);
     const selectedCards = fromArea
       .reduce<CardId[]>((allCards, area) => {
         if (cardMatcher) {
           allCards.push(
-            ...to.getCardIds(area).filter(card => CardMatcher.match(cardMatcher, Sanguosha.getCardById(card))),
+            ...to
+              .getCardIds(area)
+              .filter((card) =>
+                CardMatcher.match(cardMatcher, Sanguosha.getCardById(card))
+              )
           );
         } else {
           allCards.push(...to.getCardIds(area));
@@ -198,39 +245,50 @@ export class TrustAI extends PlayerAI {
         return allCards;
       }, [])
       .slice(0, amount);
-    const selectCard: ClientEventFinder<GameEventIdentifiers.AskForCardEvent> = {
-      fromId: toId,
-      selectedCards,
-    };
+    const selectCard: ClientEventFinder<GameEventIdentifiers.AskForCardEvent> =
+      {
+        fromId: toId,
+        selectedCards,
+      };
     return selectCard;
   }
-  protected onAskForPinDianCardEvent<T extends GameEventIdentifiers.AskForPinDianCardEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForPinDianCardEvent<
+    T extends GameEventIdentifiers.AskForPinDianCardEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const pindianEvent: ClientEventFinder<T> = {
       fromId: content.toId,
-      pindianCard: room.getPlayerById(content.toId).getCardIds(PlayerCardsArea.HandArea)[0],
+      pindianCard: room
+        .getPlayerById(content.toId)
+        .getCardIds(PlayerCardsArea.HandArea)[0],
     };
 
     return pindianEvent;
   }
 
-  protected onAskForChoosingCardEvent<T extends GameEventIdentifiers.AskForChoosingCardEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForChoosingCardEvent<
+    T extends GameEventIdentifiers.AskForChoosingCardEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { cardIds, cardMatcher, toId, amount, customCardFields } = content;
 
     let selectedCardIndex: number[] | undefined;
     let selectedCards: CardId[] | undefined;
 
     if (cardIds !== undefined) {
-      selectedCardIndex = typeof cardIds === 'number' ? new Array(amount).fill(0).map((_, index) => index) : undefined;
+      selectedCardIndex =
+        typeof cardIds === "number"
+          ? new Array(amount).fill(0).map((_, index) => index)
+          : undefined;
       selectedCards =
         cardIds instanceof Array
           ? cardIds
-              .filter(cardId => (cardMatcher ? CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId)) : cardId))
+              .filter((cardId) =>
+                cardMatcher
+                  ? CardMatcher.match(
+                      cardMatcher,
+                      Sanguosha.getCardById(cardId)
+                    )
+                  : cardId
+              )
               .slice(0, amount)
           : undefined;
     } else if (customCardFields !== undefined) {
@@ -242,7 +300,11 @@ export class TrustAI extends PlayerAI {
       }
 
       selectedCards = avaliableCards
-        .filter(cardId => (cardMatcher ? CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId)) : cardId))
+        .filter((cardId) =>
+          cardMatcher
+            ? CardMatcher.match(cardMatcher, Sanguosha.getCardById(cardId))
+            : cardId
+        )
         .slice(0, amount);
     }
 
@@ -255,22 +317,21 @@ export class TrustAI extends PlayerAI {
     return chooseCard;
   }
 
-  protected onAskForChoosingPlayerEvent<T extends GameEventIdentifiers.AskForChoosingPlayerEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForChoosingPlayerEvent<
+    T extends GameEventIdentifiers.AskForChoosingPlayerEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { requiredAmount, players, toId } = content;
-    const amount = requiredAmount instanceof Array ? requiredAmount[0] : requiredAmount;
+    const amount =
+      requiredAmount instanceof Array ? requiredAmount[0] : requiredAmount;
     const choosePlayer: ClientEventFinder<T> = {
       fromId: toId,
       selectedPlayers: players.slice(0, amount),
     };
     return choosePlayer;
   }
-  protected onAskForChoosingOptionsEvent<T extends GameEventIdentifiers.AskForChoosingOptionsEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForChoosingOptionsEvent<
+    T extends GameEventIdentifiers.AskForChoosingOptionsEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { toId, options } = content;
     const chooseOptions: ClientEventFinder<T> = {
       selectedOption: options[0],
@@ -279,10 +340,9 @@ export class TrustAI extends PlayerAI {
 
     return chooseOptions;
   }
-  protected onAskForChoosingCharacterEvent<T extends GameEventIdentifiers.AskForChoosingCharacterEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForChoosingCharacterEvent<
+    T extends GameEventIdentifiers.AskForChoosingCharacterEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { characterIds, toId } = content;
     const chooseCharacter: ClientEventFinder<T> = {
       chosenCharacterIds: characterIds,
@@ -291,10 +351,9 @@ export class TrustAI extends PlayerAI {
 
     return chooseCharacter;
   }
-  protected onAskForChoosingCardFromPlayerEvent<T extends GameEventIdentifiers.AskForChoosingCardFromPlayerEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForChoosingCardFromPlayerEvent<
+    T extends GameEventIdentifiers.AskForChoosingCardFromPlayerEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { options, fromId, toId } = content;
 
     if (!EventPacker.isUncancellableEvent(content)) {
@@ -303,14 +362,18 @@ export class TrustAI extends PlayerAI {
       };
       return chooseCard;
     }
-    const chooseCard = AiLibrary.askAiChooseCardFromPlayer(room, fromId, toId, options);
+    const chooseCard = AiLibrary.askAiChooseCardFromPlayer(
+      room,
+      fromId,
+      toId,
+      options
+    );
     return chooseCard;
   }
 
-  protected onAskForPlaceCardsInDileEvent<T extends GameEventIdentifiers.AskForPlaceCardsInDileEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForPlaceCardsInDileEvent<
+    T extends GameEventIdentifiers.AskForPlaceCardsInDileEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const placeCards: ClientEventFinder<T> = {
       top: content.cardIds.slice(0, content.top),
       bottom: content.cardIds.slice(content.top, content.top + content.bottom),
@@ -320,12 +383,13 @@ export class TrustAI extends PlayerAI {
     return placeCards;
   }
 
-  protected onAskForContinuouslyChoosingCardEvent<T extends GameEventIdentifiers.AskForContinuouslyChoosingCardEvent>(
-    content: ServerEventFinder<T>,
-    room: Room,
-  ) {
+  protected onAskForContinuouslyChoosingCardEvent<
+    T extends GameEventIdentifiers.AskForContinuouslyChoosingCardEvent
+  >(content: ServerEventFinder<T>, room: Room) {
     const { toId, cardIds, selected } = content;
-    const selectedCard = cardIds.find(cardId => !selected.find(selectCard => selectCard.card === cardId))!;
+    const selectedCard = cardIds.find(
+      (cardId) => !selected.find((selectCard) => selectCard.card === cardId)
+    )!;
     const chooseCard: ClientEventFinder<T> = {
       selectedCard,
       fromId: toId,
@@ -335,15 +399,25 @@ export class TrustAI extends PlayerAI {
   }
 
   protected onAskForChoosingCardWithConditionsEvent<
-    T extends GameEventIdentifiers.AskForChoosingCardWithConditionsEvent,
+    T extends GameEventIdentifiers.AskForChoosingCardWithConditionsEvent
   >(content: ServerEventFinder<T>, room: Room): ClientEventFinder<T> {
-    const { amount, customCardFields, cardIds, cardFilter, involvedTargets, triggeredBySkills } = content;
+    const {
+      amount,
+      customCardFields,
+      cardIds,
+      cardFilter,
+      involvedTargets,
+      triggeredBySkills,
+    } = content;
 
     for (const skillName of triggeredBySkills!) {
       const skill = Sanguosha.getSkillBySkillName(skillName);
       const aiSkill = skill.tryToCallAiTrigger();
 
-      const response = aiSkill?.onAskForChoosingCardWithConditionsEvent?.(content, room);
+      const response = aiSkill?.onAskForChoosingCardWithConditionsEvent?.(
+        content,
+        room
+      );
       if (response) {
         return response;
       }
@@ -377,7 +451,10 @@ export class TrustAI extends PlayerAI {
       for (const cards of Object.values(customCardFields!)) {
         if (cards instanceof Array) {
           for (const card of cards) {
-            if (cardAmount && selectedCardsIndex.length + selectedCards.length === cardAmount) {
+            if (
+              cardAmount &&
+              selectedCardsIndex.length + selectedCards.length === cardAmount
+            ) {
               break;
             }
             if (
@@ -385,14 +462,18 @@ export class TrustAI extends PlayerAI {
                 allCards,
                 selectedCards,
                 card,
-                involvedTargets?.map(target => room.getPlayerById(target)),
+                involvedTargets?.map((target) => room.getPlayerById(target))
               )
             ) {
               selectedCards.push(card);
             }
           }
         } else {
-          selectedCardsIndex.push(...Array.from(Array(cardAmount).keys()).map(id => id + selectedCardsIndex.length));
+          selectedCardsIndex.push(
+            ...Array.from(Array(cardAmount).keys()).map(
+              (id) => id + selectedCardsIndex.length
+            )
+          );
         }
       }
     }

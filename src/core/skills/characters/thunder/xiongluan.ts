@@ -1,11 +1,18 @@
-import { CardMatcher } from 'core/cards/libs/card_matcher';
-import { CardId } from 'core/cards/libs/card_props';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { INFINITE_DISTANCE, INFINITE_TRIGGERING_TIMES } from 'core/game/game_props';
-import { AllStage, PhaseChangeStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
+import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardId } from "@/core/cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  INFINITE_DISTANCE,
+  INFINITE_TRIGGERING_TIMES,
+} from "@/core/game/game_props";
+import {
+  AllStage,
+  PhaseChangeStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
 import {
   ActiveSkill,
   CommonSkill,
@@ -16,12 +23,14 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from 'core/skills/skill';
+} from "@/core/skills/skill";
 
-@LimitSkill({ name: 'xiongluan', description: 'xiongluan_description' })
+@LimitSkill({ name: "xiongluan", description: "xiongluan_description" })
 export class XiongLuan extends ActiveSkill {
   public canUse(room: Room, owner: Player): boolean {
-    return owner.AvailableEquipSections.length > 0 && !owner.judgeAreaDisabled();
+    return (
+      owner.AvailableEquipSections.length > 0 && !owner.judgeAreaDisabled()
+    );
   }
 
   public numberOfTargets(): number {
@@ -32,7 +41,11 @@ export class XiongLuan extends ActiveSkill {
     return cards.length === 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return owner !== target;
   }
 
@@ -44,7 +57,10 @@ export class XiongLuan extends ActiveSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
@@ -70,23 +86,32 @@ export class XiongLuan extends ActiveSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: XiongLuan.Name, description: XiongLuan.Description })
-export class XiongLuanShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class XiongLuanShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterDead(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
@@ -97,13 +122,22 @@ export class XiongLuanShadow extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
-  public canUse(room: Room, owner: Player, event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    event: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>
+  ): boolean {
     return (
-      owner.Id === event.fromPlayer && event.from === PlayerPhase.PlayCardStage && owner.getFlag<boolean>(this.Name)
+      owner.Id === event.fromPlayer &&
+      event.from === PlayerPhase.PlayCardStage &&
+      owner.getFlag<boolean>(this.Name)
     );
   }
 
@@ -111,7 +145,10 @@ export class XiongLuanShadow extends TriggerSkill implements OnDefineReleaseTimi
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     room.removeFlag(event.fromId, this.Name);
     for (const other of room.getOtherPlayers(event.fromId)) {
       if (room.getFlag<PlayerId>(other.Id, this.GeneralName)) {
@@ -128,22 +165,31 @@ export class XiongLuanShadow extends TriggerSkill implements OnDefineReleaseTimi
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: XiongLuanShadow.Name, description: XiongLuanShadow.Description })
-export class XiongLuanBuff extends RulesBreakerSkill implements OnDefineReleaseTiming {
+@CommonSkill({
+  name: XiongLuanShadow.Name,
+  description: XiongLuanShadow.Description,
+})
+export class XiongLuanBuff
+  extends RulesBreakerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public breakCardUsableDistanceTo(
     cardId: CardId | CardMatcher | undefined,
     room: Room,
     owner: Player,
-    target: Player,
+    target: Player
   ): number {
     if (target.getFlag<PlayerId>(this.GeneralName) === owner.Id) {
       return INFINITE_DISTANCE;
@@ -152,7 +198,12 @@ export class XiongLuanBuff extends RulesBreakerSkill implements OnDefineReleaseT
     }
   }
 
-  public breakCardUsableTimesTo(cardId: CardId | CardMatcher, room: Room, owner: Player, target: Player): number {
+  public breakCardUsableTimesTo(
+    cardId: CardId | CardMatcher,
+    room: Room,
+    owner: Player,
+    target: Player
+  ): number {
     if (target.getFlag<PlayerId>(this.GeneralName) === owner.Id) {
       return INFINITE_TRIGGERING_TIMES;
     } else {
@@ -163,7 +214,10 @@ export class XiongLuanBuff extends RulesBreakerSkill implements OnDefineReleaseT
 
 @ShadowSkill
 @PersistentSkill()
-@CommonSkill({ name: 's_xiongluan_debuff', description: 's_xiongluan_debuff_description' })
+@CommonSkill({
+  name: "s_xiongluan_debuff",
+  description: "s_xiongluan_debuff_description",
+})
 export class XiongLuanDeBuff extends FilterSkill {
   canUseCard(cardId: CardId | CardMatcher, room: Room, owner: PlayerId) {
     return cardId instanceof CardMatcher

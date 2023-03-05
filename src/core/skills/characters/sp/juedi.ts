@@ -1,17 +1,26 @@
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { YinBing } from 'core/skills';
-import { TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { YinBing } from "@/core/skills";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'juedi', description: 'juedi_description' })
+@CompulsorySkill({ name: "juedi", description: "juedi_description" })
 export class JueDi extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -19,7 +28,7 @@ export class JueDi extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       content.playerId === owner.Id &&
@@ -32,34 +41,41 @@ export class JueDi extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const from = room.getPlayerById(event.fromId);
     const targets = room
       .getOtherPlayers(event.fromId)
-      .filter(player => player.Hp <= from.Hp)
-      .map(player => player.Id);
+      .filter((player) => player.Hp <= from.Hp)
+      .map((player) => player.Id);
 
     if (targets.length > 0) {
-      const resp = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
-        GameEventIdentifiers.AskForChoosingPlayerEvent,
-        {
-          players: targets,
-          toId: event.fromId,
-          requiredAmount: 1,
-          conversation:
-            'juedi: please choose a target to give all your ‘Yin Bing’ to him, or you remove all your ‘Yin Bing’',
-          triggeredBySkills: [this.Name],
-        },
-        event.fromId,
-      );
+      const resp =
+        await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+          GameEventIdentifiers.AskForChoosingPlayerEvent,
+          {
+            players: targets,
+            toId: event.fromId,
+            requiredAmount: 1,
+            conversation:
+              "juedi: please choose a target to give all your ‘Yin Bing’ to him, or you remove all your ‘Yin Bing’",
+            triggeredBySkills: [this.Name],
+          },
+          event.fromId
+        );
 
       if (resp.selectedPlayers && resp.selectedPlayers.length > 0) {
-        const num = from.getCardIds(PlayerCardsArea.OutsideArea, YinBing.Name).length;
+        const num = from.getCardIds(
+          PlayerCardsArea.OutsideArea,
+          YinBing.Name
+        ).length;
 
         await room.moveCards({
           movingCards: from
             .getCardIds(PlayerCardsArea.OutsideArea, YinBing.Name)
-            .map(card => ({ card, fromArea: CardMoveArea.OutsideArea })),
+            .map((card) => ({ card, fromArea: CardMoveArea.OutsideArea })),
           fromId: event.fromId,
           toId: resp.selectedPlayers[0],
           toArea: CardMoveArea.HandArea,
@@ -74,7 +90,13 @@ export class JueDi extends TriggerSkill {
           recoverBy: event.fromId,
         });
 
-        await room.drawCards(num, resp.selectedPlayers[0], 'top', event.fromId, this.Name);
+        await room.drawCards(
+          num,
+          resp.selectedPlayers[0],
+          "top",
+          event.fromId,
+          this.Name
+        );
 
         return true;
       }
@@ -83,7 +105,7 @@ export class JueDi extends TriggerSkill {
     await room.moveCards({
       movingCards: from
         .getCardIds(PlayerCardsArea.OutsideArea, YinBing.Name)
-        .map(card => ({ card, fromArea: CardMoveArea.OutsideArea })),
+        .map((card) => ({ card, fromArea: CardMoveArea.OutsideArea })),
       fromId: event.fromId,
       toArea: CardMoveArea.DropStack,
       moveReason: CardMoveReason.PlaceToDropStack,
@@ -92,7 +114,14 @@ export class JueDi extends TriggerSkill {
     });
 
     const diff = from.MaxHp - from.getCardIds(PlayerCardsArea.HandArea).length;
-    diff > 0 && (await room.drawCards(diff, event.fromId, 'top', event.fromId, this.Name));
+    diff > 0 &&
+      (await room.drawCards(
+        diff,
+        event.fromId,
+        "top",
+        event.fromId,
+        this.Name
+      ));
 
     return true;
   }

@@ -1,19 +1,36 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { AllStage, CardMoveStage, DamageEffectStage, DrawCardStage } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { CommonSkill, ShadowSkill, TriggerSkill } from 'core/skills/skill';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import {
+  AllStage,
+  CardMoveStage,
+  DamageEffectStage,
+  DrawCardStage,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { CommonSkill, ShadowSkill, TriggerSkill } from "@/core/skills/skill";
 
-@CommonSkill({ name: 'yiji', description: 'yiji_description' })
+@CommonSkill({ name: "yiji", description: "yiji_description" })
 export class YiJi extends TriggerSkill {
-  isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage) {
+  isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ) {
     return stage === DamageEffectStage.AfterDamagedEffect;
   }
 
-  canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>) {
+  canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ) {
     return owner.Id === content.toId;
   }
 
@@ -25,10 +42,20 @@ export class YiJi extends TriggerSkill {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { triggeredOnEvent } = skillUseEvent;
-    const damagedEvent = triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
-    await room.drawCards(2, damagedEvent.toId, 'top', damagedEvent.toId, this.Name);
+    const damagedEvent =
+      triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>;
+    await room.drawCards(
+      2,
+      damagedEvent.toId,
+      "top",
+      damagedEvent.toId,
+      this.Name
+    );
     return true;
   }
 }
@@ -41,27 +68,39 @@ export class YiJiShadow extends TriggerSkill {
   }
 
   isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.MoveCardEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.MoveCardEvent
+    >,
+    stage?: AllStage
   ) {
-    return stage === DrawCardStage.AfterDrawCardEffect || stage === CardMoveStage.AfterCardMoved;
+    return (
+      stage === DrawCardStage.AfterDrawCardEffect ||
+      stage === CardMoveStage.AfterCardMoved
+    );
   }
 
   public getSkillLog(room: Room, owner: Player) {
-    return 'please assign others no more than 2 handcards';
+    return "please assign others no more than 2 handcards";
   }
 
   canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.MoveCardEvent>,
+    content: ServerEventFinder<
+      GameEventIdentifiers.DrawCardEvent | GameEventIdentifiers.MoveCardEvent
+    >
   ) {
     const identifier = EventPacker.getIdentifier(content);
     if (identifier === GameEventIdentifiers.DrawCardEvent) {
-      const drawCardEvent = content as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
-      return owner.Id === drawCardEvent.fromId && !!drawCardEvent.triggeredBySkills?.includes(this.GeneralName);
+      const drawCardEvent =
+        content as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
+      return (
+        owner.Id === drawCardEvent.fromId &&
+        !!drawCardEvent.triggeredBySkills?.includes(this.GeneralName)
+      );
     } else if (identifier === GameEventIdentifiers.MoveCardEvent) {
-      content = content as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
+      content =
+        content as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>;
       const info = content.infos[0];
       const from = info.fromId && room.getPlayerById(info.fromId);
       if (!from) {
@@ -97,7 +136,7 @@ export class YiJiShadow extends TriggerSkill {
     cardId: CardId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard?: CardId,
+    containerCard?: CardId
   ): boolean {
     return true;
   }
@@ -111,16 +150,22 @@ export class YiJiShadow extends TriggerSkill {
     target: PlayerId,
     selectedCards: CardId[],
     selectedTargets: PlayerId[],
-    containerCard?: CardId,
+    containerCard?: CardId
   ): boolean {
     return owner !== target;
   }
 
-  async onTrigger(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  async onTrigger(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  async onEffect(room: Room, skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  async onEffect(
+    room: Room,
+    skillUseEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { toIds, cardIds, fromId } = skillUseEvent;
     const from = room.getPlayerById(fromId);
     if (cardIds === undefined || cardIds.length === 0) {
@@ -130,7 +175,10 @@ export class YiJiShadow extends TriggerSkill {
     from.addInvisibleMark(this.GeneralName, cardIds!.length);
 
     await room.moveCards({
-      movingCards: cardIds!.map(card => ({ card, fromArea: CardMoveArea.HandArea })),
+      movingCards: cardIds!.map((card) => ({
+        card,
+        fromArea: CardMoveArea.HandArea,
+      })),
       fromId,
       toId: toIds![0],
       toArea: CardMoveArea.HandArea,

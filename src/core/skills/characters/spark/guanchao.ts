@@ -1,6 +1,6 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
 import {
   AllStage,
   CardUseStage,
@@ -8,19 +8,23 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'guanchao', description: 'guanchao_description' })
+@CommonSkill({ name: "guanchao", description: "guanchao_description" })
 export class GuanChao extends TriggerSkill {
-  public static readonly GuanChaoIncrease = 'guanchao_increase';
-  public static readonly GuanChaoDecrease = 'guanchao_decrease';
+  public static readonly GuanChaoIncrease = "guanchao_increase";
+  public static readonly GuanChaoDecrease = "guanchao_decrease";
 
   public isAutoTrigger(): boolean {
     return true;
@@ -28,7 +32,7 @@ export class GuanChao extends TriggerSkill {
 
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -36,25 +40,32 @@ export class GuanChao extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
-    return content.playerId === owner.Id && content.toStage === PlayerPhaseStages.PlayCardStageStart;
+    return (
+      content.playerId === owner.Id &&
+      content.toStage === PlayerPhaseStages.PlayCardStageStart
+    );
   }
 
-  public async beforeUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async beforeUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
 
-    const options = ['guanchao:increase', 'guanchao:decrease'];
-    const { selectedOption } = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-      GameEventIdentifiers.AskForChoosingOptionsEvent,
-      {
-        options,
-        toId: fromId,
-        conversation: 'guanchao: please choose one option',
-        triggeredBySkills: [this.Name],
-      },
-      fromId,
-    );
+    const options = ["guanchao:increase", "guanchao:decrease"];
+    const { selectedOption } =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingOptionsEvent>(
+        GameEventIdentifiers.AskForChoosingOptionsEvent,
+        {
+          options,
+          toId: fromId,
+          conversation: "guanchao: please choose one option",
+          triggeredBySkills: [this.Name],
+        },
+        fromId
+      );
 
     if (selectedOption) {
       const chosen = selectedOption === options[0];
@@ -62,7 +73,7 @@ export class GuanChao extends TriggerSkill {
         fromId,
         chosen ? GuanChao.GuanChaoIncrease : GuanChao.GuanChaoDecrease,
         chosen ? 0 : 14,
-        chosen ? 'guanchao increase' : 'guanchao decrease',
+        chosen ? "guanchao increase" : "guanchao decrease"
       );
 
       return true;
@@ -83,29 +94,41 @@ export class GuanChao extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: GuanChao.Name, description: GuanChao.Description })
-export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTiming {
-  private readonly GuanChaoFirst = 'guanchao_first';
+export class GuanChaoShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
+  private readonly GuanChaoFirst = "guanchao_first";
 
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(): boolean {
     return true;
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage !== CardUseStage.CardUsing;
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
     return (
       stage === CardUseStage.BeforeCardUseEffect ||
@@ -117,16 +140,22 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    content: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
     const identifier = EventPacker.getIdentifier(content);
 
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = content as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        content as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       let canUse =
         cardUseEvent.fromId === owner.Id &&
-        !(stage === CardUseStage.CardUsing && owner.getFlag<boolean>(this.GuanChaoFirst));
+        !(
+          stage === CardUseStage.CardUsing &&
+          owner.getFlag<boolean>(this.GuanChaoFirst)
+        );
 
       if (canUse) {
         const increase = owner.getFlag<number>(GuanChao.GuanChaoIncrease);
@@ -140,8 +169,12 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
 
       return canUse;
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return phaseChangeEvent.fromPlayer === owner.Id && phaseChangeEvent.from === PlayerPhase.PlayCardStage;
+      const phaseChangeEvent =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        phaseChangeEvent.fromPlayer === owner.Id &&
+        phaseChangeEvent.from === PlayerPhase.PlayCardStage
+      );
     }
 
     return false;
@@ -151,7 +184,10 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
@@ -162,7 +198,8 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
       const stage = room.getFlag<AllStage>(fromId, this.Name);
       if (stage === CardUseStage.BeforeCardUseEffect) {
         const cardNumber = Sanguosha.getCardById(
-          (unknownEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>).cardId,
+          (unknownEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>)
+            .cardId
         ).CardNumber;
         if (cardNumber === 0) {
           room.removeFlag(fromId, GuanChao.GuanChaoIncrease);
@@ -170,7 +207,10 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
           return true;
         }
 
-        const increase = room.getFlag<number>(fromId, GuanChao.GuanChaoIncrease);
+        const increase = room.getFlag<number>(
+          fromId,
+          GuanChao.GuanChaoIncrease
+        );
         const from = room.getPlayerById(fromId);
         if (increase !== undefined) {
           if (cardNumber > increase) {
@@ -184,14 +224,20 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
               fromId,
               GuanChao.GuanChaoIncrease,
               cardNumber,
-              TranslationPack.translationJsonPatcher('guanchao increase: {0}', cardNumber).toString(),
+              TranslationPack.translationJsonPatcher(
+                "guanchao increase: {0}",
+                cardNumber
+              ).toString()
             );
           } else {
             room.removeFlag(fromId, GuanChao.GuanChaoIncrease);
           }
         }
 
-        const decrease = room.getFlag<number>(fromId, GuanChao.GuanChaoDecrease);
+        const decrease = room.getFlag<number>(
+          fromId,
+          GuanChao.GuanChaoDecrease
+        );
         if (decrease !== undefined) {
           if (cardNumber < decrease) {
             if (decrease === 14) {
@@ -204,7 +250,10 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
               fromId,
               GuanChao.GuanChaoDecrease,
               cardNumber,
-              TranslationPack.translationJsonPatcher('guanchao decrease: {0}', cardNumber).toString(),
+              TranslationPack.translationJsonPatcher(
+                "guanchao decrease: {0}",
+                cardNumber
+              ).toString()
             );
           } else {
             room.removeFlag(fromId, GuanChao.GuanChaoDecrease);
@@ -212,9 +261,21 @@ export class GuanChaoShadow extends TriggerSkill implements OnDefineReleaseTimin
         }
       } else {
         room.getFlag<number>(fromId, GuanChao.GuanChaoIncrease) !== undefined &&
-          (await room.drawCards(1, event.fromId, 'top', event.fromId, this.GeneralName));
+          (await room.drawCards(
+            1,
+            event.fromId,
+            "top",
+            event.fromId,
+            this.GeneralName
+          ));
         room.getFlag<number>(fromId, GuanChao.GuanChaoDecrease) !== undefined &&
-          (await room.drawCards(1, event.fromId, 'top', event.fromId, this.GeneralName));
+          (await room.drawCards(
+            1,
+            event.fromId,
+            "top",
+            event.fromId,
+            this.GeneralName
+          ));
       }
     } else {
       room.removeFlag(fromId, GuanChao.GuanChaoIncrease);

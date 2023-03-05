@@ -1,23 +1,42 @@
-import { CardId, DamageCardEnum } from 'core/cards/libs/card_props';
-import { CardMoveArea, CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { MovingCardProps } from 'core/event/event.server';
-import { Sanguosha } from 'core/game/engine';
-import { AllStage, DamageEffectStage, PlayerPhase } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Algorithm } from 'core/shares/libs/algorithm';
-import { TriggerSkill } from 'core/skills/skill';
-import { CommonSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+import { CardId, DamageCardEnum } from "@/core/cards/libs/card_props";
+import {
+  CardMoveArea,
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { MovingCardProps } from "@/core/event/event.server";
+import { Sanguosha } from "@/core/game/engine";
+import {
+  AllStage,
+  DamageEffectStage,
+  PlayerPhase,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Algorithm } from "@/core/shares/libs/algorithm";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CommonSkill } from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'koulve', description: 'koulve_description' })
+@CommonSkill({ name: "koulve", description: "koulve_description" })
 export class KouLve extends TriggerSkill {
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers.DamageEvent>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    stage?: AllStage
+  ): boolean {
     return stage === DamageEffectStage.AfterDamageEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.DamageEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.DamageEvent>
+  ): boolean {
     return (
       content.fromId === owner.Id &&
       content.toId !== owner.Id &&
@@ -25,20 +44,21 @@ export class KouLve extends TriggerSkill {
       room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
       !room.getPlayerById(content.toId).Dead &&
       room.getPlayerById(content.toId).LostHp > 0 &&
-      room.getPlayerById(content.toId).getCardIds(PlayerCardsArea.HandArea).length > 0
+      room.getPlayerById(content.toId).getCardIds(PlayerCardsArea.HandArea)
+        .length > 0
     );
   }
 
   public getSkillLog(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>,
+    event: ServerEventFinder<GameEventIdentifiers.DamageEvent>
   ): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to display {1} card from {2}’s hand?',
+      "{0}: do you want to display {1} card from {2}’s hand?",
       this.Name,
       room.getPlayerById(event.toId).LostHp,
-      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.toId)),
+      TranslationPack.patchPlayerInTranslation(room.getPlayerById(event.toId))
     ).extract();
   }
 
@@ -46,11 +66,18 @@ export class KouLve extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
-    const victim = (event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>).toId;
+    const victim = (
+      event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DamageEvent>
+    ).toId;
 
-    const handCards = room.getPlayerById(victim).getCardIds(PlayerCardsArea.HandArea);
+    const handCards = room
+      .getPlayerById(victim)
+      .getCardIds(PlayerCardsArea.HandArea);
     let selectedCards: CardId[] = handCards;
 
     if (handCards.length > room.getPlayerById(victim).LostHp) {
@@ -66,30 +93,36 @@ export class KouLve extends TriggerSkill {
           triggeredBySkills: [this.Name],
         },
         fromId,
-        true,
+        true
       );
 
       response.selectedCardsIndex = response.selectedCardsIndex || [0];
-      selectedCards = Algorithm.randomPick(response.selectedCardsIndex.length, handCards);
+      selectedCards = Algorithm.randomPick(
+        response.selectedCardsIndex.length,
+        handCards
+      );
     }
 
-    const showCardEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-      displayCards: selectedCards,
-      fromId: victim,
-      translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} display hand card {1} from {2}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-        TranslationPack.patchCardInTranslation(...selectedCards),
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(victim)),
-      ).extract(),
-    };
+    const showCardEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+      {
+        displayCards: selectedCards,
+        fromId: victim,
+        translationsMessage: TranslationPack.translationJsonPatcher(
+          "{0} display hand card {1} from {2}",
+          TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+          TranslationPack.patchCardInTranslation(...selectedCards),
+          TranslationPack.patchPlayerInTranslation(room.getPlayerById(victim))
+        ).extract(),
+      };
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, showCardEvent);
 
     const movingCards: MovingCardProps[] = [];
     let hasRed = false;
     for (const id of selectedCards) {
       const card = Sanguosha.getCardById(id);
-      if ((Object.values(DamageCardEnum) as string[]).includes(card.GeneralName)) {
+      if (
+        (Object.values(DamageCardEnum) as string[]).includes(card.GeneralName)
+      ) {
         movingCards.push({ card: id, fromArea: CardMoveArea.HandArea });
       }
       hasRed = hasRed || card.isRed();
@@ -111,7 +144,7 @@ export class KouLve extends TriggerSkill {
       } else {
         await room.loseHp(fromId, 1);
       }
-      await room.drawCards(2, event.fromId, 'top', event.fromId, this.Name);
+      await room.drawCards(2, event.fromId, "top", event.fromId, this.Name);
     }
 
     return true;

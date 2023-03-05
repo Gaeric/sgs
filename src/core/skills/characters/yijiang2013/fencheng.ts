@@ -1,14 +1,19 @@
-import { CardId } from 'core/cards/libs/card_props';
-import { CardMoveReason, ClientEventFinder, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { DamageType } from 'core/game/game_props';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { ActiveSkill } from 'core/skills/skill';
-import { LimitSkill } from 'core/skills/skill_wrappers';
+import { CardId } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  ClientEventFinder,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { DamageType } from "@/core/game/game_props";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { ActiveSkill } from "@/core/skills/skill";
+import { LimitSkill } from "@/core/skills/skill_wrappers";
 
-@LimitSkill({ name: 'fencheng', description: 'fencheng_description' })
+@LimitSkill({ name: "fencheng", description: "fencheng_description" })
 export class FenCheng extends ActiveSkill {
   public canUse() {
     return true;
@@ -22,7 +27,11 @@ export class FenCheng extends ActiveSkill {
     return cards.length === 0;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
     return false;
   }
 
@@ -30,53 +39,68 @@ export class FenCheng extends ActiveSkill {
     return false;
   }
 
-  public async onUse(room: Room, event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>) {
+  public async onUse(
+    room: Room,
+    event: ClientEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ) {
     return true;
   }
 
-  public async onEffect(room: Room, SkillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>) {
+  public async onEffect(
+    room: Room,
+    SkillEffectEvent: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ) {
     const { fromId } = SkillEffectEvent;
     let x: number = 1;
     for (const player of room.getOtherPlayers(fromId)) {
-      const playerCardsLength = player.getPlayerCards().filter(id => room.canDropCard(player.Id, id)).length;
+      const playerCardsLength = player
+        .getPlayerCards()
+        .filter((id) => room.canDropCard(player.Id, id)).length;
 
-      const options = ['option-one', 'option-two'];
+      const options = ["option-one", "option-two"];
       playerCardsLength < x && options.shift();
 
-      const askForChoosingOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
-        options,
-        conversation: 'please choose: fencheng-options',
-        toId: player.Id,
-        askedBy: SkillEffectEvent.fromId,
-        triggeredBySkills: [this.Name],
-      };
+      const askForChoosingOptionsEvent: ServerEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> =
+        {
+          options,
+          conversation: "please choose: fencheng-options",
+          toId: player.Id,
+          askedBy: SkillEffectEvent.fromId,
+          triggeredBySkills: [this.Name],
+        };
 
       room.notify(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
         EventPacker.createUncancellableEvent<GameEventIdentifiers.AskForChoosingOptionsEvent>(
-          askForChoosingOptionsEvent,
+          askForChoosingOptionsEvent
         ),
-        player.Id,
+        player.Id
       );
 
       const { selectedOption } = await room.onReceivingAsyncResponseFrom(
         GameEventIdentifiers.AskForChoosingOptionsEvent,
-        player.Id,
+        player.Id
       );
 
-      if (selectedOption === 'option-one') {
+      if (selectedOption === "option-one") {
         const response = await room.askForCardDrop(
           player.Id,
           [x, playerCardsLength],
           [PlayerCardsArea.HandArea, PlayerCardsArea.EquipArea],
           false,
           undefined,
-          this.Name,
+          this.Name
         );
 
         if (response.droppedCards.length > 0) {
           x = response.droppedCards.length + 1;
-          await room.dropCards(CardMoveReason.SelfDrop, response.droppedCards, player.Id, player.Id, this.GeneralName);
+          await room.dropCards(
+            CardMoveReason.SelfDrop,
+            response.droppedCards,
+            player.Id,
+            player.Id,
+            this.GeneralName
+          );
         } else {
           await room.damage({
             fromId: SkillEffectEvent.fromId,

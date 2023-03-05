@@ -1,5 +1,8 @@
-import { GameCharacterExtensions, UPPER_LIMIT_OF_ARMOR } from 'core/game/game_props';
-import { Skill } from 'core/skills/skill';
+import {
+  GameCharacterExtensions,
+  UPPER_LIMIT_OF_ARMOR,
+} from "@/core/game/game_props";
+import { Skill } from "@/core/skills/skill";
 
 export type CharacterId = number;
 export const enum CharacterGender {
@@ -9,11 +12,11 @@ export const enum CharacterGender {
 }
 
 export const enum CharacterEquipSections {
-  Weapon = 'weapon section',
-  Shield = 'shield section',
-  DefenseRide = 'defense ride section',
-  OffenseRide = 'offense ride section',
-  Precious = 'precious',
+  Weapon = "weapon section",
+  Shield = "shield section",
+  DefenseRide = "defense ride section",
+  OffenseRide = "offense ride section",
+  Precious = "precious",
 }
 
 export const enum CharacterNationality {
@@ -25,11 +28,11 @@ export const enum CharacterNationality {
 }
 
 export function getNationalityRawText(nationality: CharacterNationality) {
-  const rawNationalityText = ['wei', 'shu', 'wu', 'qun', 'god'];
+  const rawNationalityText = ["wei", "shu", "wu", "qun", "god"];
   return rawNationalityText[nationality];
 }
 export function getGenderRawText(gender: CharacterGender) {
-  const rawGenderText = ['male', 'female', 'unknoun'];
+  const rawGenderText = ["male", "female", "unknoun"];
   return rawGenderText[gender];
 }
 
@@ -42,7 +45,10 @@ export function Lord(constructor: new (...args: any[]) => any): any {
 export function Armor(amount: number) {
   return function <T extends new (...args: any[]) => any>(constructor: T) {
     return class extends constructor {
-      private armor: number = Math.max(Math.min(amount, UPPER_LIMIT_OF_ARMOR), 0);
+      private armor: number = Math.max(
+        Math.min(amount, UPPER_LIMIT_OF_ARMOR),
+        0
+      );
     } as any;
   };
 }
@@ -61,11 +67,11 @@ export abstract class Character {
     protected maxHp: number,
     protected hp: number,
     protected fromPackage: GameCharacterExtensions,
-    protected skills: Skill[],
+    protected skills: Skill[]
   ) {}
 
   protected getSkillsDescrption() {
-    return this.skills.map(skill => skill.Description);
+    return this.skills.map((skill) => skill.Description);
   }
 
   public isLord() {

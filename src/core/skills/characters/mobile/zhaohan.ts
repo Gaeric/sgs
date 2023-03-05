@@ -1,15 +1,19 @@
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { AllStage, PhaseStageChangeStage, PlayerPhaseStages } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import {
+  AllStage,
+  PhaseStageChangeStage,
+  PlayerPhaseStages,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { CompulsorySkill } from "@/core/skills/skill_wrappers";
 
-@CompulsorySkill({ name: 'zhaohan', description: 'zhaohan_description' })
+@CompulsorySkill({ name: "zhaohan", description: "zhaohan_description" })
 export class ZhaoHan extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
     return stage === PhaseStageChangeStage.StageChanged;
   }
@@ -17,7 +21,7 @@ export class ZhaoHan extends TriggerSkill {
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       owner.Id === content.playerId &&
@@ -26,14 +30,25 @@ export class ZhaoHan extends TriggerSkill {
     );
   }
 
-  public async onTrigger(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
-    event.audioIndex = room.getPlayerById(event.fromId).hasUsedSkillTimes(this.Name) <= 4 ? 1 : 2;
+  public async onTrigger(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
+    event.audioIndex =
+      room.getPlayerById(event.fromId).hasUsedSkillTimes(this.Name) <= 4
+        ? 1
+        : 2;
 
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
-    const usedTimes = room.getPlayerById(event.fromId).hasUsedSkillTimes(this.Name);
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
+    const usedTimes = room
+      .getPlayerById(event.fromId)
+      .hasUsedSkillTimes(this.Name);
     if (usedTimes <= 4) {
       await room.changeMaxHp(event.fromId, 1);
       await room.recover({

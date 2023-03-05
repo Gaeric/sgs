@@ -1,4 +1,4 @@
-import { PlayerCardsArea } from 'core/player/player_props';
+import { PlayerCardsArea } from "@/core/player/player_props";
 
 export const enum CardSuit {
   NoSuit,
@@ -41,11 +41,11 @@ export const enum CardTargetEnum {
 }
 
 export enum DamageCardEnum {
-  Slash = 'slash',
-  Duel = 'duel',
-  FireAttack = 'fire_attack',
-  NanManRuQin = 'nanmanruqin',
-  WanJianQiFa = 'wanjianqifa',
+  Slash = "slash",
+  Duel = "duel",
+  FireAttack = "fire_attack",
+  NanManRuQin = "nanmanruqin",
+  WanJianQiFa = "wanjianqifa",
 }
 
 // equip priority is [80, 100]

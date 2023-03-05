@@ -1,25 +1,42 @@
-import { CardChoosingOptions, CardSuit } from 'core/cards/libs/card_props';
-import { CardMoveReason, GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
-import { DamageType } from 'core/game/game_props';
-import { AllStage, CardUseStage, PhaseChangeStage, PlayerPhase, StagePriority } from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { TranslationPack } from 'core/translations/translation_json_tool';
+import { CardChoosingOptions, CardSuit } from "@/core/cards/libs/card_props";
+import {
+  CardMoveReason,
+  GameEventIdentifiers,
+  ServerEventFinder,
+} from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
+import { DamageType } from "@/core/game/game_props";
+import {
+  AllStage,
+  CardUseStage,
+  PhaseChangeStage,
+  PlayerPhase,
+  StagePriority,
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import { TranslationPack } from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'bingqing', description: 'bingqing_description' })
+@CommonSkill({ name: "bingqing", description: "bingqing_description" })
 export class BingQing extends TriggerSkill {
   public async whenObtainingSkill(room: Room, owner: Player) {
-    if (room.CurrentPhasePlayer !== owner || room.CurrentPlayerPhase !== PlayerPhase.PlayCardStage) {
+    if (
+      room.CurrentPhasePlayer !== owner ||
+      room.CurrentPlayerPhase !== PlayerPhase.PlayCardStage
+    ) {
       return;
     }
 
-    const records = room.Analytics.getCardUseRecord(owner.Id, 'phase');
+    const records = room.Analytics.getCardUseRecord(owner.Id, "phase");
 
     if (records.length > 0) {
       for (const cardUseEvent of records) {
@@ -28,7 +45,10 @@ export class BingQing extends TriggerSkill {
         if (suit !== CardSuit.NoSuit && !originalSuits.includes(suit)) {
           originalSuits.push(suit);
           owner.setFlag<CardSuit[]>(this.Name, originalSuits);
-          EventPacker.addMiddleware({ tag: this.Name, data: true }, cardUseEvent);
+          EventPacker.addMiddleware(
+            { tag: this.Name, data: true },
+            cardUseEvent
+          );
         }
       }
     }
@@ -38,11 +58,18 @@ export class BingQing extends TriggerSkill {
     return true;
   }
 
-  public isTriggerable(event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isTriggerable(
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === CardUseStage.CardUseFinishedEffect;
   }
 
-  public canUse(room: Room, owner: Player, content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>): boolean {
+  public canUse(
+    room: Room,
+    owner: Player,
+    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>
+  ): boolean {
     return (
       content.fromId === owner.Id &&
       room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
@@ -52,37 +79,47 @@ export class BingQing extends TriggerSkill {
     );
   }
 
-  public async beforeUse(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>): Promise<boolean> {
+  public async beforeUse(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillUseEvent>
+  ): Promise<boolean> {
     const { fromId } = event;
 
     const suits = room.getFlag<CardSuit[]>(fromId, this.Name) || [];
     let targets = room.AlivePlayers;
-    let prompt = '{0}: do you want to draw 2 cards?';
+    let prompt = "{0}: do you want to draw 2 cards?";
     if (suits.length === 3) {
       targets = targets.filter(
-        player =>
+        (player) =>
           player.getCardIds().length > 0 &&
-          !(player.Id === fromId && !player.getCardIds().find(id => room.canDropCard(fromId, id))),
+          !(
+            player.Id === fromId &&
+            !player.getCardIds().find((id) => room.canDropCard(fromId, id))
+          )
       );
-      prompt = '{0}: do you want to discard a card from the area of a player?';
+      prompt = "{0}: do you want to discard a card from the area of a player?";
     } else if (suits.length === 4) {
-      const index = targets.findIndex(player => player.Id === fromId);
+      const index = targets.findIndex((player) => player.Id === fromId);
       index !== -1 && targets.splice(index, 1);
-      prompt = '{0}: do you want to deal 1 damage to another player?';
+      prompt = "{0}: do you want to deal 1 damage to another player?";
     }
 
-    const players = targets.map(player => player.Id);
-    const response = await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
-      GameEventIdentifiers.AskForChoosingPlayerEvent,
-      {
-        players,
-        toId: fromId,
-        requiredAmount: 1,
-        conversation: TranslationPack.translationJsonPatcher(prompt, this.Name).toString(),
-        triggeredBySkills: [this.Name],
-      },
-      fromId,
-    );
+    const players = targets.map((player) => player.Id);
+    const response =
+      await room.doAskForCommonly<GameEventIdentifiers.AskForChoosingPlayerEvent>(
+        GameEventIdentifiers.AskForChoosingPlayerEvent,
+        {
+          players,
+          toId: fromId,
+          requiredAmount: 1,
+          conversation: TranslationPack.translationJsonPatcher(
+            prompt,
+            this.Name
+          ).toString(),
+          triggeredBySkills: [this.Name],
+        },
+        fromId
+      );
 
     if (response.selectedPlayers && response.selectedPlayers.length > 0) {
       event.toIds = response.selectedPlayers;
@@ -96,20 +133,24 @@ export class BingQing extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     if (!event.toIds) {
       return false;
     }
 
     const suits = room.getFlag<CardSuit[]>(event.fromId, this.Name) || [];
     if (suits.length === 2) {
-      await room.drawCards(2, event.toIds[0], 'top', event.fromId, this.Name);
+      await room.drawCards(2, event.toIds[0], "top", event.fromId, this.Name);
     } else if (suits.length === 3) {
       const to = room.getPlayerById(event.toIds[0]);
       const options: CardChoosingOptions = {
         [PlayerCardsArea.JudgeArea]: to.getCardIds(PlayerCardsArea.JudgeArea),
         [PlayerCardsArea.EquipArea]: to.getCardIds(PlayerCardsArea.EquipArea),
-        [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea).length,
+        [PlayerCardsArea.HandArea]: to.getCardIds(PlayerCardsArea.HandArea)
+          .length,
       };
 
       const chooseCardEvent = {
@@ -119,18 +160,25 @@ export class BingQing extends TriggerSkill {
         triggeredBySkills: [this.Name],
       };
 
-      const response = await room.askForChoosingPlayerCard(chooseCardEvent, event.fromId, true, true);
+      const response = await room.askForChoosingPlayerCard(
+        chooseCardEvent,
+        event.fromId,
+        true,
+        true
+      );
       if (!response) {
         return false;
       }
 
       response.selectedCard !== undefined &&
         (await room.dropCards(
-          event.fromId === event.toIds[0] ? CardMoveReason.SelfDrop : CardMoveReason.PassiveDrop,
+          event.fromId === event.toIds[0]
+            ? CardMoveReason.SelfDrop
+            : CardMoveReason.PassiveDrop,
           [response.selectedCard],
           event.toIds[0],
           event.fromId,
-          this.Name,
+          this.Name
         ));
     } else if (suits.length === 4) {
       await room.damage({
@@ -149,22 +197,31 @@ export class BingQing extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: BingQing.Name, description: BingQing.Description })
-export class BingQingShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class BingQingShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return content.from === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      content.from === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public getPriority(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): StagePriority {
-    return EventPacker.getIdentifier(event) === GameEventIdentifiers.CardUseEvent
+    return EventPacker.getIdentifier(event) ===
+      GameEventIdentifiers.CardUseEvent
       ? StagePriority.High
       : StagePriority.Medium;
   }
@@ -178,20 +235,28 @@ export class BingQingShadow extends TriggerSkill implements OnDefineReleaseTimin
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ) {
-    return stage === CardUseStage.CardUseFinishedEffect || stage === PhaseChangeStage.PhaseChanged;
+    return (
+      stage === CardUseStage.CardUseFinishedEffect ||
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(event);
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        event as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       const suits = owner.getFlag<CardSuit[]>(this.GeneralName) || [];
       return (
         cardUseEvent.fromId === owner.Id &&
@@ -202,8 +267,12 @@ export class BingQingShadow extends TriggerSkill implements OnDefineReleaseTimin
         Sanguosha.getCardById(cardUseEvent.cardId).Suit !== CardSuit.NoSuit
       );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
-      return phaseChangeEvent.from === PlayerPhase.PlayCardStage && !!owner.getFlag<CardSuit[]>(this.GeneralName);
+      const phaseChangeEvent =
+        event as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      return (
+        phaseChangeEvent.from === PlayerPhase.PlayCardStage &&
+        !!owner.getFlag<CardSuit[]>(this.GeneralName)
+      );
     }
 
     return false;
@@ -213,18 +282,28 @@ export class BingQingShadow extends TriggerSkill implements OnDefineReleaseTimin
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const unknownEvent = event.triggeredOnEvent as ServerEventFinder<
       GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
     >;
     const identifier = EventPacker.getIdentifier(unknownEvent);
 
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = unknownEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
-      const originalSuits = room.getFlag<CardSuit[]>(event.fromId, this.GeneralName) || [];
+      const cardUseEvent =
+        unknownEvent as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const originalSuits =
+        room.getFlag<CardSuit[]>(event.fromId, this.GeneralName) || [];
       originalSuits.push(Sanguosha.getCardById(cardUseEvent.cardId).Suit);
-      room.getPlayerById(event.fromId).setFlag<CardSuit[]>(this.GeneralName, originalSuits);
-      EventPacker.addMiddleware({ tag: this.GeneralName, data: true }, cardUseEvent);
+      room
+        .getPlayerById(event.fromId)
+        .setFlag<CardSuit[]>(this.GeneralName, originalSuits);
+      EventPacker.addMiddleware(
+        { tag: this.GeneralName, data: true },
+        cardUseEvent
+      );
     } else {
       room.removeFlag(event.fromId, this.GeneralName);
     }

@@ -1,5 +1,0 @@
-{
-  "watch": ["../core/**/*.ts", "./**/*.ts"],
-  "ignore": ["**/*.spec.ts"],
-  "exec": "ts-node -r tsconfig-paths/register ./main.ts --files"
-}

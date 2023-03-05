@@ -1,7 +1,7 @@
-import { CardType } from 'core/cards/card';
-import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
-import { EventPacker } from 'core/event/event_packer';
-import { Sanguosha } from 'core/game/engine';
+import { CardType } from "@/core/cards/card";
+import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { EventPacker } from "@/core/event/event_packer";
+import { Sanguosha } from "@/core/game/engine";
 import {
   AllStage,
   CardUseStage,
@@ -9,34 +9,47 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from 'core/game/stage_processor';
-import { Player } from 'core/player/player';
-import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
-import { Room } from 'core/room/room';
-import { Functional } from 'core/shares/libs/functional';
-import { TriggerSkill } from 'core/skills/skill';
-import { OnDefineReleaseTiming } from 'core/skills/skill_hooks';
-import { CommonSkill, PersistentSkill, ShadowSkill } from 'core/skills/skill_wrappers';
-import { PatchedTranslationObject, TranslationPack } from 'core/translations/translation_json_tool';
+} from "@/core/game/stage_processor";
+import { Player } from "@/core/player/player";
+import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
+import { Room } from "@/core/room/room";
+import { Functional } from "@/core/shares/libs/functional";
+import { TriggerSkill } from "@/core/skills/skill";
+import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+import {
+  CommonSkill,
+  PersistentSkill,
+  ShadowSkill,
+} from "@/core/skills/skill_wrappers";
+import {
+  PatchedTranslationObject,
+  TranslationPack,
+} from "@/core/translations/translation_json_tool";
 
-@CommonSkill({ name: 'qiangzhi', description: 'qiangzhi_description' })
+@CommonSkill({ name: "qiangzhi", description: "qiangzhi_description" })
 export class QiangZhi extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return stage === PhaseStageChangeStage.StageChanged && event.toStage === PlayerPhaseStages.PlayCardStageStart;
+    return (
+      stage === PhaseStageChangeStage.StageChanged &&
+      event.toStage === PlayerPhaseStages.PlayCardStageStart
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,
+    content: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>
   ): boolean {
     return (
       owner.Id === content.playerId &&
-      room.getOtherPlayers(owner.Id).find(player => player.getCardIds(PlayerCardsArea.HandArea).length > 0) !==
-        undefined
+      room
+        .getOtherPlayers(owner.Id)
+        .find(
+          (player) => player.getCardIds(PlayerCardsArea.HandArea).length > 0
+        ) !== undefined
     );
   }
 
@@ -44,14 +57,21 @@ export class QiangZhi extends TriggerSkill {
     return 1;
   }
 
-  public isAvailableTarget(owner: PlayerId, room: Room, target: PlayerId): boolean {
-    return owner !== target && room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0;
+  public isAvailableTarget(
+    owner: PlayerId,
+    room: Room,
+    target: PlayerId
+  ): boolean {
+    return (
+      owner !== target &&
+      room.getPlayerById(target).getCardIds(PlayerCardsArea.HandArea).length > 0
+    );
   }
 
   public getSkillLog(): PatchedTranslationObject {
     return TranslationPack.translationJsonPatcher(
-      '{0}: do you want to display a hand card from another player?',
-      this.Name,
+      "{0}: do you want to display a hand card from another player?",
+      this.Name
     ).extract();
   }
 
@@ -59,7 +79,10 @@ export class QiangZhi extends TriggerSkill {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const { fromId, toIds } = event;
     if (!toIds) {
       return false;
@@ -68,7 +91,9 @@ export class QiangZhi extends TriggerSkill {
     const response = await room.askForChoosingPlayerCard(
       {
         options: {
-          [PlayerCardsArea.HandArea]: room.getPlayerById(toIds[0]).getCardIds(PlayerCardsArea.HandArea).length,
+          [PlayerCardsArea.HandArea]: room
+            .getPlayerById(toIds[0])
+            .getCardIds(PlayerCardsArea.HandArea).length,
         },
         fromId,
         toId: toIds[0],
@@ -76,22 +101,23 @@ export class QiangZhi extends TriggerSkill {
       },
       fromId,
       false,
-      true,
+      true
     );
     if (!response) {
       return false;
     }
 
-    const displayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> = {
-      fromId: toIds[0],
-      displayCards: [response.selectedCard!],
-      translationsMessage: TranslationPack.translationJsonPatcher(
-        '{0} display hand card {1} from {2}',
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
-        TranslationPack.patchCardInTranslation(response.selectedCard!),
-        TranslationPack.patchPlayerInTranslation(room.getPlayerById(toIds[0])),
-      ).extract(),
-    };
+    const displayEvent: ServerEventFinder<GameEventIdentifiers.CardDisplayEvent> =
+      {
+        fromId: toIds[0],
+        displayCards: [response.selectedCard!],
+        translationsMessage: TranslationPack.translationJsonPatcher(
+          "{0} display hand card {1} from {2}",
+          TranslationPack.patchPlayerInTranslation(room.getPlayerById(fromId)),
+          TranslationPack.patchCardInTranslation(response.selectedCard!),
+          TranslationPack.patchPlayerInTranslation(room.getPlayerById(toIds[0]))
+        ).extract(),
+      };
     room.broadcast(GameEventIdentifiers.CardDisplayEvent, displayEvent);
 
     room.setFlag<CardType>(
@@ -99,9 +125,11 @@ export class QiangZhi extends TriggerSkill {
       this.Name,
       Sanguosha.getCardById(response.selectedCard!).BaseType,
       TranslationPack.translationJsonPatcher(
-        'qiangzhi type: {0}',
-        Functional.getCardBaseTypeAbbrRawText(Sanguosha.getCardById(response.selectedCard!).BaseType),
-      ).toString(),
+        "qiangzhi type: {0}",
+        Functional.getCardBaseTypeAbbrRawText(
+          Sanguosha.getCardById(response.selectedCard!).BaseType
+        )
+      ).toString()
     );
 
     return true;
@@ -111,51 +139,75 @@ export class QiangZhi extends TriggerSkill {
 @ShadowSkill
 @PersistentSkill()
 @CommonSkill({ name: QiangZhi.Name, description: QiangZhi.Description })
-export class QiangZhiShadow extends TriggerSkill implements OnDefineReleaseTiming {
+export class QiangZhiShadow
+  extends TriggerSkill
+  implements OnDefineReleaseTiming
+{
   public afterLosingSkill(
     room: Room,
     owner: PlayerId,
     content: ServerEventFinder<GameEventIdentifiers>,
-    stage?: AllStage,
+    stage?: AllStage
   ): boolean {
-    return room.CurrentPlayerPhase === PlayerPhase.PlayCardStage && stage === PhaseChangeStage.PhaseChanged;
+    return (
+      room.CurrentPlayerPhase === PlayerPhase.PlayCardStage &&
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public isAutoTrigger(
     room: Room,
     owner: Player,
-    event?: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    event?: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): boolean {
-    return event !== undefined && EventPacker.getIdentifier(event) === GameEventIdentifiers.PhaseChangeEvent;
+    return (
+      event !== undefined &&
+      EventPacker.getIdentifier(event) === GameEventIdentifiers.PhaseChangeEvent
+    );
   }
 
-  public isFlaggedSkill(room: Room, event: ServerEventFinder<GameEventIdentifiers>, stage?: AllStage): boolean {
+  public isFlaggedSkill(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers>,
+    stage?: AllStage
+  ): boolean {
     return stage === PhaseChangeStage.PhaseChanged;
   }
 
   public isTriggerable(
-    event: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
-    stage?: AllStage,
+    event: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >,
+    stage?: AllStage
   ): boolean {
-    return stage === CardUseStage.CardUsing || stage === PhaseChangeStage.PhaseChanged;
+    return (
+      stage === CardUseStage.CardUsing ||
+      stage === PhaseChangeStage.PhaseChanged
+    );
   }
 
   public canUse(
     room: Room,
     owner: Player,
-    content: ServerEventFinder<GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent>,
+    content: ServerEventFinder<
+      GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
+    >
   ): boolean {
     const identifier = EventPacker.getIdentifier(content);
     const type = owner.getFlag<CardType>(this.GeneralName);
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      const cardUseEvent = content as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
+      const cardUseEvent =
+        content as ServerEventFinder<GameEventIdentifiers.CardUseEvent>;
       return (
         type !== undefined &&
         cardUseEvent.fromId === owner.Id &&
         Sanguosha.getCardById(cardUseEvent.cardId).BaseType === type
       );
     } else if (identifier === GameEventIdentifiers.PhaseChangeEvent) {
-      const phaseChangeEvent = content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
+      const phaseChangeEvent =
+        content as ServerEventFinder<GameEventIdentifiers.PhaseChangeEvent>;
       return (
         phaseChangeEvent.fromPlayer === owner.Id &&
         phaseChangeEvent.from === PlayerPhase.PlayCardStage &&
@@ -167,22 +219,35 @@ export class QiangZhiShadow extends TriggerSkill implements OnDefineReleaseTimin
   }
 
   public getSkillLog(): PatchedTranslationObject {
-    return TranslationPack.translationJsonPatcher('{0}: do you want to draw a card?', this.Name).extract();
+    return TranslationPack.translationJsonPatcher(
+      "{0}: do you want to draw a card?",
+      this.Name
+    ).extract();
   }
 
   public async onTrigger(): Promise<boolean> {
     return true;
   }
 
-  public async onEffect(room: Room, event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>): Promise<boolean> {
+  public async onEffect(
+    room: Room,
+    event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
+  ): Promise<boolean> {
     const identifier = EventPacker.getIdentifier(
       event.triggeredOnEvent as ServerEventFinder<
-        GameEventIdentifiers.CardUseEvent | GameEventIdentifiers.PhaseChangeEvent
-      >,
+        | GameEventIdentifiers.CardUseEvent
+        | GameEventIdentifiers.PhaseChangeEvent
+      >
     );
 
     if (identifier === GameEventIdentifiers.CardUseEvent) {
-      await room.drawCards(1, event.fromId, 'top', event.fromId, this.GeneralName);
+      await room.drawCards(
+        1,
+        event.fromId,
+        "top",
+        event.fromId,
+        this.GeneralName
+      );
     } else {
       room.removeFlag(event.fromId, this.GeneralName);
     }

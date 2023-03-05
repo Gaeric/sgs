@@ -1,8 +1,8 @@
-import { GameCardExtensions, INFINITE_DISTANCE } from 'core/game/game_props';
-import { SkillLoader } from 'core/game/package_loader/loader.skills';
-import { Multiple } from '../card';
-import type { CardSuit, RealCardId } from '../libs/card_props';
-import { TrickCard } from '../trick_card';
+import { GameCardExtensions, INFINITE_DISTANCE } from "@/core/game/game_props";
+import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { Multiple } from "../card";
+import type { CardSuit, RealCardId } from "../libs/card_props";
+import { TrickCard } from "../trick_card";
 
 @Multiple
 export class TieSuoLianHuan extends TrickCard {
@@ -12,10 +12,10 @@ export class TieSuoLianHuan extends TrickCard {
       cardNumber,
       suit,
       INFINITE_DISTANCE,
-      'tiesuolianhuan',
-      'tiesuolianhuan_description',
+      "tiesuolianhuan",
+      "tiesuolianhuan_description",
       GameCardExtensions.LegionFight,
-      SkillLoader.getInstance().getSkillByName('tiesuolianhuan'),
+      SkillLoader.getInstance().getSkillByName("tiesuolianhuan")
     );
   }
 
