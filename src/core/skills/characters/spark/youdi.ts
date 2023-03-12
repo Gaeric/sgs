@@ -1,23 +1,23 @@
-import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import { CardChoosingOptions } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { CommonSkill, TriggerSkill } from "../../skill";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "youdi", description: "youdi_description" })
 export class YouDi extends TriggerSkill {

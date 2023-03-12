@@ -1,18 +1,18 @@
-import { Card, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { Card, VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
 import {
   CardChoosingOptions,
   CardId,
   CardSuit,
-} from "@/core/cards/libs/card_props";
+} from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   CardResponseStage,
@@ -20,20 +20,20 @@ import {
   GameStartStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { System } from "@/core/shares/libs/system";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { TriggerSkill, ViewAsSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { System } from "../../../shares/libs/system";
+import { TargetGroupUtil } from "../../../shares/libs/utils/target_group";
+import { TriggerSkill, ViewAsSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
   SideEffectSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @CommonSkill({ name: "xiansi", description: "xiansi_description" })
 export class XianSi extends TriggerSkill {

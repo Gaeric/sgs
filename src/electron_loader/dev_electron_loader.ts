@@ -1,4 +1,4 @@
-import { ReplayDataType } from "@/types/replay_props";
+import { ReplayDataType } from "../types/replay_props";
 import { ElectronData } from "./electron_data";
 import { ElectronLoader } from "./electron_loader";
 

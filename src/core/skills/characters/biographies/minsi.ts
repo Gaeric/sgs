@@ -1,23 +1,23 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardColor, CardId } from "@/core/cards/libs/card_props";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardColor, CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_DISTANCE } from "@/core/game/game_props";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_DISTANCE } from "../../../game/game_props";
 import {
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
 import {
   ActiveSkill,
   CommonSkill,
@@ -25,8 +25,8 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { PersistentSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { PersistentSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "minsi", description: "minsi_description" })
 export class MinSi extends ActiveSkill {

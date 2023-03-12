@@ -1,11 +1,11 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { Card, CardType, VirtualCard } from "../../core/cards/card";
+import { CardMatcher } from "../../core/cards/libs/card_matcher";
+import { CardId } from "../../core/cards/libs/card_props";
 import {
   Character,
   CharacterGender,
   CharacterId,
-} from "@/core/characters/character";
+} from "../../core/characters/character";
 import {
   CardMoveArea,
   CardMovedBySpecifiedReason,
@@ -15,24 +15,24 @@ import {
   GameEventIdentifiers,
   ServerEventFinder,
   serverResponsiveListenerEvents,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { TemporaryRoomCreationInfo } from "@/core/game/game_props";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { System } from "@/core/shares/libs/system";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { SkillType } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ElectronLoader } from "@/electron_loader/electron_loader";
-import { ImageLoader } from "@/image_loader/image_loader";
+} from "../../core/event/event";
+import { EventPacker } from "../../core/event/event_packer";
+import { Sanguosha } from "../../core/game/engine";
+import { TemporaryRoomCreationInfo } from "../../core/game/game_props";
+import { PlayerPhase } from "../../core/game/stage_processor";
+import { Player } from "../../core/player/player";
+import { PlayerCardsArea } from "../../core/player/player_props";
+import { Precondition } from "../../core/shares/libs/precondition/precondition";
+import { System } from "../../core/shares/libs/system";
+import { TargetGroupUtil } from "../../core/shares/libs/utils/target_group";
+import { SkillType } from "../../core/skills/skill";
+import { TranslationPack } from "../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../core/translations/translation_module.client";
+import { ElectronLoader } from "../../electron_loader/electron_loader";
+import { ImageLoader } from "../../image_loader/image_loader";
 import * as React from "react";
-import { CharacterSkinInfo } from "@/skins/skins";
-import { AudioService } from "@/ui/audio/install";
+import { CharacterSkinInfo } from "../../skins/skins";
+import { AudioService } from "../../ui/audio/install";
 import { AskForPeachAction } from "./actions/ask_for_peach_action";
 import { CardResponseAction } from "./actions/card_response_action";
 import { PlayPhaseAction } from "./actions/play_phase_action";

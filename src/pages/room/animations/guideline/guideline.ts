@@ -1,5 +1,5 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { RoomStore } from "@/pages/room/room.store";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../../core/event/event";
+import { RoomStore } from "../../room.store";
 import { Point } from "../position";
 import { UiAnimation } from "../ui_animation";
 

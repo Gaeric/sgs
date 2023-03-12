@@ -1,12 +1,12 @@
 import classNames from "classnames";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
-import { RoomPresenter } from "@/pages/room/room.presenter";
-import { RoomStore } from "@/pages/room/room.store";
+import { RoomPresenter } from "../../room.presenter";
+import { RoomStore } from "../../room.store";
 import * as React from "react";
-import { ClientCard } from "@/ui/card/card";
+import { ClientCard } from "../../../../ui/card/card";
 import styles from "./move_card.module.css";
 
 type MoveCardProps = {

@@ -3,11 +3,11 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { PlayerPhase } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { ActiveSkill, CommonSkill } from "../../skill";
 
 @CommonSkill({ name: "jijie", description: "jijie_description" })
 export class JiJie extends ActiveSkill {

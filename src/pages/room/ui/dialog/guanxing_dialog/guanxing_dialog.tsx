@@ -1,13 +1,13 @@
-import { Card } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+import { Card } from "../../../../../core/cards/card";
+import { CardId } from "../../../../../core/cards/libs/card_props";
+import { ClientTranslationModule } from "../../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
-import { RoomPresenter } from "@/pages/room/room.presenter";
+import { RoomPresenter } from "../../../room.presenter";
 import * as React from "react";
-import { ClientCard } from "@/ui/card/card";
-import { CardSlot } from "@/ui/card/card_slot";
+import { ClientCard } from "../../../../../ui/card/card";
+import { CardSlot } from "../../../../../ui/card/card_slot";
 import styles from "./guanxing_dialog.module.css";
 import { BaseDialog } from "../base_dialog";
 

@@ -1,21 +1,21 @@
-import { CardSuit } from "@/core/cards/libs/card_props";
+import { CardSuit } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, CardMoveStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, CardMoveStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   RulesBreakerSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { ShadowSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "tuntian", description: "tuntian_description" })
 export class TunTian extends TriggerSkill {

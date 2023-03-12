@@ -1,21 +1,21 @@
-import { CardType } from "@/core/cards/card";
-import { EquipCard } from "@/core/cards/equip_card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { CharacterGender } from "@/core/characters/character";
+import { CardType } from "../../../cards/card";
+import { EquipCard } from "../../../cards/equip_card";
+import { CardId } from "../../../cards/libs/card_props";
+import { CharacterGender } from "../../../characters/character";
 import {
   CardMoveArea,
   CardMoveReason,
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { PlayerPhase } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { ActiveSkill, CommonSkill } from "../../skill";
 
 @CommonSkill({ name: "jieyin", description: "jieyin_description" })
 export class JieYin extends ActiveSkill {

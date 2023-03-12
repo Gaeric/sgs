@@ -1,6 +1,6 @@
-import { ImageProps } from "@/props/image_props";
+import { ImageProps } from "../../../../props/image_props";
 import * as React from "react";
-import { Picture } from "@/ui/picture/picture";
+import { Picture } from "../../../../ui/picture/picture";
 import styles from "./background.module.css";
 
 export type BackgroundProps = {

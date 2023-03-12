@@ -1,9 +1,9 @@
 import classNames from "classnames";
-import { PlayerRole } from "@/core/player/player_props";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+import { PlayerRole } from "../../../../core/player/player_props";
+import { TranslationPack } from "../../../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
 import * as mobxReact from "mobx-react";
-import { RoomStore } from "@/pages/room/room.store";
+import { RoomStore } from "../../room.store";
 import * as React from "react";
 import styles from "./gameboard.module.css";
 

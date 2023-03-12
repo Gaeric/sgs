@@ -1,13 +1,13 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { AllStage, PlayerDyingStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "liewei", description: "liewei_description" })
 export class LieWei extends TriggerSkill {

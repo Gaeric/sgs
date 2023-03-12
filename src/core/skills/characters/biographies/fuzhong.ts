@@ -3,21 +3,21 @@ import {
   CardMoveArea,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { DamageType } from "@/core/game/game_props";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { DamageType } from "../../../game/game_props";
 import {
   AllStage,
   CardMoveStage,
   DrawCardStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { RulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { RulesBreakerSkill, TriggerSkill } from "../../skill";
+import { CompulsorySkill, ShadowSkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "fuzhong", description: "fuzhong_description" })
 export class FuZhong extends TriggerSkill {

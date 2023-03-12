@@ -1,15 +1,15 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { Card, CardType, VirtualCard } from "../../core/cards/card";
+import { CardMatcher } from "../../core/cards/libs/card_matcher";
 import {
   GameEventIdentifiers,
   ServerEventFinder,
   serverResponsiveListenerEvents,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../core/event/event";
+import { Sanguosha } from "../../core/game/engine";
+import { PlayerPhase } from "../../core/game/stage_processor";
+import { Player } from "../../core/player/player";
+import { TargetGroupUtil } from "../../core/shares/libs/utils/target_group";
+import { TranslationPack } from "../../core/translations/translation_json_tool";
 import React from "react";
 import { GameClientProcessor } from "./game_processor";
 import { CardSelectorDialog } from "./ui/dialog/card_selector_dialog/card_selector_dialog";

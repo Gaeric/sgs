@@ -1,21 +1,21 @@
-import { CardSuit } from "@/core/cards/libs/card_props";
+import { CardSuit } from "../../../cards/libs/card_props";
 import {
   CardMovedBySpecifiedReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "guizao", description: "guizao_description" })
 export class GuiZao extends TriggerSkill {

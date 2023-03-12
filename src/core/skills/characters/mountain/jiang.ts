@@ -1,9 +1,9 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AimStage, AllStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AimStage, AllStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { CommonSkill, TriggerSkill } from "../../skill";
 
 @CommonSkill({ name: "jiang", description: "jiang_description" })
 export class JiAng extends TriggerSkill {

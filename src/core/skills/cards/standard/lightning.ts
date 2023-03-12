@@ -1,21 +1,21 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { DamageType } from "@/core/game/game_props";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { DamageType } from "../../../game/game_props";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   JudgeMatcher,
   JudgeMatcherEnum,
-} from "@/core/shares/libs/judge_matchers";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ActiveSkill, CommonSkill, SelfTargetSkill } from "@/core/skills/skill";
+} from "../../../shares/libs/judge_matchers";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { ActiveSkill, CommonSkill, SelfTargetSkill } from "../../skill";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @CommonSkill({ name: "lightning", description: "lightning_description" })

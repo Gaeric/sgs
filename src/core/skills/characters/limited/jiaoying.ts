@@ -1,31 +1,31 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardColor, CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardColor, CardId, CardSuit } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   CardMoveStage,
   CardUseStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { FilterSkill, TriggerSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { FilterSkill, TriggerSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   CommonSkill,
   CompulsorySkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 type JiaoYingMapper = { [playerId: string]: number };
 

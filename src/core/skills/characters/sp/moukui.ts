@@ -1,29 +1,29 @@
-import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import { CardChoosingOptions } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AimStage,
   AllStage,
   CardEffectStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "moukui", description: "moukui_description" })
 export class MouKui extends TriggerSkill {

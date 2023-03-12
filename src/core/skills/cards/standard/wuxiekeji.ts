@@ -1,10 +1,10 @@
-import { WuXieKeJiSkillTrigger } from "@/core/ai/skills/cards/wuxiekeji";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Room } from "@/core/room/room";
-import { System } from "@/core/shares/libs/system";
-import { AI, CommonSkill, ResponsiveSkill } from "@/core/skills/skill";
+import { WuXieKeJiSkillTrigger } from "../../../ai/skills/cards/wuxiekeji";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Room } from "../../../room/room";
+import { System } from "../../../shares/libs/system";
+import { AI, CommonSkill, ResponsiveSkill } from "../../skill";
 
 @AI(WuXieKeJiSkillTrigger)
 @CommonSkill({ name: "wuxiekeji", description: "wuxiekeji_description" })

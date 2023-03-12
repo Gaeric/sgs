@@ -1,26 +1,26 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardDrawReason,
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   DrawCardStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "sibian", description: "sibian_description" })
 export class SiBian extends TriggerSkill {

@@ -1,26 +1,26 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
+} from "../../../event/event";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   OnDefineReleaseTiming,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 import { PanShi } from "./panshi";
 
 @CommonSkill({ name: "cixiao", description: "cixiao_description" })

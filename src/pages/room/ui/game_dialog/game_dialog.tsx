@@ -1,10 +1,10 @@
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
-import { RoomPresenter } from "@/pages/room/room.presenter";
-import { RoomStore } from "@/pages/room/room.store";
+import { RoomPresenter } from "../../room.presenter";
+import { RoomStore } from "../../room.store";
 import * as React from "react";
-import { ConnectionService } from "@/services/connection_service/connection_service";
+import { ConnectionService } from "../../../../services/connection_service/connection_service";
 import styles from "./game_dialog.module.css";
 import { MessageDialog } from "../message_dialog/message_dialog";
 

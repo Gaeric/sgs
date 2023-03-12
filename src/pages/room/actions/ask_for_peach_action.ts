@@ -1,23 +1,23 @@
-import { Card } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { Card } from "../../../core/cards/card";
+import { CardMatcher } from "../../../core/cards/libs/card_matcher";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../core/event/event";
+import { EventPacker } from "../../../core/event/event_packer";
+import { Player } from "../../../core/player/player";
+import { PlayerCardsArea } from "../../../core/player/player_props";
+import { Room } from "../../../core/room/room";
 import {
   ActiveSkill,
   FilterSkill,
   Skill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { UniqueSkillRule } from "@/core/skills/skill_rule";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+} from "../../../core/skills/skill";
+import { UniqueSkillRule } from "../../../core/skills/skill_rule";
+import { ClientTranslationModule } from "../../../core/translations/translation_module.client";
 import { BaseAction } from "./base_action";
 import { ResponsiveUseCardAction } from "./responsive_card_use_action";
 

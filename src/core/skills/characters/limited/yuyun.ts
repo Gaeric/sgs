@@ -1,39 +1,39 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardChoosingOptions, CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   DamageType,
   INFINITE_DISTANCE,
   INFINITE_TRIGGERING_TIMES,
-} from "@/core/game/game_props";
+} from "../../../game/game_props";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   OnDefineReleaseTiming,
   RulesBreakerSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 import {
   CommonSkill,
   CompulsorySkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CompulsorySkill({ name: "yuyun", description: "yuyun_description" })
 export class YuYun extends TriggerSkill {

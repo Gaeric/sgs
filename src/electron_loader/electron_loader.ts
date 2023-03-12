@@ -1,6 +1,6 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { GameEventIdentifiers, ServerEventFinder } from "../core/event/event";
 import MarkDown from "markdown-it";
-import { ReplayDataType } from "@/types/replay_props";
+import { ReplayDataType } from "../types/replay_props";
 import { ElectronData } from "./electron_data";
 
 export abstract class ElectronLoader {

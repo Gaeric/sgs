@@ -1,11 +1,11 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CompulsorySkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CompulsorySkill({ name: "jueqing", description: "jueqing_description" })
 export class JueQing extends TriggerSkill {

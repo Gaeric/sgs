@@ -3,18 +3,18 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "xing_yishi", description: "xing_yishi_description" })
 export class YiShi extends TriggerSkill {

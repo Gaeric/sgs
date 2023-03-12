@@ -1,24 +1,24 @@
 import classNames from "classnames";
-import { Character } from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
+import { Character } from "../../../core/characters/character";
+import { Sanguosha } from "../../../core/game/engine";
 import {
   GameCharacterExtensions,
   WaitingRoomGameSettings,
-} from "@/core/game/game_props";
-import { GameMode } from "@/core/shares/types/room_props";
-import { WuXieKeJiSkill } from "@/core/skills";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+} from "../../../core/game/game_props";
+import { GameMode } from "../../../core/shares/types/room_props";
+import { WuXieKeJiSkill } from "../../../core/skills";
+import { ClientTranslationModule } from "../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
 import * as React from "react";
-import { CharacterCard } from "@/ui/character/character";
-import { CheckBox } from "@/ui/check_box/check_box";
-import { CheckBoxGroup } from "@/ui/check_box/check_box_group";
-import { Input } from "@/ui/input/input";
-import { Spacing } from "@/ui/layout/spacing";
-import { Text } from "@/ui/text/text";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { CharacterCard } from "../../../ui/character/character";
+import { CheckBox } from "../../../ui/check_box/check_box";
+import { CheckBoxGroup } from "../../../ui/check_box/check_box_group";
+import { Input } from "../../../ui/input/input";
+import { Spacing } from "../../../ui/layout/spacing";
+import { Text } from "../../../ui/text/text";
+import { Tooltip } from "../../../ui/tooltip/tooltip";
 import styles from "./game_settings.module.css";
 import { createTranslationMessages } from "./messages";
 import { WaitingRoomPresenter } from "../waiting_room.presenter";

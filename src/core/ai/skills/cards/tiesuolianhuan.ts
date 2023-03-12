@@ -1,16 +1,16 @@
-import { AiLibrary } from "@/core/ai/ai_lib";
-import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
-import { CardType } from "@/core/cards/card";
-import type { CardId } from "@/core/cards/libs/card_props";
+import { AiLibrary } from "../../ai_lib";
+import { ActiveSkillTriggerClass } from "../base/active_skill_trigger";
+import { CardType } from "../../../cards/card";
+import type { CardId } from "../../../cards/libs/card_props";
 import type {
   ClientEventFinder,
   GameEventIdentifiers,
-} from "@/core/event/event";
-import type { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import type { PlayerId } from "@/core/player/player_props";
-import type { Room } from "@/core/room/room";
-import type { TieSuoLianHuanSkill } from "@/core/skills";
+} from "../../../event/event";
+import type { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import type { PlayerId } from "../../../player/player_props";
+import type { Room } from "../../../room/room";
+import type { TieSuoLianHuanSkill } from "../../../skills";
 
 export class TieSuoLianHuanSkillTrigger extends ActiveSkillTriggerClass<TieSuoLianHuanSkill> {
   protected filterTargets(

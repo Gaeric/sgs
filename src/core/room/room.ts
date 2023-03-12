@@ -1,11 +1,11 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { EquipCard } from "@/core/cards/equip_card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { Card, CardType, VirtualCard } from "../cards/card";
+import { EquipCard } from "../cards/equip_card";
+import { CardMatcher } from "../cards/libs/card_matcher";
+import { CardId } from "../cards/libs/card_props";
 import {
   CharacterEquipSections,
   CharacterId,
-} from "@/core/characters/character";
+} from "../characters/character";
 import {
   CardMoveArea,
   CardMoveReason,
@@ -14,40 +14,40 @@ import {
   GameEventIdentifiers,
   ServerEventFinder,
   WorkPlace,
-} from "@/core/event/event";
-import { MoveCardEventInfos, PinDianReport } from "@/core/event/event.server";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { GameInfo } from "@/core/game/game_props";
-import { GameCommonRules } from "@/core/game/game_rules";
-import { RecordAnalytics } from "@/core/game/record_analytics";
+} from "../event/event";
+import { MoveCardEventInfos, PinDianReport } from "../event/event.server";
+import { EventPacker } from "../event/event_packer";
+import { Sanguosha } from "../game/engine";
+import { GameInfo } from "../game/game_props";
+import { GameCommonRules } from "../game/game_rules";
+import { RecordAnalytics } from "../game/record_analytics";
 import {
   AllStage,
   GameEventStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Socket } from "@/core/network/socket";
-import { Player } from "@/core/player/player";
+} from "../game/stage_processor";
+import { Socket } from "../network/socket";
+import { Player } from "../player/player";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerRole,
   PlayerStatus,
-} from "@/core/player/player_props";
-import { JudgeMatcherEnum } from "@/core/shares/libs/judge_matchers";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { System } from "@/core/shares/libs/system";
-import { FlagEnum } from "@/core/shares/types/flag_list";
-import { GameMode } from "@/core/shares/types/room_props";
-import { RoomInfo, RoomShortcutInfo } from "@/core/shares/types/server_types";
+} from "../player/player_props";
+import { JudgeMatcherEnum } from "../shares/libs/judge_matchers";
+import { Precondition } from "../shares/libs/precondition/precondition";
+import { System } from "../shares/libs/system";
+import { FlagEnum } from "../shares/types/flag_list";
+import { GameMode } from "../shares/types/room_props";
+import { RoomInfo, RoomShortcutInfo } from "../shares/types/server_types";
 import {
   FilterSkill,
   GlobalRulesBreakerSkill,
   RulesBreakerSkill,
   TransformSkill,
-} from "@/core/skills/skill";
-import { PatchedTranslationObject } from "@/core/translations/translation_json_tool";
+} from "../skills/skill";
+import { PatchedTranslationObject } from "../translations/translation_json_tool";
 import { RoomEventStacker } from "./utils/room_event_stack";
 
 export type RoomId = number;

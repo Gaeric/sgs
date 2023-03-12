@@ -1,13 +1,13 @@
-import { AiLibrary } from "@/core/ai/ai_lib";
-import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
-import type { CardId } from "@/core/cards/libs/card_props";
+import { AiLibrary } from "../../ai_lib";
+import { ActiveSkillTriggerClass } from "../base/active_skill_trigger";
+import type { CardId } from "../../../cards/libs/card_props";
 import type {
   ClientEventFinder,
   GameEventIdentifiers,
-} from "@/core/event/event";
-import type { Player } from "@/core/player/player";
-import type { Room } from "@/core/room/room";
-import { BingLiangCunDuanSkill } from "@/core/skills";
+} from "../../../event/event";
+import type { Player } from "../../../player/player";
+import type { Room } from "../../../room/room";
+import { BingLiangCunDuanSkill } from "../../../skills";
 
 export class BingLiangCunDuanSkillTrigger extends ActiveSkillTriggerClass<BingLiangCunDuanSkill> {
   skillTrigger = (

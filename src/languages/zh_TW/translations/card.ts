@@ -1,4 +1,4 @@
-import { Word } from "@/languages";
+import { Word } from "../..";
 
 export const cardDictionary: Word[] = [
   { source: "slash", target: "殺" },

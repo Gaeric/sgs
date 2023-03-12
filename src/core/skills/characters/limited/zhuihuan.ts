@@ -2,25 +2,25 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { DamageType } from "@/core/game/game_props";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { DamageType } from "../../../game/game_props";
 import {
   AllStage,
   DamageEffectStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { OnDefineReleaseTiming, TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Algorithm } from "../../../shares/libs/algorithm";
+import { OnDefineReleaseTiming, TriggerSkill } from "../../skill";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @CommonSkill({ name: "zhuihuan", description: "zhuihuan_description" })
 export class ZhuiHuan extends TriggerSkill {

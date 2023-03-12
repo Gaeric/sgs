@@ -1,16 +1,16 @@
-import { CardId } from "@/core/cards/libs/card_props";
-import { Character } from "@/core/characters/character";
+import { CardId } from "../../cards/libs/card_props";
+import { Character } from "../../characters/character";
 import {
   BaseGameEvent,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { MoveCardEventInfos } from "@/core/event/event.server";
-import { Player } from "@/core/player/player";
-import { PlayerId, PlayerInfo, PlayerRole } from "@/core/player/player_props";
-import { ServerRoom } from "@/core/room/room.server";
-import { Logger } from "@/core/shares/libs/logger/logger";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+} from "../../event/event";
+import { MoveCardEventInfos } from "../../event/event.server";
+import { Player } from "../../player/player";
+import { PlayerId, PlayerInfo, PlayerRole } from "../../player/player_props";
+import { ServerRoom } from "../../room/room.server";
+import { Logger } from "../../shares/libs/logger/logger";
+import { Precondition } from "../../shares/libs/precondition/precondition";
 import {
   GameEventStage,
   PlayerPhase,

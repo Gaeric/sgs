@@ -3,17 +3,17 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { CommonSkill, TriggerSkill } from "../../skill";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "zhiman", description: "zhiman_description" })
 export class ZhiMan extends TriggerSkill {

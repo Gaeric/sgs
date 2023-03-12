@@ -1,13 +1,13 @@
-import { AiLibrary } from "@/core/ai/ai_lib";
-import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
-import { CardType } from "@/core/cards/card";
-import type { CardId } from "@/core/cards/libs/card_props";
-import { Sanguosha } from "@/core/game/engine";
-import type { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import type { Room } from "@/core/room/room";
-import type { ZhiHeng } from "@/core/skills";
-import { ActiveSkill } from "@/core/skills/skill";
+import { AiLibrary } from "../../../ai_lib";
+import { ActiveSkillTriggerClass } from "../../base/active_skill_trigger";
+import { CardType } from "../../../../cards/card";
+import type { CardId } from "../../../../cards/libs/card_props";
+import { Sanguosha } from "../../../../game/engine";
+import type { Player } from "../../../../player/player";
+import { PlayerCardsArea } from "../../../../player/player_props";
+import type { Room } from "../../../../room/room";
+import type { ZhiHeng } from "../../../../skills";
+import { ActiveSkill } from "../../../../skills/skill";
 
 export class ZhiHengSkillTrigger extends ActiveSkillTriggerClass<ZhiHeng> {
   skillTrigger = (room: Room, ai: Player, skill: ZhiHeng) => {

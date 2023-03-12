@@ -1,5 +1,5 @@
-import { Flavor } from "@/core/shares/types/host_config";
-import { TranslationModule } from "@/core/translations/translation_module";
+import { Flavor } from "../../types/host_config";
+import { TranslationModule } from "../../../translations/translation_module";
 
 export abstract class Logger {
   protected translator: TranslationModule | undefined;

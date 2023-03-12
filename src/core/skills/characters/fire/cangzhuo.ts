@@ -1,19 +1,19 @@
-import { CardType } from "@/core/cards/card";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+import { CardType } from "../../../cards/card";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { OnDefineReleaseTiming, TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { OnDefineReleaseTiming, TriggerSkill } from "../../skill";
+import { CompulsorySkill, ShadowSkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "cangzhuo", description: "cangzhuo_description" })
 export class CangZhuo extends TriggerSkill {

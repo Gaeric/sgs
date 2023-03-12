@@ -1,22 +1,22 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   CardUseStage,
   DamageEffectStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { OnDefineReleaseTiming, TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { OnDefineReleaseTiming, TriggerSkill } from "../../skill";
 import {
   CompulsorySkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 import { ZhenGe } from "./zhenge";
 
 @CompulsorySkill({ name: "xinghan", description: "xinghan_description" })

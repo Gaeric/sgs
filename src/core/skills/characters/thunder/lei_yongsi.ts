@@ -1,10 +1,10 @@
-import { CharacterNationality } from "@/core/characters/character";
+import { CharacterNationality } from "../../../characters/character";
 import {
   CardDrawReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   DrawCardStage,
@@ -12,17 +12,17 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CompulsorySkill,
   OnDefineReleaseTiming,
   RulesBreakerSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { PersistentSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { PersistentSkill, ShadowSkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "lei_yongsi", description: "lei_yongsi_description" })
 export class LeiYongSi extends TriggerSkill {

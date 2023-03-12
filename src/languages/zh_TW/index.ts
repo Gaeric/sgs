@@ -1,4 +1,4 @@
-import { TranslationsDictionary, Word } from "@/languages";
+import { TranslationsDictionary, Word } from "..";
 import * as dictionaryBooks from "./translations";
 
 function wordsToDictionary(words: Word[]): TranslationsDictionary {

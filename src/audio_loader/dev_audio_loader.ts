@@ -1,6 +1,6 @@
-import { CharacterGender } from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
-import { CharacterSkinInfo } from "@/skins/skins";
+import { CharacterGender } from "../core/characters/character";
+import { Sanguosha } from "../core/game/engine";
+import { CharacterSkinInfo } from "../skins/skins";
 import { AudioLoader } from "./audio_loader";
 
 const baseHost: string = "/cdn";

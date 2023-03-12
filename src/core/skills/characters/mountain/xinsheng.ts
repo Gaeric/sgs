@@ -1,13 +1,13 @@
-import { CharacterId } from "@/core/characters/character";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { CharacterId } from "../../../characters/character";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { HuaShen } from "./huashen";
 
 @CommonSkill({ name: "xinsheng", description: "xinsheng_description" })

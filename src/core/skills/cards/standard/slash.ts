@@ -1,16 +1,16 @@
-import { SlashSkillTrigger } from "@/core/ai/skills/cards/slash";
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { DamageType } from "@/core/game/game_props";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TagEnum } from "@/core/shares/types/tag_list";
-import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
+import { SlashSkillTrigger } from "../../../ai/skills/cards/slash";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { DamageType } from "../../../game/game_props";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TagEnum } from "../../../shares/types/tag_list";
+import { ActiveSkill, AI, CommonSkill } from "../../skill";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(SlashSkillTrigger)

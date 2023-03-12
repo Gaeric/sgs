@@ -1,18 +1,18 @@
-import { CardType, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+import { CardType, VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { System } from "@/core/shares/libs/system";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { System } from "../../../shares/libs/system";
 import {
   CommonSkill,
   PersistentSkill,
@@ -20,12 +20,12 @@ import {
   SideEffectSkill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @PersistentSkill()
 @CommonSkill({ name: "zuoxing", description: "zuoxing_description" })

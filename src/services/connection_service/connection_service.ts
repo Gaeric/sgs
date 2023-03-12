@@ -1,11 +1,11 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { TemporaryRoomCreationInfo } from "@/core/game/game_props";
-import { RoomId } from "@/core/room/room";
+import { GameCardExtensions } from "../../core/game/game_props";
+import { TemporaryRoomCreationInfo } from "../../core/game/game_props";
+import { RoomId } from "../../core/room/room";
 import {
   LobbySocketEvent,
   LobbySocketEventPicker,
-} from "@/core/shares/types/server_types";
-import { ServerHostTag } from "@/props/config_props";
+} from "../../core/shares/types/server_types";
+import { ServerHostTag } from "../../props/config_props";
 
 export type ChatPacketObject = {
   message: string;

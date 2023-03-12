@@ -3,12 +3,12 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Room } from "@/core/room/room";
-import { DangXian } from "@/core/skills";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { PlayerPhase } from "../../../game/stage_processor";
+import { Room } from "../../../room/room";
+import { DangXian } from "../..";
+import { CompulsorySkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CompulsorySkill({
   name: "decade_dangxian",

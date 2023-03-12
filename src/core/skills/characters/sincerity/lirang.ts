@@ -1,12 +1,12 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardDrawReason,
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   DrawCardStage,
@@ -14,22 +14,22 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { TriggerSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { TriggerSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "lirang", description: "lirang_description" })
 export class LiRang extends TriggerSkill {

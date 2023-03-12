@@ -1,6 +1,6 @@
-import { CardId } from "@/core/cards/libs/card_props";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { CardId } from "../../../cards/libs/card_props";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 
 export interface ExtralCardSkillProperty {
   isCardAvailableTarget(

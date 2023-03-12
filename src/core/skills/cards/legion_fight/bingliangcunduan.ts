@@ -1,18 +1,18 @@
-import { BingLiangCunDuanSkillTrigger } from "@/core/ai/skills/cards/bingliangcunduan";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { BingLiangCunDuanSkillTrigger } from "../../../ai/skills/cards/bingliangcunduan";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { PlayerPhase } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   JudgeMatcher,
   JudgeMatcherEnum,
-} from "@/core/shares/libs/judge_matchers";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../shares/libs/judge_matchers";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { ActiveSkill, AI, CommonSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(BingLiangCunDuanSkillTrigger)

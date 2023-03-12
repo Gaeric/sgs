@@ -1,12 +1,12 @@
-import { CharacterNationality } from "@/core/characters/character";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AimStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { LordSkill, TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { CharacterNationality } from "../../../characters/character";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AimStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { LordSkill, TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "jiuyuan", description: "jiuyuan_description" })
 @LordSkill

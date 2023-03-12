@@ -1,4 +1,4 @@
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { Precondition } from "../../../../core/shares/libs/precondition/precondition";
 
 export const quickMessageMaxIndex = 22;
 

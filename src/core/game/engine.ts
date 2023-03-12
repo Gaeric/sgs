@@ -1,14 +1,14 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId, VirtualCardId } from "@/core/cards/libs/card_props";
+import { Card, CardType, VirtualCard } from "../cards/card";
+import { CardMatcher } from "../cards/libs/card_matcher";
+import { CardId, VirtualCardId } from "../cards/libs/card_props";
 import {
   Character,
   CharacterId,
   CharacterNationality,
-} from "@/core/characters/character";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { GameMode } from "@/core/shares/types/room_props";
-import { Skill, TransformSkill } from "@/core/skills/skill";
+} from "../characters/character";
+import { Precondition } from "../shares/libs/precondition/precondition";
+import { GameMode } from "../shares/types/room_props";
+import { Skill, TransformSkill } from "../skills/skill";
 import { GameCardExtensions, GameCharacterExtensions } from "./game_props";
 import { CardLoader } from "./package_loader/loader.cards";
 import { CharacterLoader } from "./package_loader/loader.characters";

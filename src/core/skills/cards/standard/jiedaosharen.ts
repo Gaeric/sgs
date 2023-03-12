@@ -1,20 +1,20 @@
-import { JieDaoShaRenSkillTrigger } from "@/core/ai/skills/cards/jiedaosharen";
-import { CardType } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { JieDaoShaRenSkillTrigger } from "../../../ai/skills/cards/jiedaosharen";
+import { CardType } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { TargetGroupUtil } from "../../../shares/libs/utils/target_group";
+import { ActiveSkill, AI, CommonSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(JieDaoShaRenSkillTrigger)

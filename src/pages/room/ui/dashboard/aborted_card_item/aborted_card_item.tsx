@@ -1,9 +1,9 @@
 import classNames from "classnames";
-import { CharacterEquipSections } from "@/core/characters/character";
-import { ImageLoader } from "@/image_loader/image_loader";
-import { ImageProps } from "@/props/image_props";
+import { CharacterEquipSections } from "../../../../../core/characters/character";
+import { ImageLoader } from "../../../../../image_loader/image_loader";
+import { ImageProps } from "../../../../../props/image_props";
 import * as React from "react";
-import { Picture } from "@/ui/picture/picture";
+import { Picture } from "../../../../../ui/picture/picture";
 import styles from "./aborted_card_item.module.css";
 import itemStyles from "../equip_card_item/equip_card_item.module.css";
 

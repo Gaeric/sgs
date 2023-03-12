@@ -1,5 +1,5 @@
-import { TranslationPack } from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+import { TranslationPack } from "../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../core/translations/translation_module.client";
 
 export const createTranslationMessages = (
   translator: ClientTranslationModule

@@ -1,23 +1,23 @@
-import { GameProcessor } from "@/core/game/game_processor/game_processor";
-import { OneVersusTwoGameProcessor } from "@/core/game/game_processor/game_processor.1v2";
-import { TwoVersusTwoGameProcessor } from "@/core/game/game_processor/game_processor.2v2";
-import { PveClassicGameProcessor } from "@/core/game/game_processor/game_processor.pve_classic";
-import { PveLongshenGameProcessor } from "@/core/game/game_processor/game_processor.pve_longshen";
-import { StandardGameProcessor } from "@/core/game/game_processor/game_processor.standard";
-import { GameCardExtensions } from "@/core/game/game_props";
-import { TemporaryRoomCreationInfo } from "@/core/game/game_props";
-import { GameCommonRules } from "@/core/game/game_rules";
-import { RecordAnalytics } from "@/core/game/record_analytics";
-import { StageProcessor } from "@/core/game/stage_processor";
-import { LocalServerEmitter } from "@/core/network/local/local_emitter.server";
-import { ServerSocket } from "@/core/network/socket.server";
-import { ServerRoom } from "@/core/room/room.server";
-import { RoomEventStacker } from "@/core/room/utils/room_event_stack";
-import { Logger } from "@/core/shares/libs/logger/logger";
-import { Flavor } from "@/core/shares/types/host_config";
-import { GameMode } from "@/core/shares/types/room_props";
-import { ClientFlavor, ServerHostTag } from "@/props/config_props";
-import { CreateGameListenerResponse } from "@/services/connection_service/connection_service";
+import { GameProcessor } from "../../core/game/game_processor/game_processor";
+import { OneVersusTwoGameProcessor } from "../../core/game/game_processor/game_processor.1v2";
+import { TwoVersusTwoGameProcessor } from "../../core/game/game_processor/game_processor.2v2";
+import { PveClassicGameProcessor } from "../../core/game/game_processor/game_processor.pve_classic";
+import { PveLongshenGameProcessor } from "../../core/game/game_processor/game_processor.pve_longshen";
+import { StandardGameProcessor } from "../../core/game/game_processor/game_processor.standard";
+import { GameCardExtensions } from "../../core/game/game_props";
+import { TemporaryRoomCreationInfo } from "../../core/game/game_props";
+import { GameCommonRules } from "../../core/game/game_rules";
+import { RecordAnalytics } from "../../core/game/record_analytics";
+import { StageProcessor } from "../../core/game/stage_processor";
+import { LocalServerEmitter } from "../../core/network/local/local_emitter.server";
+import { ServerSocket } from "../../core/network/socket.server";
+import { ServerRoom } from "../../core/room/room.server";
+import { RoomEventStacker } from "../../core/room/utils/room_event_stack";
+import { Logger } from "../../core/shares/libs/logger/logger";
+import { Flavor } from "../../core/shares/types/host_config";
+import { GameMode } from "../../core/shares/types/room_props";
+import { ClientFlavor, ServerHostTag } from "../../props/config_props";
+import { CreateGameListenerResponse } from "../connection_service/connection_service";
 
 export class CampaignService {
   private campaginRooms: {

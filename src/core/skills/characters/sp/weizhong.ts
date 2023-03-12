@@ -1,10 +1,10 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CompulsorySkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "weizhong", description: "weizhong_description" })
 export class WeiZhong extends TriggerSkill {

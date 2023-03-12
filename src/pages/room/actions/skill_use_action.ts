@@ -1,16 +1,16 @@
-import { Card } from "@/core/cards/card";
+import { Card } from "../../../core/cards/card";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Skill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+} from "../../../core/event/event";
+import { EventPacker } from "../../../core/event/event_packer";
+import { Sanguosha } from "../../../core/game/engine";
+import { Player } from "../../../core/player/player";
+import { PlayerCardsArea, PlayerId } from "../../../core/player/player_props";
+import { Skill, TriggerSkill } from "../../../core/skills/skill";
+import { TranslationPack } from "../../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../../core/translations/translation_module.client";
 import { BaseAction } from "./base_action";
 import { RoomPresenter } from "../room.presenter";
 import { RoomStore } from "../room.store";

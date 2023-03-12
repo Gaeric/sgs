@@ -1,12 +1,12 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { ViewAsSkill } from "@/core/skills/skill";
-import { CircleSkill, CommonSkill } from "@/core/skills/skill_wrappers";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { ViewAsSkill } from "../../skill";
+import { CircleSkill, CommonSkill } from "../../skill_wrappers";
 
 @CircleSkill
 @CommonSkill({ name: "weijing", description: "weijing_description" })

@@ -1,29 +1,29 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
+} from "../../../event/event";
 import {
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Algorithm } from "../../../shares/libs/algorithm";
 import {
   ActiveSkill,
   OnDefineReleaseTiming,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @CommonSkill({ name: "fenglve", description: "fenglve_description" })
 export class FengLve extends ActiveSkill {

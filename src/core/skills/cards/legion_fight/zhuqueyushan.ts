@@ -1,14 +1,14 @@
-import { ZhuQueYuShanSkillTrigger } from "@/core/ai/skills/cards/zhuqueyushan";
-import { VirtualCard } from "@/core/cards/card";
-import { FireSlash } from "@/core/cards/legion_fight/fire_slash";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, CardUseStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
-import { AI } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { ZhuQueYuShanSkillTrigger } from "../../../ai/skills/cards/zhuqueyushan";
+import { VirtualCard } from "../../../cards/card";
+import { FireSlash } from "../../../cards/legion_fight/fire_slash";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, CardUseStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { CommonSkill, TriggerSkill } from "../../skill";
+import { AI } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @AI(ZhuQueYuShanSkillTrigger)
 @CommonSkill({ name: "zhuqueyushan", description: "zhuqueyushan_description" })

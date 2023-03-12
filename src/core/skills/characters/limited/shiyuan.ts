@@ -1,24 +1,24 @@
-import { CharacterNationality } from "@/core/characters/character";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { CharacterNationality } from "../../../characters/character";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
 import {
   AimStage,
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { OnDefineReleaseTiming, TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { OnDefineReleaseTiming, TriggerSkill } from "../../skill";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 import { YuWei } from "./yuwei";
 
 const enum ShiYuanEffect {

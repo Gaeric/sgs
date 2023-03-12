@@ -1,33 +1,33 @@
-import { AudioLoader } from "@/audio_loader/audio_loader";
+import { AudioLoader } from "../../audio_loader/audio_loader";
 import {
   clientActiveListenerEvents,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { TemporaryRoomCreationInfo } from "@/core/game/game_props";
-import { LocalClientEmitter } from "@/core/network/local/local_emitter.client";
-import { ClientSocket } from "@/core/network/socket.client";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { RoomMode } from "@/core/shares/types/room_props";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ElectronData } from "@/electron_loader/electron_data";
-import { ElectronLoader } from "@/electron_loader/electron_loader";
-import { ImageLoader } from "@/image_loader/image_loader";
+} from "../../core/event/event";
+import { EventPacker } from "../../core/event/event_packer";
+import { Sanguosha } from "../../core/game/engine";
+import { TemporaryRoomCreationInfo } from "../../core/game/game_props";
+import { LocalClientEmitter } from "../../core/network/local/local_emitter.client";
+import { ClientSocket } from "../../core/network/socket.client";
+import { Player } from "../../core/player/player";
+import { PlayerId } from "../../core/player/player_props";
+import { Precondition } from "../../core/shares/libs/precondition/precondition";
+import { RoomMode } from "../../core/shares/types/room_props";
+import { TranslationPack } from "../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../core/translations/translation_module.client";
+import { ElectronData } from "../../electron_loader/electron_data";
+import { ElectronLoader } from "../../electron_loader/electron_loader";
+import { ImageLoader } from "../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
-import { SettingsDialog } from "@/pages/ui/settings/settings";
-import { ServerHostTag, ServiceConfig } from "@/props/config_props";
+import { SettingsDialog } from "../ui/settings/settings";
+import { ServerHostTag, ServiceConfig } from "../../props/config_props";
 import * as React from "react";
 import { match } from "react-router-dom";
-import { ConnectionService } from "@/services/connection_service/connection_service";
-import { CharacterSkinInfo } from "@/skins/skins";
-import { PagePropsWithConfig } from "@/types/page_props";
-import { installAudioPlayerService } from "@/ui/audio/install";
+import { ConnectionService } from "../../services/connection_service/connection_service";
+import { CharacterSkinInfo } from "../../skins/skins";
+import { PagePropsWithConfig } from "../../types/page_props";
+import { installAudioPlayerService } from "../../ui/audio/install";
 import { GameClientProcessor } from "./game_processor";
 import { installService, RoomBaseService } from "./install_service";
 import styles from "./room.module.css";

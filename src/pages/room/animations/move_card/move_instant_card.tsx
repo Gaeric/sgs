@@ -1,19 +1,19 @@
-import { Card, CardType } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
+import { Card, CardType } from "../../../../core/cards/card";
+import { CardId } from "../../../../core/cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
-import { RoomStore } from "@/pages/room/room.store";
+} from "../../../../core/event/event";
+import { Sanguosha } from "../../../../core/game/engine";
+import { TargetGroupUtil } from "../../../../core/shares/libs/utils/target_group";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../image_loader/image_loader";
+import { RoomStore } from "../../room.store";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { ClientCard } from "@/ui/card/card";
+import { ClientCard } from "../../../../ui/card/card";
 import styles from "./move_instant_card.module.css";
 import { Point } from "../position";
 import { UiAnimation } from "../ui_animation";

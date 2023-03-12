@@ -3,16 +3,16 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
+} from "../../../event/event";
 import {
   AllStage,
   CardMoveStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CompulsorySkill } from "../../skill_wrappers";
 import { ZiShu } from "../sp/zishu";
 
 @CompulsorySkill({ name: "zhanji", description: "zhanji_description" })

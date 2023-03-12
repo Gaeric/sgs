@@ -1,4 +1,4 @@
-import { ClientConfig } from "@/props/config_props";
+import { ClientConfig } from "../../props/config_props";
 import { FakeConnectionService } from "./fake_connection_service";
 import { RealConnectionService } from "./real_connection_service";
 

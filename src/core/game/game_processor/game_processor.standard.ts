@@ -1,13 +1,13 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { EquipCard } from "@/core/cards/equip_card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { Card, CardType, VirtualCard } from "../../cards/card";
+import { EquipCard } from "../../cards/equip_card";
+import { CardMatcher } from "../../cards/libs/card_matcher";
+import { CardId } from "../../cards/libs/card_props";
 import {
   Character,
   CharacterGender,
   CharacterId,
   CharacterNationality,
-} from "@/core/characters/character";
+} from "../../characters/character";
 import {
   CardDrawReason,
   CardMoveArea,
@@ -16,10 +16,10 @@ import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { MoveCardEventInfos, MovingCardProps } from "@/core/event/event.server";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../event/event";
+import { MoveCardEventInfos, MovingCardProps } from "../../event/event.server";
+import { EventPacker } from "../../event/event_packer";
+import { Sanguosha } from "../engine";
 import {
   ArmorChangeStage,
   CardEffectStage,
@@ -43,25 +43,25 @@ import {
   SkillUseStage,
   StageProcessor,
   TurnOverStage,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
+} from "../stage_processor";
+import { Player } from "../../player/player";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerInfo,
   PlayerRole,
-} from "@/core/player/player_props";
-import { TimeLimitVariant } from "@/core/room/room";
-import { ServerRoom } from "@/core/room/room.server";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { Functional } from "@/core/shares/libs/functional";
-import { Logger } from "@/core/shares/libs/logger/logger";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { Flavor } from "@/core/shares/types/host_config";
-import { GameMode } from "@/core/shares/types/room_props";
-import { GlobalFilterSkill, SkillLifeCycle } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../player/player_props";
+import { TimeLimitVariant } from "../../room/room";
+import { ServerRoom } from "../../room/room.server";
+import { Algorithm } from "../../shares/libs/algorithm";
+import { Functional } from "../../shares/libs/functional";
+import { Logger } from "../../shares/libs/logger/logger";
+import { Precondition } from "../../shares/libs/precondition/precondition";
+import { TargetGroupUtil } from "../../shares/libs/utils/target_group";
+import { Flavor } from "../../shares/types/host_config";
+import { GameMode } from "../../shares/types/room_props";
+import { GlobalFilterSkill, SkillLifeCycle } from "../../skills/skill";
+import { TranslationPack } from "../../translations/translation_json_tool";
 import { GameProcessor } from "./game_processor";
 import { DamageType, UPPER_LIMIT_OF_ARMOR } from "../game_props";
 

@@ -1,23 +1,23 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_DISTANCE } from "@/core/game/game_props";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_DISTANCE } from "../../../game/game_props";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   FilterSkill,
@@ -26,7 +26,7 @@ import {
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CommonSkill({ name: "jiangchi", description: "jiangchi_description" })
 export class JiangChi extends TriggerSkill {

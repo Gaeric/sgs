@@ -1,6 +1,6 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { JinkSkill } from "@/core/skills/cards/standard/jink";
+import { GameCardExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { JinkSkill } from "../../skills/cards/standard/jink";
 import { BasicCard } from "../basic_card";
 import { CardSuit } from "../libs/card_props";
 

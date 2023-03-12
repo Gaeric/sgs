@@ -1,19 +1,19 @@
-import { CardType, VirtualCard } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Slash } from "@/core/cards/standard/slash";
+import { CardType, VirtualCard } from "../../../cards/card";
+import { CardId } from "../../../cards/libs/card_props";
+import { Slash } from "../../../cards/standard/slash";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { ActiveSkill, CommonSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "mingce", description: "mingce_description" })
 export class MingCe extends ActiveSkill {

@@ -1,10 +1,10 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { GlobalFilterSkill } from "@/core/skills/skill";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { Sanguosha } from "../../../game/engine";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { GlobalFilterSkill } from "../../skill";
+import { CompulsorySkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "wansha", description: "wansha_description" })
 export class WanSha extends GlobalFilterSkill {

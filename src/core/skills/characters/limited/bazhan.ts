@@ -1,19 +1,19 @@
-import { Alcohol } from "@/core/cards/legion_fight/alcohol";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { Alcohol } from "../../../cards/legion_fight/alcohol";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { ActiveSkill, SwitchSkillState } from "@/core/skills/skill";
-import { CommonSkill, SwitchSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Algorithm } from "../../../shares/libs/algorithm";
+import { ActiveSkill, SwitchSkillState } from "../../skill";
+import { CommonSkill, SwitchSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @SwitchSkill()
 @CommonSkill({ name: "bazhan", description: "bazhan_description" })

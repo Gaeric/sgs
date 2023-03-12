@@ -1,8 +1,8 @@
 import classNames from "classnames";
-import { ServerHostTag } from "@/props/config_props";
+import { ServerHostTag } from "../../props/config_props";
 import * as React from "react";
 import { ConnectionService } from "services/connection_service/connection_service";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { Tooltip } from "../tooltip/tooltip";
 import styles from "./signal_bar.module.css";
 
 let queryingPing = false;

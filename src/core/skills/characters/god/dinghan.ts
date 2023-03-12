@@ -1,20 +1,20 @@
-import { CardType } from "@/core/cards/card";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+import { CardType } from "../../../cards/card";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AimStage,
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { AimGroupUtil } from "@/core/shares/libs/utils/aim_group";
-import { QiZhengXiangShengSkill } from "@/core/skills/cards/character_skills/qizhengxiangsheng";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { AimGroupUtil } from "../../../shares/libs/utils/aim_group";
+import { QiZhengXiangShengSkill } from "../../cards/character_skills/qizhengxiangsheng";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "dinghan", description: "dinghan_description" })
 export class DingHan extends TriggerSkill {

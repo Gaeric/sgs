@@ -1,17 +1,17 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { DamageType } from "@/core/game/game_props";
-import { AimStage, AllStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { AimGroupUtil } from "@/core/shares/libs/utils/aim_group";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill } from "@/core/skills/skill_wrappers";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { DamageType } from "../../../game/game_props";
+import { AimStage, AllStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { AimGroupUtil } from "../../../shares/libs/utils/aim_group";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "zhennan", description: "zhennan_description" })
 export class ZhenNan extends TriggerSkill {

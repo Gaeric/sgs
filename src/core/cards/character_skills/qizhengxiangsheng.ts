@@ -1,7 +1,7 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { TianZuo } from "@/core/skills";
-import { QiZhengXiangShengSkill } from "@/core/skills/cards/character_skills/qizhengxiangsheng";
+import { GameCardExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { TianZuo } from "../../skills";
+import { QiZhengXiangShengSkill } from "../../skills/cards/character_skills/qizhengxiangsheng";
 import { UniqueCard } from "../card";
 import type { CardSuit, RealCardId } from "../libs/card_props";
 import { TrickCard } from "../trick_card";

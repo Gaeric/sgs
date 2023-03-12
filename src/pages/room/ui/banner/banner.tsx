@@ -1,11 +1,11 @@
 import classNames from "classnames";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ServerHostTag } from "@/props/config_props";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
+import { ServerHostTag } from "../../../../props/config_props";
 import * as React from "react";
 import { useHistory } from "react-router-dom";
-import { ConnectionService } from "@/services/connection_service/connection_service";
-import { Button } from "@/ui/button/button";
-import { SignalBar } from "@/ui/signal_bar/signal_bar";
+import { ConnectionService } from "../../../../services/connection_service/connection_service";
+import { Button } from "../../../../ui/button/button";
+import { SignalBar } from "../../../../ui/signal_bar/signal_bar";
 import styles from "./banner.module.css";
 
 export type BannerProps = {

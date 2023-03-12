@@ -1,27 +1,27 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   ActiveSkill,
   CommonSkill,
   CompulsorySkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 
 @CommonSkill({ name: "qingnang", description: "qingnang_description" })
 export class QingNang extends ActiveSkill {

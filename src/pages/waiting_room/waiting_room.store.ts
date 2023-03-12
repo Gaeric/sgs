@@ -1,7 +1,7 @@
-import { WaitingRoomGameSettings } from "@/core/game/game_props";
-import { PlayerId } from "@/core/player/player_props";
+import { WaitingRoomGameSettings } from "../../core/game/game_props";
+import { PlayerId } from "../../core/player/player_props";
 import * as mobx from "mobx";
-import { ChatPacketObject } from "@/services/connection_service/connection_service";
+import { ChatPacketObject } from "../../services/connection_service/connection_service";
 
 export type WaitingRoomSeatInfo = { seatId: number } & (
   | {

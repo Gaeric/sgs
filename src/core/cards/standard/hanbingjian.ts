@@ -1,7 +1,7 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { HanBingJianSkill } from "@/core/skills/cards/standard/hanbingjian";
-import { Skill } from "@/core/skills/skill";
+import { GameCardExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { HanBingJianSkill } from "../../skills/cards/standard/hanbingjian";
+import { Skill } from "../../skills/skill";
 import { WeaponCard } from "../equip_card";
 import { CardSuit } from "../libs/card_props";
 

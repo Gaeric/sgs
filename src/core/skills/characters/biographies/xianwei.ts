@@ -1,28 +1,28 @@
-import { CardType } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CharacterEquipSections } from "@/core/characters/character";
+import { CardType } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CharacterEquipSections } from "../../../characters/character";
 import {
   CardMoveArea,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { Functional } from "@/core/shares/libs/functional";
-import { GlobalRulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { Functional } from "../../../shares/libs/functional";
+import { GlobalRulesBreakerSkill, TriggerSkill } from "../../skill";
 import {
   CommonSkill,
   CompulsorySkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CompulsorySkill({ name: "xianwei", description: "xianwei_description" })
 export class XianWei extends TriggerSkill {

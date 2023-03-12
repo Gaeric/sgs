@@ -1,15 +1,15 @@
 import classNames from "classnames";
-import { Card } from "@/core/cards/card";
-import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
-import { CharacterId } from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Functional } from "@/core/shares/libs/functional";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+import { Card } from "../../../../../core/cards/card";
+import { CardChoosingOptions, CardId } from "../../../../../core/cards/libs/card_props";
+import { CharacterId } from "../../../../../core/characters/character";
+import { Sanguosha } from "../../../../../core/game/engine";
+import { PlayerCardsArea } from "../../../../../core/player/player_props";
+import { Functional } from "../../../../../core/shares/libs/functional";
+import { ClientTranslationModule } from "../../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../../image_loader/image_loader";
 import * as React from "react";
-import { ClientCard } from "@/ui/card/card";
-import { CharacterCard } from "@/ui/character/character";
+import { ClientCard } from "../../../../../ui/card/card";
+import { CharacterCard } from "../../../../../ui/character/character";
 import styles from "./card_selector_dialog.module.css";
 import { BaseDialog } from "../base_dialog";
 

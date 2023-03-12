@@ -1,16 +1,16 @@
-import { CardType, VirtualCard } from "@/core/cards/card";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
-import { Duel } from "@/core/cards/standard/duel";
-import { Slash } from "@/core/cards/standard/slash";
+import { CardType, VirtualCard } from "../../../cards/card";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
+import { Duel } from "../../../cards/standard/duel";
+import { Slash } from "../../../cards/standard/slash";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { DamageType } from "@/core/game/game_props";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { DamageType } from "../../../game/game_props";
 import {
   AimStage,
   AllStage,
@@ -22,21 +22,21 @@ import {
   PlayerPhase,
   PlayerPhaseStages,
   StagePriority,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { ExtralCardSkillProperty } from "@/core/skills/cards/interface/extral_property";
-import { TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TargetGroupUtil } from "../../../shares/libs/utils/target_group";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { ExtralCardSkillProperty } from "../../cards/interface/extral_property";
+import { TriggerSkill } from "../../skill";
 import {
   AwakeningSkill,
   CommonSkill,
   CompulsorySkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { PveClassicLianZhen } from "./pve_classic_lianzhen";
 import { PveClassicQiSha } from "./pve_classic_qisha";
 import { PveClassicTianJi } from "./pve_classic_tianji";

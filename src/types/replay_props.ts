@@ -1,7 +1,7 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { GameInfo } from "@/core/game/game_props";
-import { PlayerId } from "@/core/player/player_props";
-import { RoomId } from "@/core/room/room";
+import { GameEventIdentifiers, ServerEventFinder } from "../core/event/event";
+import { GameInfo } from "../core/game/game_props";
+import { PlayerId } from "../core/player/player_props";
+import { RoomId } from "../core/room/room";
 
 export type ReplayPlayerInfo = {
   Id: PlayerId;

@@ -1,4 +1,4 @@
-import { Flavor } from "@/core/shares/types/host_config";
+import { Flavor } from "../../types/host_config";
 
 export class Precondition {
   public static alarm<T>(arg: T | null | undefined, errorMsg: string): T {

@@ -1,21 +1,21 @@
-import { Card } from "@/core/cards/card";
+import { Card } from "../../../core/cards/card";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../core/event/event";
+import { Sanguosha } from "../../../core/game/engine";
+import { Player } from "../../../core/player/player";
+import { PlayerCardsArea, PlayerId } from "../../../core/player/player_props";
+import { Room } from "../../../core/room/room";
 import {
   ActiveSkill,
   ResponsiveSkill,
   Skill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { UniqueSkillRule } from "@/core/skills/skill_rule";
+} from "../../../core/skills/skill";
+import { UniqueSkillRule } from "../../../core/skills/skill_rule";
 import { BaseAction } from "./base_action";
 
 export class PlayPhaseAction extends BaseAction {

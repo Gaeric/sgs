@@ -1,6 +1,6 @@
-import { GameCharacterExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { JingCe } from "@/core/skills/characters/yijiang2013/jingce";
+import { GameCharacterExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { JingCe } from "../../skills/characters/yijiang2013/jingce";
 import { Character, CharacterGender, CharacterNationality } from "../character";
 
 const skillLoaderInstance = SkillLoader.getInstance();

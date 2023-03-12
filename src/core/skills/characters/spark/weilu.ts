@@ -1,5 +1,5 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   DamageEffectStage,
@@ -7,17 +7,17 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
+import { CompulsorySkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "weilu", description: "weilu_description" })
 export class WeiLu extends TriggerSkill {

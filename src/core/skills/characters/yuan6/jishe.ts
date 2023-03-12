@@ -1,20 +1,20 @@
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { ActiveSkill, TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { ActiveSkill, TriggerSkill } from "../../skill";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "jishe", description: "jishe_description" })
 export class JiShe extends ActiveSkill {

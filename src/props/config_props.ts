@@ -1,4 +1,4 @@
-import { Languages } from "@/core/translations/translation_json_tool";
+import { Languages } from "../core/translations/translation_json_tool";
 
 export type UiConfigTypes = {
   language: Languages;

@@ -1,15 +1,15 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { TriggerSkill } from "@/core/skills/skill";
-import { AwakeningSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { TriggerSkill } from "../../skill";
+import { AwakeningSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { GuJu } from "./guju";
 
 @AwakeningSkill({ name: "baijia", description: "baijia_description" })

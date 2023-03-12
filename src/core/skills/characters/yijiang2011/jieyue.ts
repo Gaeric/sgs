@@ -1,25 +1,25 @@
-import { JieYueSkillTrigger } from "@/core/ai/skills/characters/yijiang2011/jieyue";
-import { CardId } from "@/core/cards/libs/card_props";
+import { JieYueSkillTrigger } from "../../../ai/skills/characters/yijiang2011/jieyue";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { System } from "@/core/shares/libs/system";
-import { TriggerSkill } from "@/core/skills/skill";
-import { AI, CommonSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Algorithm } from "../../../shares/libs/algorithm";
+import { System } from "../../../shares/libs/system";
+import { TriggerSkill } from "../../skill";
+import { AI, CommonSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @AI(JieYueSkillTrigger)
 @CommonSkill({ name: "jieyue", description: "jieyue_description" })

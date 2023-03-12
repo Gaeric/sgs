@@ -1,13 +1,13 @@
-import { AiLibrary } from "@/core/ai/ai_lib";
-import type { CardId } from "@/core/cards/libs/card_props";
+import { AiLibrary } from "../../ai_lib";
+import type { CardId } from "../../../cards/libs/card_props";
 import type {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import type { Player } from "@/core/player/player";
-import type { Room } from "@/core/room/room";
-import type { GuanShiFuSkill } from "@/core/skills";
+} from "../../../event/event";
+import type { Player } from "../../../player/player";
+import type { Room } from "../../../room/room";
+import type { GuanShiFuSkill } from "../../../skills";
 import { TriggerSkillTriggerClass } from "../base/trigger_skill_trigger";
 
 export class GuanShiFuSkillTrigger extends TriggerSkillTriggerClass<

@@ -3,8 +3,8 @@ import {
   GameEventIdentifiers,
   ServerEventFinder,
   WorkPlace,
-} from "@/core/event/event";
-import { Socket } from "@/core/network/socket";
+} from "../event/event";
+import { Socket } from "./socket";
 import IOSocketClient, { Manager } from "socket.io-client";
 
 export class ClientSocket extends Socket<WorkPlace.Client> {

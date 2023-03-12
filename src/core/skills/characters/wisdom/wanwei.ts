@@ -1,20 +1,20 @@
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { AllStage, PlayerDyingStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   ActiveSkill,
   CircleSkill,
   CommonSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { ShadowSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CircleSkill
 @CommonSkill({ name: "wanwei", description: "wanwei_description" })

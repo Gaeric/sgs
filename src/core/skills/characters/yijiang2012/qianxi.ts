@@ -1,29 +1,29 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardColor, CardId } from "@/core/cards/libs/card_props";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardColor, CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseChangeStage,
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   FilterSkill,
   OnDefineReleaseTiming,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CommonSkill({ name: "qianxi", description: "qianxi_description" })
 export class QianXi extends TriggerSkill {

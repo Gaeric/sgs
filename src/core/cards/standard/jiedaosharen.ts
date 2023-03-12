@@ -1,9 +1,9 @@
-import { CardSuit } from "@/core/cards/libs/card_props";
-import type { RealCardId } from "@/core/cards/libs/card_props";
-import { TrickCard } from "@/core/cards/trick_card";
-import { GameCardExtensions, INFINITE_DISTANCE } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { JieDaoShaRenSkill } from "@/core/skills";
+import { CardSuit } from "../libs/card_props";
+import type { RealCardId } from "../libs/card_props";
+import { TrickCard } from "../trick_card";
+import { GameCardExtensions, INFINITE_DISTANCE } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { JieDaoShaRenSkill } from "../../skills";
 import { Single } from "../card";
 
 @Single

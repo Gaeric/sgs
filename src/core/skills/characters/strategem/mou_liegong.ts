@@ -1,36 +1,36 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { Card, CardType, VirtualCard } from "../../../cards/card";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AimStage,
   AllStage,
   CardUseStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { Functional } from "@/core/shares/libs/functional";
-import { TransformSkill, TriggerSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Algorithm } from "../../../shares/libs/algorithm";
+import { Functional } from "../../../shares/libs/functional";
+import { TransformSkill, TriggerSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "mou_liegong", description: "mou_liegong_description" })
 export class MouLieGong extends TriggerSkill {

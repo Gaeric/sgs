@@ -2,20 +2,20 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   DamageEffectStage,
   PhaseStageChangeStage,
   PlayerDyingStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { QuestSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { QuestSkill } from "../../skill_wrappers";
 import { XuanCun } from "./xuancun";
 
 @QuestSkill({ name: "qingyu", description: "qingyu_description" })

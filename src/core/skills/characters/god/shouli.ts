@@ -1,14 +1,14 @@
-import { CardType } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardType } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
 import {
   CardMoveArea,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { AllStage, GameStartStage } from "@/core/game/stage_processor";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+} from "../../../event/event";
+import { AllStage, GameStartStage } from "../../../game/stage_processor";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CompulsorySkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "shouli", description: "shouli_description" })
 export class ShouLi extends TriggerSkill {

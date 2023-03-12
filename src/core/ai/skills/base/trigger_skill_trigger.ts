@@ -1,12 +1,12 @@
-import type { TriggerSkillTrigger } from "@/core/ai/ai_skill_trigger";
-import type { CardId } from "@/core/cards/libs/card_props";
+import type { TriggerSkillTrigger } from "../../ai_skill_trigger";
+import type { CardId } from "../../../cards/libs/card_props";
 import type {
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import type { Player } from "@/core/player/player";
-import type { Room } from "@/core/room/room";
-import type { TriggerSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import type { Player } from "../../../player/player";
+import type { Room } from "../../../room/room";
+import type { TriggerSkill } from "../../../skills/skill";
 import { BaseSkillTrigger } from "./base_trigger";
 
 export class TriggerSkillTriggerClass<

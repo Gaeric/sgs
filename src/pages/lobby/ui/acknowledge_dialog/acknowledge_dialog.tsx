@@ -1,7 +1,7 @@
-import { ImageLoader } from "@/image_loader/image_loader";
+import { ImageLoader } from "../../../../image_loader/image_loader";
 import * as React from "react";
-import { Dialog } from "@/ui/dialog/dialog";
-import { Picture } from "@/ui/picture/picture";
+import { Dialog } from "../../../../ui/dialog/dialog";
+import { Picture } from "../../../../ui/picture/picture";
 import styles from "./acknowledge_dialog.module.css";
 
 export const AcknowledgeDialog = ({

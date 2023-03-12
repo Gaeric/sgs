@@ -1,12 +1,12 @@
-import { QingLongDaoSkillTrigger } from "@/core/ai/skills/cards/qinglongdao";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, CardEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { AI, CommonSkill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { QingLongDaoSkillTrigger } from "../../../ai/skills/cards/qinglongdao";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, CardEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { AI, CommonSkill, TriggerSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @AI(QingLongDaoSkillTrigger)
 @CommonSkill({

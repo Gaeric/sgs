@@ -1,4 +1,4 @@
-import { PlayerId } from "@/core/player/player_props";
+import { PlayerId } from "../../../player/player_props";
 
 export type TargetGroup = readonly PlayerId[][];
 

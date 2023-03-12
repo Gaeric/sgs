@@ -1,4 +1,4 @@
-import { CompulsorySkill, RulesBreakerSkill } from "@/core/skills/skill";
+import { CompulsorySkill, RulesBreakerSkill } from "../../skill";
 
 @CompulsorySkill({
   name: "defense_horse",

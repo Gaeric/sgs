@@ -1,29 +1,29 @@
-import { CardId } from "@/core/cards/libs/card_props";
-import { CharacterNationality } from "@/core/characters/character";
+import { CardId } from "../../../cards/libs/card_props";
+import { CharacterNationality } from "../../../characters/character";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { DamageType } from "@/core/game/game_props";
+} from "../../../event/event";
+import { DamageType } from "../../../game/game_props";
 import {
   AllStage,
   DamageEffectStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
 import {
   CompulsorySkill,
   LimitSkill,
   LordSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @LordSkill
 @LimitSkill({

@@ -1,18 +1,18 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { DamageType } from "@/core/game/game_props";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { ActiveSkill, LimitSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { DamageType } from "../../../game/game_props";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { ActiveSkill, LimitSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @LimitSkill({ name: "xianzhou", description: "xianzhou_description" })
 export class XianZhou extends ActiveSkill {

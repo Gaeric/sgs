@@ -2,7 +2,7 @@ import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
+} from "../event/event";
 import { ClientSocket } from "./socket.client";
 
 export class ClientOfflineSocket extends ClientSocket {

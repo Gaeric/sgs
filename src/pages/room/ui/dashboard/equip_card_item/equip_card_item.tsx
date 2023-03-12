@@ -1,15 +1,15 @@
 import classNames from "classnames";
-import { Card, CardType } from "@/core/cards/card";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+import { Card, CardType } from "../../../../../core/cards/card";
+import { ClientTranslationModule } from "../../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
 import * as React from "react";
-import { CardNumberItem } from "@/ui/card/card_number";
-import { CardSuitItem } from "@/ui/card/card_suit";
+import { CardNumberItem } from "../../../../../ui/card/card_number";
+import { CardSuitItem } from "../../../../../ui/card/card_suit";
 
-import { CardDescription } from "@/ui/card_description/card_description";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { CardDescription } from "../../../../../ui/card_description/card_description";
+import { Tooltip } from "../../../../../ui/tooltip/tooltip";
 import styles from "./equip_card_item.module.css";
 
 type EquipCardItemProps = {

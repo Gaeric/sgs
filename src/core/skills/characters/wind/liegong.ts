@@ -1,14 +1,14 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { AimStage, AllStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { RulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { AimStage, AllStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { RulesBreakerSkill, TriggerSkill } from "../../skill";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "liegong", description: "liegong_description" })
 export class LieGong extends TriggerSkill {

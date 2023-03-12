@@ -1,26 +1,26 @@
-import { VirtualCard } from "@/core/cards/card";
-import { Alcohol } from "@/core/cards/legion_fight/alcohol";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_TRIGGERING_TIMES } from "@/core/game/game_props";
+import { VirtualCard } from "../../../cards/card";
+import { Alcohol } from "../../../cards/legion_fight/alcohol";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_TRIGGERING_TIMES } from "../../../game/game_props";
 import {
   AllStage,
   DamageEffectStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   RulesBreakerSkill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "jiuchi", description: "jiuchi_description" })
 export class JiuChi extends ViewAsSkill {

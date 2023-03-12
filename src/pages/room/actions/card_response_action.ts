@@ -1,23 +1,23 @@
-import { Card } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { Card } from "../../../core/cards/card";
+import { CardMatcher } from "../../../core/cards/libs/card_matcher";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../core/event/event";
+import { EventPacker } from "../../../core/event/event_packer";
+import { Sanguosha } from "../../../core/game/engine";
+import { Player } from "../../../core/player/player";
+import { PlayerCardsArea, PlayerId } from "../../../core/player/player_props";
+import { Room } from "../../../core/room/room";
 import {
   FilterSkill,
   Skill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { UniqueSkillRule } from "@/core/skills/skill_rule";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+} from "../../../core/skills/skill";
+import { UniqueSkillRule } from "../../../core/skills/skill_rule";
+import { ClientTranslationModule } from "../../../core/translations/translation_module.client";
 import { BaseAction } from "./base_action";
 import { RoomPresenter } from "../room.presenter";
 import { RoomStore } from "../room.store";

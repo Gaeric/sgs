@@ -1,24 +1,24 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { GameCardExtensions } from "@/core/game/game_props";
-import { PhaseChangeStage, PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+} from "../../../event/event";
+import { GameCardExtensions } from "../../../game/game_props";
+import { PhaseChangeStage, PlayerPhase } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
 import {
   ActiveSkill,
   CommonSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CommonSkill({ name: "rende", description: "rende_description" })
 export class Rende extends ActiveSkill {

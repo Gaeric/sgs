@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { Character, CharacterNationality } from "@/core/characters/character";
+import { Character, CharacterNationality } from "../../core/characters/character";
 import * as React from "react";
 import styles from "./hp.module.css";
 import { CharaterMagatama } from "./magatama/character_magatama";

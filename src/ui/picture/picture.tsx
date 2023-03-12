@@ -1,4 +1,4 @@
-import { ImageProps } from "@/props/image_props";
+import { ImageProps } from "../../props/image_props";
 import * as React from "react";
 
 export const Picture = React.memo(

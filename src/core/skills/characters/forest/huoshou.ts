@@ -1,16 +1,16 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AimStage,
   AllStage,
   CardEffectStage,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { NanManRuQingSkill } from "@/core/skills/cards/standard/nanmanruqing";
-import { CompulsorySkill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { NanManRuQingSkill } from "../../cards/standard/nanmanruqing";
+import { CompulsorySkill, TriggerSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CompulsorySkill({ name: "huoshou", description: "huoshou_description" })
 export class HuoShou extends TriggerSkill {

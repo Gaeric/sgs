@@ -1,14 +1,14 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { CompulsorySkill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { CompulsorySkill, TriggerSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { JiuChi } from "./jiuchi";
 
 @CompulsorySkill({ name: "benghuai", description: "benghuai_description" })

@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { Flavor } from "@/core/shares/types/host_config";
+import { Flavor } from "../../types/host_config";
 import { Logger } from "./logger";
 
 export class ServerLogger extends Logger {

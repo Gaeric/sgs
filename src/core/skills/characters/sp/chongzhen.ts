@@ -1,26 +1,26 @@
-import { VirtualCard } from "@/core/cards/card";
+import { VirtualCard } from "../../../cards/card";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   CardResponseStage,
   CardUseStage,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TargetGroupUtil } from "../../../shares/libs/utils/target_group";
+import { CommonSkill, TriggerSkill } from "../../skill";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "chongzhen", description: "chongzhen_description" })
 export class ChongZhen extends TriggerSkill {

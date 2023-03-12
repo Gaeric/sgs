@@ -1,27 +1,27 @@
-import { BaseSkillTrigger } from "@/core/ai/skills/base/base_trigger";
-import { Card, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { BaseSkillTrigger } from "../ai/skills/base/base_trigger";
+import { Card, VirtualCard } from "../cards/card";
+import { CardMatcher } from "../cards/libs/card_matcher";
+import { CardId } from "../cards/libs/card_props";
 import {
   ClientEventFinder,
   EventProcessSteps,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../event/event";
+import { EventPacker } from "../event/event_packer";
 import {
   AllStage,
   PlayerPhase,
   StagePriority,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
+} from "../game/stage_processor";
+import { Player } from "../player/player";
+import { PlayerCardsArea, PlayerId } from "../player/player_props";
+import { Room } from "../room/room";
+import { TargetGroupUtil } from "../shares/libs/utils/target_group";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../translations/translation_json_tool";
 export * from "./skill_wrappers";
 export * from "./skill_hooks";
 

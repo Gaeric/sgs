@@ -1,10 +1,10 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../cards/libs/card_props";
 import {
   Character,
   CharacterGender,
   CharacterId,
   CharacterNationality,
-} from "@/core/characters/character";
+} from "../../characters/character";
 import {
   CardDrawReason,
   CardMoveArea,
@@ -12,18 +12,18 @@ import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Player } from "@/core/player/player";
+} from "../../event/event";
+import { Player } from "../../player/player";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerInfo,
   PlayerRole,
-} from "@/core/player/player_props";
-import { Functional } from "@/core/shares/libs/functional";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { GameMode } from "@/core/shares/types/room_props";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../player/player_props";
+import { Functional } from "../../shares/libs/functional";
+import { Precondition } from "../../shares/libs/precondition/precondition";
+import { GameMode } from "../../shares/types/room_props";
+import { TranslationPack } from "../../translations/translation_json_tool";
 import { StandardGameProcessor } from "./game_processor.standard";
 import { Sanguosha } from "../engine";
 import {

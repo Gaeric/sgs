@@ -1,31 +1,31 @@
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { Card, CardType, VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
 import {
   GameEventIdentifiers,
   ServerEventFinder,
   WorkPlace,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_TRIGGERING_TIMES } from "@/core/game/game_props";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_TRIGGERING_TIMES } from "../../../game/game_props";
 import {
   AllStage,
   CardUseStage,
   PlayerPhase,
   StagePriority,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
 import {
   CommonSkill,
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { PersistentSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { PersistentSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "jianying", description: "jianying_description" })
 export class JianYing extends ViewAsSkill {

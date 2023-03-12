@@ -1,12 +1,12 @@
-import { GuDingDaoSkillTrigger } from "@/core/ai/skills/cards/gudingdao";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { AI, CompulsorySkill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { GuDingDaoSkillTrigger } from "../../../ai/skills/cards/gudingdao";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { AI, CompulsorySkill, TriggerSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @AI(GuDingDaoSkillTrigger)
 @CompulsorySkill({ name: "gudingdao", description: "gudingdao_description" })

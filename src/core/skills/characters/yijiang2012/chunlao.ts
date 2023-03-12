@@ -1,28 +1,28 @@
-import { VirtualCard } from "@/core/cards/card";
-import { Alcohol } from "@/core/cards/legion_fight/alcohol";
-import { CardId } from "@/core/cards/libs/card_props";
+import { VirtualCard } from "../../../cards/card";
+import { Alcohol } from "../../../cards/legion_fight/alcohol";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerDyingStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
-import { ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { CommonSkill, TriggerSkill } from "../../skill";
+import { ShadowSkill } from "../../skill_wrappers";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "chunlao", description: "chunlao_description" })
 export class ChunLao extends TriggerSkill {

@@ -1,5 +1,5 @@
-import { PlayerId } from "@/core/player/player_props";
-import { CharacterSkinInfo } from "@/skins/skins";
+import { PlayerId } from "../../../../core/player/player_props";
+import { CharacterSkinInfo } from "../../../../skins/skins";
 
 export type HistoryCharacterSkin = {
   playerId: PlayerId;

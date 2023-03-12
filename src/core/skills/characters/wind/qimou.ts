@@ -1,28 +1,28 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   ActiveSkill,
   LimitSkill,
   RulesBreakerSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
 
 @LimitSkill({ name: "qimou", description: "qimou_description" })
 export class QiMou extends ActiveSkill {

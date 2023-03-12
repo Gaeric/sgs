@@ -1,26 +1,26 @@
-import { CardId } from "@/core/cards/libs/card_props";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
+} from "../../../event/event";
 import {
   AllStage,
   CardMoveStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CompulsorySkill,
   OnDefineReleaseTiming,
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CompulsorySkill({ name: "zishu", description: "zishu_description" })
 export class ZiShu extends TriggerSkill {

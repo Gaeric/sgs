@@ -1,5 +1,5 @@
-import { Card, CardType } from "@/core/cards/card";
-import { Player } from "@/core/player/player";
+import { Card, CardType } from "../cards/card";
+import { Player } from "../player/player";
 import { QingGangSkill } from "./cards/standard/qinggang";
 import { XianZhenNullify } from "./characters/yijiang2011/xianzhen";
 import { BenXi } from "./characters/yijiang2014/benxi";

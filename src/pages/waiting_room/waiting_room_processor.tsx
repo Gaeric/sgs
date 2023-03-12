@@ -2,14 +2,14 @@ import {
   activeWaitingRoomListeningEvents,
   WaitingRoomEvent,
   WaitingRoomServerEventFinder,
-} from "@/core/event/event";
-import { GameInfo, TemporaryRoomCreationInfo } from "@/core/game/game_props";
-import { PlayerId } from "@/core/player/player_props";
-import { RoomId } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ElectronData } from "@/electron_loader/electron_data";
-import { ElectronLoader } from "@/electron_loader/electron_loader";
+} from "../../core/event/event";
+import { GameInfo, TemporaryRoomCreationInfo } from "../../core/game/game_props";
+import { PlayerId } from "../../core/player/player_props";
+import { RoomId } from "../../core/room/room";
+import { Precondition } from "../../core/shares/libs/precondition/precondition";
+import { ClientTranslationModule } from "../../core/translations/translation_module.client";
+import { ElectronData } from "../../electron_loader/electron_data";
+import { ElectronLoader } from "../../electron_loader/electron_loader";
 import { createTranslationMessages } from "./messages";
 import { RoomAvatarService } from "./services/avatar_service";
 import { WaitingRoomPresenter } from "./waiting_room.presenter";

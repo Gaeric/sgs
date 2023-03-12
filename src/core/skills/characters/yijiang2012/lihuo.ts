@@ -1,35 +1,35 @@
-import { VirtualCard } from "@/core/cards/card";
-import { FireSlash } from "@/core/cards/legion_fight/fire_slash";
+import { VirtualCard } from "../../../cards/card";
+import { FireSlash } from "../../../cards/legion_fight/fire_slash";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   CardUseStage,
   PhaseChangeStage,
   PlayerPhase,
   StagePriority,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TargetGroupUtil } from "@/core/shares/libs/utils/target_group";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TargetGroupUtil } from "../../../shares/libs/utils/target_group";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 import { ChunLao } from "./chunlao";
 
 @CommonSkill({ name: "lihuo", description: "lihuo_description" })

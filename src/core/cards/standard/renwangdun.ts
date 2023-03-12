@@ -1,6 +1,6 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { RenWangDunSkill } from "@/core/skills/cards/standard/renwangdun";
+import { GameCardExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { RenWangDunSkill } from "../../skills/cards/standard/renwangdun";
 import { ArmorCard } from "../equip_card";
 import { CardSuit } from "../libs/card_props";
 

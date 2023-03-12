@@ -1,7 +1,7 @@
 import classNames from "classnames";
-import { MarkEnum } from "@/core/shares/types/mark_list";
+import { MarkEnum } from "../../../../core/shares/types/mark_list";
 import * as React from "react";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { Tooltip } from "../../../../ui/tooltip/tooltip";
 import awakenIcon from "./images/awaken.png";
 import baoliIcon from "./images/baoli.png";
 import danlieIcon from "./images/danlie.png";

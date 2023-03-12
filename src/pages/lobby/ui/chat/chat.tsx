@@ -1,8 +1,8 @@
 import classNames from "classnames";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
 import * as React from "react";
-import { ConnectionService } from "@/services/connection_service/connection_service";
-import { Button } from "@/ui/button/button";
+import { ConnectionService } from "../../../../services/connection_service/connection_service";
+import { Button } from "../../../../ui/button/button";
 import styles from "./chat.module.css";
 
 export const Chat = ({

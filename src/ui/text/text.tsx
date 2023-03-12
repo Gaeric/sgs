@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Spacing } from "@/ui/layout/spacing";
+import { Spacing } from "../layout/spacing";
 import styles from "./text.module.css";
 
 export type TextProps = {

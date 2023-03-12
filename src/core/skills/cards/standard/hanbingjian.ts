@@ -1,17 +1,17 @@
-import { HanBingJianSkillTrigger } from "@/core/ai/skills/cards/hanbingjian";
-import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import { HanBingJianSkillTrigger } from "../../../ai/skills/cards/hanbingjian";
+import { CardChoosingOptions } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { AI, CommonSkill, TriggerSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { AI, CommonSkill, TriggerSkill } from "../../skill";
 
 @AI(HanBingJianSkillTrigger)
 @CommonSkill({ name: "hanbingjian", description: "hanbingjian_description" })

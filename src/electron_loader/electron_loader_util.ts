@@ -1,5 +1,5 @@
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ClientFlavor } from "@/props/config_props";
+import { Precondition } from "../core/shares/libs/precondition/precondition";
+import { ClientFlavor } from "../props/config_props";
 import { DevElectronLoader } from "./dev_electron_loader";
 import { ElectronLoader } from "./electron_loader";
 import { FakeElectronLoader } from "./fake_electron_loader";

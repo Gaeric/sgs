@@ -1,20 +1,20 @@
-import { CardType } from "@/core/cards/card";
-import { CardChoosingOptions } from "@/core/cards/libs/card_props";
+import { CardType } from "../../../cards/card";
+import { CardChoosingOptions } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, PlayerDyingStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { CommonSkill, TriggerSkill } from "../../skill";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
+} from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "buyi", description: "buyi_description" })
 export class BuYi extends TriggerSkill {

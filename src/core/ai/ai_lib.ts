@@ -1,35 +1,35 @@
-import { CardType } from "@/core/cards/card";
-import { EquipCard } from "@/core/cards/equip_card";
+import { CardType } from "../cards/card";
+import { EquipCard } from "../cards/equip_card";
 import {
   CardMatcher,
   CardMatcherSocketPassenger,
-} from "@/core/cards/libs/card_matcher";
+} from "../cards/libs/card_matcher";
 import {
   CardChoosingOptions,
   CardColor,
   CardId,
   CardValue,
-} from "@/core/cards/libs/card_props";
+} from "../cards/libs/card_props";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
+} from "../event/event";
+import { Sanguosha } from "../game/engine";
+import { Player } from "../player/player";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerRole,
-} from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { GameMode } from "@/core/shares/types/room_props";
+} from "../player/player_props";
+import { Room } from "../room/room";
+import { GameMode } from "../shares/types/room_props";
 import {
   ActiveSkill,
   FilterSkill,
   ResponsiveSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
+} from "../skills/skill";
 import { ActiveSkillTriggerClass } from "./skills/base/active_skill_trigger";
 import { ViewAsSkillTriggerClass } from "./skills/base/view_as_skill_trigger";
 

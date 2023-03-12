@@ -1,16 +1,16 @@
-import { CardId } from "@/core/cards/libs/card_props";
-import { CharacterId } from "@/core/characters/character";
+import { CardId } from "../cards/libs/card_props";
+import { CharacterId } from "../characters/character";
 import {
   DamageType,
   GameInfo,
   TemporaryRoomCreationInfo,
   WaitingRoomGameSettings,
-} from "@/core/game/game_props";
+} from "../game/game_props";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerInfo,
-} from "@/core/player/player_props";
+} from "../player/player_props";
 import {
   EventUtilities,
   GameEventIdentifiers,

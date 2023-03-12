@@ -1,11 +1,11 @@
-import { CharacterEquipSections } from "@/core/characters/character";
-import { PlayerId, PlayerRole } from "@/core/player/player_props";
-import { Functional } from "@/core/shares/libs/functional";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { GameMode } from "@/core/shares/types/room_props";
-import { SkillType } from "@/core/skills/skill";
-import { LobbyButton } from "@/props/game_props";
-import { CharacterSkinInfo } from "@/skins/skins";
+import { CharacterEquipSections } from "../core/characters/character";
+import { PlayerId, PlayerRole } from "../core/player/player_props";
+import { Functional } from "../core/shares/libs/functional";
+import { Precondition } from "../core/shares/libs/precondition/precondition";
+import { GameMode } from "../core/shares/types/room_props";
+import { SkillType } from "../core/skills/skill";
+import { LobbyButton } from "../props/game_props";
+import { CharacterSkinInfo } from "../skins/skins";
 import { ImageLoader } from "./image_loader";
 
 import cardBackImage from "./images/cards/cardback.webp";

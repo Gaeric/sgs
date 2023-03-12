@@ -1,38 +1,38 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Jink } from "@/core/cards/standard/jink";
-import { Slash } from "@/core/cards/standard/slash";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { Jink } from "../../../cards/standard/jink";
+import { Slash } from "../../../cards/standard/slash";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   CardUseStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { System } from "@/core/shares/libs/system";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { System } from "../../../shares/libs/system";
 import {
   ActiveSkill,
   CommonSkill,
   OnDefineReleaseTiming,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 import {
   PersistentSkill,
   ShadowSkill,
   SideEffectSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @CommonSkill({ name: "mouli", description: "mouli_description" })
 export class MouLi extends ActiveSkill implements OnDefineReleaseTiming {

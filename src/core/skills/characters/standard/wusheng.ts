@@ -1,20 +1,20 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
-import { Slash } from "@/core/cards/standard/slash";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_DISTANCE } from "@/core/game/game_props";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
+import { Slash } from "../../../cards/standard/slash";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_DISTANCE } from "../../../game/game_props";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   CompulsorySkill,
   RulesBreakerSkill,
   ShadowSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CommonSkill({ name: "wusheng", description: "wusheng_description" })
 export class WuSheng extends ViewAsSkill {

@@ -1,15 +1,15 @@
-import { Card } from "@/core/cards/card";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { AllStage, HpChangeStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { Skill, SkillProhibitedSkill } from "@/core/skills/skill";
+import { Card } from "../../../cards/card";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { AllStage, HpChangeStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { Skill, SkillProhibitedSkill } from "../../skill";
 import {
   OnDefineReleaseTiming,
   SkillLifeCycle,
-} from "@/core/skills/skill_hooks";
-import { UniqueSkillRule } from "@/core/skills/skill_rule";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+} from "../../skill_hooks";
+import { UniqueSkillRule } from "../../skill_rule";
+import { CompulsorySkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "chanyuan", description: "chanyuan_description" })
 export class ChanYuan

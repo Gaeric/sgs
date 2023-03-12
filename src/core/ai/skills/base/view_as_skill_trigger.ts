@@ -1,15 +1,15 @@
-import { AiLibrary } from "@/core/ai/ai_lib";
-import type { ViewAsSkillTrigger } from "@/core/ai/ai_skill_trigger";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import type { CardId } from "@/core/cards/libs/card_props";
+import { AiLibrary } from "../../ai_lib";
+import type { ViewAsSkillTrigger } from "../../ai_skill_trigger";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import type { CardId } from "../../../cards/libs/card_props";
 import type {
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import type { Player } from "@/core/player/player";
-import type { PlayerId } from "@/core/player/player_props";
-import type { Room } from "@/core/room/room";
-import type { ViewAsSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import type { Player } from "../../../player/player";
+import type { PlayerId } from "../../../player/player_props";
+import type { Room } from "../../../room/room";
+import type { ViewAsSkill } from "../../../skills/skill";
 import { BaseSkillTrigger } from "./base_trigger";
 
 export class ViewAsSkillTriggerClass extends BaseSkillTrigger {

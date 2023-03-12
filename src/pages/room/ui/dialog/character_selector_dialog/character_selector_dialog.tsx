@@ -1,14 +1,14 @@
 import classNames from "classnames";
-import { Character, CharacterId } from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
-import { Skill } from "@/core/skills/skill";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+import { Character, CharacterId } from "../../../../../core/characters/character";
+import { Sanguosha } from "../../../../../core/game/engine";
+import { Skill } from "../../../../../core/skills/skill";
+import { ClientTranslationModule } from "../../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
 import * as React from "react";
-import { CharacterCard } from "@/ui/character/character";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { CharacterCard } from "../../../../../ui/character/character";
+import { Tooltip } from "../../../../../ui/tooltip/tooltip";
 import styles from "./character_selector_dialog.module.css";
 import { BaseDialog } from "../base_dialog";
 

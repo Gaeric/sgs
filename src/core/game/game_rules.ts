@@ -1,12 +1,12 @@
-import { Card } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { Card } from "../cards/card";
+import { CardMatcher } from "../cards/libs/card_matcher";
+import { Player } from "../player/player";
+import { PlayerId } from "../player/player_props";
+import { Room } from "../room/room";
 import {
   GlobalRulesBreakerSkill,
   RulesBreakerSkill,
-} from "@/core/skills/skill";
+} from "../skills/skill";
 import { GameCommonRuleObject, INFINITE_TRIGGERING_TIMES } from "./game_props";
 
 export class GameCommonRules {

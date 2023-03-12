@@ -1,18 +1,18 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { Slash } from "@/core/cards/standard/slash";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { Slash } from "../../../cards/standard/slash";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
 import {
   JudgeMatcher,
   JudgeMatcherEnum,
-} from "@/core/shares/libs/judge_matchers";
-import { OffenseHorseSkill } from "@/core/skills/cards/standard/offense_horse";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../shares/libs/judge_matchers";
+import { OffenseHorseSkill } from "../../cards/standard/offense_horse";
+import { TriggerSkill } from "../../skill";
+import { CompulsorySkill, ShadowSkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "huji", description: "huji_description" })
 export class HuJi extends TriggerSkill {

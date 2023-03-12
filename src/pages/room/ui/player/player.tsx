@@ -1,36 +1,36 @@
 import classNames from "classnames";
-import { Card, CardType } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Character, CharacterEquipSections } from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { ClientPlayer } from "@/core/player/player.client";
+import { Card, CardType } from "../../../../core/cards/card";
+import { CardId } from "../../../../core/cards/libs/card_props";
+import { Character, CharacterEquipSections } from "../../../../core/characters/character";
+import { Sanguosha } from "../../../../core/game/engine";
+import { PlayerPhase } from "../../../../core/game/stage_processor";
+import { ClientPlayer } from "../../../../core/player/player.client";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerRole,
   PlayerStatus,
-} from "@/core/player/player_props";
-import { System } from "@/core/shares/libs/system";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { GameMode } from "@/core/shares/types/room_props";
-import { Skill } from "@/core/skills/skill";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+} from "../../../../core/player/player_props";
+import { System } from "../../../../core/shares/libs/system";
+import { MarkEnum } from "../../../../core/shares/types/mark_list";
+import { GameMode } from "../../../../core/shares/types/room_props";
+import { Skill } from "../../../../core/skills/skill";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
-import { RoomPresenter } from "@/pages/room/room.presenter";
-import { RoomStore } from "@/pages/room/room.store";
-import { ImageProps } from "@/props/image_props";
+import { RoomPresenter } from "../../room.presenter";
+import { RoomStore } from "../../room.store";
+import { ImageProps } from "../../../../props/image_props";
 import * as React from "react";
-import { CharacterSkinInfo } from "@/skins/skins";
-import { Armor } from "@/ui/armor/armor";
-import { NationalityBadge, PlayerPhaseBadge } from "@/ui/badge/badge";
-import { ClientCard } from "@/ui/card/card";
-import { FlatClientCard } from "@/ui/card/flat_card";
-import { Hp } from "@/ui/hp/hp";
-import { Picture } from "@/ui/picture/picture";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { CharacterSkinInfo } from "../../../../skins/skins";
+import { Armor } from "../../../../ui/armor/armor";
+import { NationalityBadge, PlayerPhaseBadge } from "../../../../ui/badge/badge";
+import { ClientCard } from "../../../../ui/card/card";
+import { FlatClientCard } from "../../../../ui/card/flat_card";
+import { Hp } from "../../../../ui/hp/hp";
+import { Picture } from "../../../../ui/picture/picture";
+import { Tooltip } from "../../../../ui/tooltip/tooltip";
 import styles from "./player.module.css";
 import { getSkinName } from "../../ui/switch_avatar/switch_skin";
 import { CardSelectorDialog } from "../dialog/card_selector_dialog/card_selector_dialog";

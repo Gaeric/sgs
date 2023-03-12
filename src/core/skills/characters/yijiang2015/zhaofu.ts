@@ -1,8 +1,8 @@
-import { CharacterNationality } from "@/core/characters/character";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { GlobalRulesBreakerSkill } from "@/core/skills/skill";
-import { CompulsorySkill, LordSkill } from "@/core/skills/skill_wrappers";
+import { CharacterNationality } from "../../../characters/character";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { GlobalRulesBreakerSkill } from "../../skill";
+import { CompulsorySkill, LordSkill } from "../../skill_wrappers";
 
 @LordSkill
 @CompulsorySkill({ name: "zhaofu", description: "zhaofu_description" })

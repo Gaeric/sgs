@@ -1,10 +1,10 @@
-import { Card, VirtualCard } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Character, CharacterNationality } from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { Card, VirtualCard } from "../../cards/card";
+import { CardId } from "../../cards/libs/card_props";
+import { Character, CharacterNationality } from "../../characters/character";
+import { Sanguosha } from "../../game/engine";
+import { Player } from "../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../player/player_props";
+import { Room } from "../../room/room";
 import {
   BaiYi,
   JingLve,
@@ -12,14 +12,14 @@ import {
   TunTian,
   WuKu,
   ZhengRong,
-} from "@/core/skills";
-import { ZuoXing } from "@/core/skills/characters/god/zuoxing";
-import { ZhanYuan } from "@/core/skills/characters/limited/zhanyuan";
-import { JiBing } from "@/core/skills/characters/mobile/jibing";
-import { ZhanYi } from "@/core/skills/characters/mobile/zhanyi";
-import { MouLi } from "@/core/skills/characters/sincerity/mouli";
-import { GuJu } from "@/core/skills/characters/sp/guju";
-import { LiangZhu } from "@/core/skills/characters/sp/liangzhu";
+} from "../../skills";
+import { ZuoXing } from "../../skills/characters/god/zuoxing";
+import { ZhanYuan } from "../../skills/characters/limited/zhanyuan";
+import { JiBing } from "../../skills/characters/mobile/jibing";
+import { ZhanYi } from "../../skills/characters/mobile/zhanyi";
+import { MouLi } from "../../skills/characters/sincerity/mouli";
+import { GuJu } from "../../skills/characters/sp/guju";
+import { LiangZhu } from "../../skills/characters/sp/liangzhu";
 import { Precondition } from "./precondition/precondition";
 import { MarkEnum } from "../types/mark_list";
 

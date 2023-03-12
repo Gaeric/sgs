@@ -2,19 +2,19 @@ import {
   ClientEventFinder,
   GameEventIdentifiers,
   WorkPlace,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { GameInfo, GameRunningInfo } from "@/core/game/game_props";
-import { GameCommonRules } from "@/core/game/game_rules";
-import { RecordAnalytics } from "@/core/game/record_analytics";
-import { PlayerPhase, PlayerPhaseStages } from "@/core/game/stage_processor";
-import { ClientSocket } from "@/core/network/socket.client";
-import { Player } from "@/core/player/player";
-import { ClientPlayer } from "@/core/player/player.client";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { GameMode } from "@/core/shares/types/room_props";
-import { RoomShortcutInfo } from "@/core/shares/types/server_types";
-import { OnDefineReleaseTiming, SkillLifeCycle } from "@/core/skills/skill";
+} from "../event/event";
+import { Sanguosha } from "../game/engine";
+import { GameInfo, GameRunningInfo } from "../game/game_props";
+import { GameCommonRules } from "../game/game_rules";
+import { RecordAnalytics } from "../game/record_analytics";
+import { PlayerPhase, PlayerPhaseStages } from "../game/stage_processor";
+import { ClientSocket } from "../network/socket.client";
+import { Player } from "../player/player";
+import { ClientPlayer } from "../player/player.client";
+import { PlayerCardsArea, PlayerId } from "../player/player_props";
+import { GameMode } from "../shares/types/room_props";
+import { RoomShortcutInfo } from "../shares/types/server_types";
+import { OnDefineReleaseTiming, SkillLifeCycle } from "../skills/skill";
 import { Room, RoomId } from "./room";
 import { RoomEventStacker } from "./utils/room_event_stack";
 

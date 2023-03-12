@@ -1,18 +1,18 @@
-import { PlayerAI } from "@/core/ai/ai";
-import { TrustAI } from "@/core/ai/trust_ai";
-import { Card, CardType, VirtualCard } from "@/core/cards/card";
-import { ArmorCard, EquipCard, WeaponCard } from "@/core/cards/equip_card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
+import { PlayerAI } from "../ai/ai";
+import { TrustAI } from "../ai/trust_ai";
+import { Card, CardType, VirtualCard } from "../cards/card";
+import { ArmorCard, EquipCard, WeaponCard } from "../cards/equip_card";
+import { CardMatcher } from "../cards/libs/card_matcher";
+import { CardId } from "../cards/libs/card_props";
 import {
   Character,
   CharacterEquipSections,
   CharacterGender,
   CharacterId,
   CharacterNationality,
-} from "@/core/characters/character";
-import { Sanguosha } from "@/core/game/engine";
-import { UPPER_LIMIT_OF_ARMOR } from "@/core/game/game_props";
+} from "../characters/character";
+import { Sanguosha } from "../game/engine";
+import { UPPER_LIMIT_OF_ARMOR } from "../game/game_props";
 import {
   PlayerCards,
   PlayerCardsArea,
@@ -22,10 +22,10 @@ import {
   PlayerRole,
   PlayerShortcutInfo,
   PlayerStatus,
-} from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+} from "./player_props";
+import { Room } from "../room/room";
+import { Algorithm } from "../shares/libs/algorithm";
+import { Precondition } from "../shares/libs/precondition/precondition";
 import {
   ActiveSkill,
   FilterSkill,
@@ -40,8 +40,8 @@ import {
   TransformSkill,
   TriggerSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
-import { UniqueSkillRule } from "@/core/skills/skill_rule";
+} from "../skills/skill";
+import { UniqueSkillRule } from "../skills/skill_rule";
 
 type SkillStringType =
   | "trigger"

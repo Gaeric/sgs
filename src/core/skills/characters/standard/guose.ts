@@ -1,17 +1,17 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher, CardMatcherProps } from "@/core/cards/libs/card_matcher";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher, CardMatcherProps } from "../../../cards/libs/card_matcher";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { ActiveSkill, CommonSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { PlayerPhase } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { ActiveSkill, CommonSkill } from "../../skill";
 
 @CommonSkill({ name: "guose", description: "guose_description" })
 export class GuoSe extends ActiveSkill {

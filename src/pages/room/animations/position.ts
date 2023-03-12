@@ -1,5 +1,5 @@
-import { PlayerId } from "@/core/player/player_props";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { PlayerId } from "../../../core/player/player_props";
+import { Precondition } from "../../../core/shares/libs/precondition/precondition";
 
 export type Point = {
   x: number;

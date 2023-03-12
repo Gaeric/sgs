@@ -1,6 +1,6 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Character, CharacterGender } from "@/core/characters/character";
+import { VirtualCard } from "../../cards/card";
+import { CardId } from "../../cards/libs/card_props";
+import { Character, CharacterGender } from "../../characters/character";
 import {
   CardDrawReason,
   CardMoveArea,
@@ -8,22 +8,22 @@ import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Player } from "@/core/player/player";
+} from "../../event/event";
+import { EventPacker } from "../../event/event_packer";
+import { Player } from "../../player/player";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerInfo,
   PlayerRole,
-} from "@/core/player/player_props";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { Functional } from "@/core/shares/libs/functional";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { GameMode } from "@/core/shares/types/room_props";
-import { PveClassicGuYong } from "@/core/skills";
-import { PveClassicAi } from "@/core/skills/game_mode/pve/pve_classic_ai";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../player/player_props";
+import { Algorithm } from "../../shares/libs/algorithm";
+import { Functional } from "../../shares/libs/functional";
+import { MarkEnum } from "../../shares/types/mark_list";
+import { GameMode } from "../../shares/types/room_props";
+import { PveClassicGuYong } from "../../skills";
+import { PveClassicAi } from "../../skills/game_mode/pve/pve_classic_ai";
+import { TranslationPack } from "../../translations/translation_json_tool";
 import { StandardGameProcessor } from "./game_processor.standard";
 import { Sanguosha } from "../engine";
 import { GameCharacterExtensions } from "../game_props";

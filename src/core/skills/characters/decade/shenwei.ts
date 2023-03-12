@@ -2,16 +2,16 @@ import {
   CardDrawReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
+} from "../../../event/event";
 import {
   AllStage,
   DrawCardStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { RulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { RulesBreakerSkill, TriggerSkill } from "../../skill";
+import { CompulsorySkill, ShadowSkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "shenwei", description: "shenwei_description" })
 export class ShenWei extends TriggerSkill {

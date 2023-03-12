@@ -1,15 +1,15 @@
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { Skill, SkillProhibitedSkill, SkillType } from "@/core/skills/skill";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { Skill, SkillProhibitedSkill, SkillType } from "../../skill";
 import {
   OnDefineReleaseTiming,
   SkillLifeCycle,
-} from "@/core/skills/skill_hooks";
+} from "../../skill_hooks";
 import {
   CommonSkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @ShadowSkill
 @PersistentSkill()

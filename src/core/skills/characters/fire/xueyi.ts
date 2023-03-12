@@ -1,21 +1,21 @@
-import { CharacterNationality } from "@/core/characters/character";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
+import { CharacterNationality } from "../../../characters/character";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
 import {
   AllStage,
   GameStartStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
 import {
   CommonSkill,
   LordSkill,
   RulesBreakerSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @LordSkill
 @CommonSkill({ name: "xueyi", description: "xueyi_description" })

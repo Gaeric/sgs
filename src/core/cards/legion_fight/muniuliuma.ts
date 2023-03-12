@@ -1,6 +1,6 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { MuNiuLiuMaSkill } from "@/core/skills/cards/legion_fight/muniuliuma";
+import { GameCardExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { MuNiuLiuMaSkill } from "../../skills/cards/legion_fight/muniuliuma";
 import { PreciousCard } from "../equip_card";
 import { CardSuit } from "../libs/card_props";
 

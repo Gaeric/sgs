@@ -1,5 +1,5 @@
-import { PlayerId } from "@/core/player/player_props";
-import { PatchedTranslationObject } from "@/core/translations/translation_json_tool";
+import { PlayerId } from "../player/player_props";
+import { PatchedTranslationObject } from "../translations/translation_json_tool";
 import { ClientEvent, WaitingRoomClientEvent } from "./event.client";
 import { ServerEvent, WaitingRoomServerEvent } from "./event.server";
 

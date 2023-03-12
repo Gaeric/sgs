@@ -1,17 +1,17 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AllStage,
   JudgeEffectStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { JudgeMatcherEnum } from "@/core/shares/libs/judge_matchers";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { JudgeMatcherEnum } from "../../../shares/libs/judge_matchers";
+import { TriggerSkill } from "../../skill";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "sishu", description: "sishu_description" })
 export class SiShu extends TriggerSkill {

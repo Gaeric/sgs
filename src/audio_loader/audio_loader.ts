@@ -1,5 +1,5 @@
-import { CharacterGender } from "@/core/characters/character";
-import { CharacterSkinInfo } from "@/skins/skins";
+import { CharacterGender } from "../core/characters/character";
+import { CharacterSkinInfo } from "../skins/skins";
 
 export interface AudioLoader {
   getRoomBackgroundMusic(): string;

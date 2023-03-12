@@ -1,14 +1,14 @@
-import { OptionPromptProps } from "@/core/event/event.server";
+import { OptionPromptProps } from "../../../../core/event/event.server";
 import {
   PatchedTranslationObject,
   TranslationPack,
-} from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+} from "../../../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
 import * as React from "react";
-import { Button } from "@/ui/button/button";
-import { Tooltip } from "@/ui/tooltip/tooltip";
+import { Button } from "../../../../ui/button/button";
+import { Tooltip } from "../../../../ui/tooltip/tooltip";
 import styles from "./conversation.module.css";
 
 export type ConversationProps = {

@@ -1,12 +1,12 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
 import {
   ClientEventFinder,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Room } from "@/core/room/room";
-import { CommonSkill, ResponsiveSkill } from "@/core/skills/skill";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Room } from "../../../room/room";
+import { CommonSkill, ResponsiveSkill } from "../../skill";
 
 @CommonSkill({ name: "jink", description: "jink_description" })
 export class JinkSkill extends ResponsiveSkill {

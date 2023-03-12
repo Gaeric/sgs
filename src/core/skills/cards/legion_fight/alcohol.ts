@@ -1,14 +1,14 @@
-import { AlcoholSkillTrigger } from "@/core/ai/skills/cards/alcohol";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { PlayerPhase } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
+import { AlcoholSkillTrigger } from "../../../ai/skills/cards/alcohol";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { PlayerPhase } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { ActiveSkill, AI, CommonSkill } from "../../skill";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(AlcoholSkillTrigger)

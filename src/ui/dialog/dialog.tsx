@@ -2,7 +2,7 @@ import classNames from "classnames";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
 import * as React from "react";
-import { Curtain } from "@/ui/curtain/curtain";
+import { Curtain } from "../curtain/curtain";
 import styles from "./dialog.module.css";
 
 @mobxReact.observer

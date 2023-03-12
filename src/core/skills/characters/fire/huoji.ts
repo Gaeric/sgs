@@ -1,11 +1,11 @@
-import { VirtualCard } from "@/core/cards/card";
-import { FireAttack } from "@/core/cards/legion_fight/fire_attack";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { CommonSkill, ViewAsSkill } from "@/core/skills/skill";
+import { VirtualCard } from "../../../cards/card";
+import { FireAttack } from "../../../cards/legion_fight/fire_attack";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { Sanguosha } from "../../../game/engine";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { CommonSkill, ViewAsSkill } from "../../skill";
 
 @CommonSkill({ name: "huoji", description: "huoji_description" })
 export class HuoJi extends ViewAsSkill {

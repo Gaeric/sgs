@@ -2,29 +2,29 @@ import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   AimStage,
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
   StagePriority,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Functional } from "@/core/shares/libs/functional";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Functional } from "../../../shares/libs/functional";
 import {
   CommonSkill,
   CompulsorySkill,
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { UncompulsoryBlocker } from "./uncompulsory_blocker";
 
 @CommonSkill({ name: "tieji", description: "tieji_description" })

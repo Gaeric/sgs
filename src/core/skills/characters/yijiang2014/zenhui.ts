@@ -1,30 +1,30 @@
-import { CardType } from "@/core/cards/card";
+import { CardType } from "../../../cards/card";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
 import {
   AimStage,
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { AimGroupUtil } from "@/core/shares/libs/utils/aim_group";
-import { ExtralCardSkillProperty } from "@/core/skills/cards/interface/extral_property";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { AimGroupUtil } from "../../../shares/libs/utils/aim_group";
+import { ExtralCardSkillProperty } from "../../cards/interface/extral_property";
 import {
   CommonSkill,
   OnDefineReleaseTiming,
   PersistentSkill,
   ShadowSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "zenhui", description: "zenhui_description" })
 export class ZenHui extends TriggerSkill {

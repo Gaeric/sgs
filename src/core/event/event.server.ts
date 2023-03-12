@@ -1,11 +1,11 @@
-import { CardMatcherSocketPassenger } from "@/core/cards/libs/card_matcher";
-import { CardChoosingOptions, CardId } from "@/core/cards/libs/card_props";
+import { CardMatcherSocketPassenger } from "../cards/libs/card_matcher";
+import { CardChoosingOptions, CardId } from "../cards/libs/card_props";
 import {
   CharacterEquipSections,
   CharacterGender,
   CharacterId,
   CharacterNationality,
-} from "@/core/characters/character";
+} from "../characters/character";
 import {
   DamageType,
   GameCommonRuleObject,
@@ -13,21 +13,21 @@ import {
   GameRunningInfo,
   TemporaryRoomCreationInfo,
   WaitingRoomGameSettings,
-} from "@/core/game/game_props";
-import { PlayerPhase, PlayerPhaseStages } from "@/core/game/stage_processor";
+} from "../game/game_props";
+import { PlayerPhase, PlayerPhaseStages } from "../game/stage_processor";
 import {
   PlayerCardsArea,
   PlayerId,
   PlayerInfo,
   PlayerShortcutInfo,
-} from "@/core/player/player_props";
-import { RoomId } from "@/core/room/room";
-import { JudgeMatcherEnum } from "@/core/shares/libs/judge_matchers";
-import { System } from "@/core/shares/libs/system";
-import { AimGroup } from "@/core/shares/libs/utils/aim_group";
-import { TargetGroup } from "@/core/shares/libs/utils/target_group";
-import { RoomInfo, RoomShortcutInfo } from "@/core/shares/types/server_types";
-import { PatchedTranslationObject } from "@/core/translations/translation_json_tool";
+} from "../player/player_props";
+import { RoomId } from "../room/room";
+import { JudgeMatcherEnum } from "../shares/libs/judge_matchers";
+import { System } from "../shares/libs/system";
+import { AimGroup } from "../shares/libs/utils/aim_group";
+import { TargetGroup } from "../shares/libs/utils/target_group";
+import { RoomInfo, RoomShortcutInfo } from "../shares/types/server_types";
+import { PatchedTranslationObject } from "../translations/translation_json_tool";
 import {
   BaseGameEvent,
   CardDrawReason,

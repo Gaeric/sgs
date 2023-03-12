@@ -1,10 +1,10 @@
-import { TaoYuanJieYiSkillTrigger } from "@/core/ai/skills/cards/taoyuanjieyi";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
+import { TaoYuanJieYiSkillTrigger } from "../../../ai/skills/cards/taoyuanjieyi";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { ActiveSkill, AI, CommonSkill } from "../../skill";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(TaoYuanJieYiSkillTrigger)

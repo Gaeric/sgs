@@ -1,8 +1,8 @@
-import { Card } from "@/core/cards/card";
-import { SkillsGeneratedCardPackage } from "@/core/cards/character_skills";
-import { LegionFightCardPackage } from "@/core/cards/legion_fight";
-import { StandardCardPackage } from "@/core/cards/standard";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { Card } from "../../cards/card";
+import { SkillsGeneratedCardPackage } from "../../cards/character_skills";
+import { LegionFightCardPackage } from "../../cards/legion_fight";
+import { StandardCardPackage } from "../../cards/standard";
+import { Precondition } from "../../shares/libs/precondition/precondition";
 import { GameCardExtensions } from "../game_props";
 
 export type CardPackages = {

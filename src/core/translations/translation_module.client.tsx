@@ -1,7 +1,7 @@
-import { CardSuit } from "@/core/cards/libs/card_props";
-import { Player } from "@/core/player/player";
-import { Algorithm } from "@/core/shares/libs/algorithm/index";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { CardSuit } from "../cards/libs/card_props";
+import { Player } from "../player/player";
+import { Algorithm } from "../shares/libs/algorithm/index";
+import { Precondition } from "../shares/libs/precondition/precondition";
 import * as React from "react";
 import {
   Languages,

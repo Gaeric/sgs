@@ -1,24 +1,24 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
+import { VirtualCard } from "../../../cards/card";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveArea,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   CardMoveStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Algorithm } from "@/core/shares/libs/algorithm";
-import { TriggerSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
-import { CompulsorySkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Algorithm } from "../../../shares/libs/algorithm";
+import { TriggerSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
+import { CompulsorySkill, ShadowSkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "fulin", description: "fulin_description" })
 export class FuLin extends TriggerSkill implements OnDefineReleaseTiming {

@@ -1,18 +1,18 @@
-import { VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardChoosingOptions } from "@/core/cards/libs/card_props";
-import { Jink } from "@/core/cards/standard/jink";
+import { VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardChoosingOptions } from "../../../cards/libs/card_props";
+import { Jink } from "../../../cards/standard/jink";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { CommonSkill, FilterSkill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { CommonSkill, FilterSkill, TriggerSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "shifei", description: "shifei_description" })
 export class ShiFei extends TriggerSkill {

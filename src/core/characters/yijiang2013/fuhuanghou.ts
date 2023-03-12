@@ -1,6 +1,6 @@
-import { GameCharacterExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { QiuYuan, ZhuiKong } from "@/core/skills";
+import { GameCharacterExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { QiuYuan, ZhuiKong } from "../../skills";
 import { Character, CharacterGender, CharacterNationality } from "../character";
 
 const skillLoader = SkillLoader.getInstance();

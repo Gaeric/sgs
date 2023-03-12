@@ -1,11 +1,11 @@
-import { CardSuit } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, CardUseStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { CommonSkill, TriggerSkill } from "@/core/skills/skill";
+import { CardSuit } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, CardUseStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { CommonSkill, TriggerSkill } from "../../skill";
 
 @CommonSkill({ name: "hanyong", description: "hanyong_description" })
 export class HanYong extends TriggerSkill {

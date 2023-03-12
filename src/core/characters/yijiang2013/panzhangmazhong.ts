@@ -1,7 +1,7 @@
-import { GameCharacterExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { AnJian } from "@/core/skills/characters/yijiang2013/anjian";
-import { DuoDao } from "@/core/skills/characters/yijiang2013/duodao";
+import { GameCharacterExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { AnJian } from "../../skills/characters/yijiang2013/anjian";
+import { DuoDao } from "../../skills/characters/yijiang2013/duodao";
 import { Character, CharacterGender, CharacterNationality } from "../character";
 
 const skillLoaderInstance = SkillLoader.getInstance();

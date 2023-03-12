@@ -1,7 +1,7 @@
-import { GameCharacterExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { ZongXuan } from "@/core/skills";
-import { ZhiYan } from "@/core/skills/characters/yijiang2013/zhiyan";
+import { GameCharacterExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { ZongXuan } from "../../skills";
+import { ZhiYan } from "../../skills/characters/yijiang2013/zhiyan";
 import { Character, CharacterGender, CharacterNationality } from "../character";
 
 const skillLoaderInstance = SkillLoader.getInstance();

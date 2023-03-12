@@ -1,6 +1,6 @@
-import { SlashSkillTrigger } from "@/core/ai/skills/cards/slash";
-import { DamageType } from "@/core/game/game_props";
-import { AI, CommonSkill } from "@/core/skills/skill";
+import { SlashSkillTrigger } from "../../../ai/skills/cards/slash";
+import { DamageType } from "../../../game/game_props";
+import { AI, CommonSkill } from "../../skill";
 import { SlashSkill } from "../standard/slash";
 
 @AI(SlashSkillTrigger)

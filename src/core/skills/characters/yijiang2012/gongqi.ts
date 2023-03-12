@@ -1,39 +1,39 @@
-import { CardType } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardType } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
 import {
   CardChoosingOptions,
   CardId,
   CardSuit,
-} from "@/core/cards/libs/card_props";
+} from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
 import {
   INFINITE_ATTACK_RANGE,
   INFINITE_TRIGGERING_TIMES,
-} from "@/core/game/game_props";
+} from "../../../game/game_props";
 import {
   AllStage,
   PhaseChangeStage,
   PlayerPhase,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Functional } from "@/core/shares/libs/functional";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Functional } from "../../../shares/libs/functional";
 import {
   ActiveSkill,
   CommonSkill,
   OnDefineReleaseTiming,
   RulesBreakerSkill,
   TriggerSkill,
-} from "@/core/skills/skill";
-import { PersistentSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../skill";
+import { PersistentSkill, ShadowSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @CommonSkill({ name: "gongqi", description: "gongqi_description" })
 export class GongQi extends ActiveSkill {

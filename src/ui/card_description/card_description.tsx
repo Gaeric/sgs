@@ -1,10 +1,10 @@
 import classNames from "classnames";
-import { Card, CardType } from "@/core/cards/card";
-import { WeaponCard } from "@/core/cards/equip_card";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
+import { Card, CardType } from "../../core/cards/card";
+import { WeaponCard } from "../../core/cards/equip_card";
+import { ClientTranslationModule } from "../../core/translations/translation_module.client";
 import * as React from "react";
-import { CardNumberItem } from "@/ui/card/card_number";
-import { CardSuitItem } from "@/ui/card/card_suit";
+import { CardNumberItem } from "../card/card_number";
+import { CardSuitItem } from "../card/card_suit";
 import styles from "./card_description.module.css";
 
 export type CardDescriptionProps = {

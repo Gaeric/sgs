@@ -1,5 +1,5 @@
-import { GameCardExtensions, INFINITE_DISTANCE } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+import { GameCardExtensions, INFINITE_DISTANCE } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
 import { Multiple } from "../card";
 import type { CardSuit, RealCardId } from "../libs/card_props";
 import { TrickCard } from "../trick_card";

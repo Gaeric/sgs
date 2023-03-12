@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { CharacterNationality } from "@/core/characters/character";
+import { CharacterNationality } from "../../../core/characters/character";
 import * as React from "react";
 import emptyMagatama from "./images/empty.png";
 import lordMagatama from "./images/lord.png";

@@ -1,12 +1,12 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { MovingCardProps } from "@/core/event/event.server";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { MovingCardProps } from "../../../event/event.server";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   DamageEffectStage,
@@ -14,18 +14,18 @@ import {
   PhaseStageChangeStage,
   PlayerPhase,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { TriggerSkill } from "@/core/skills/skill";
-import { OnDefineReleaseTiming } from "@/core/skills/skill_hooks";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { TriggerSkill } from "../../skill";
+import { OnDefineReleaseTiming } from "../../skill_hooks";
 import {
   CompulsorySkill,
   PersistentSkill,
   ShadowSkill,
-} from "@/core/skills/skill_wrappers";
+} from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "lianhua", description: "lianhua_description" })
 export class LianHua extends TriggerSkill {

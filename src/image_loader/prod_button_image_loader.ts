@@ -1,5 +1,5 @@
-import { SkillType } from "@/core/skills/skill";
-import { LobbyButton } from "@/props/game_props";
+import { SkillType } from "../core/skills/skill";
+import { LobbyButton } from "../props/game_props";
 import { SkillButtonImageSize } from "./image_loader";
 
 import lobbyAcknowledgeButtonImage from "./images/lobby/acknowledge_button.png";

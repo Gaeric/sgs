@@ -1,19 +1,19 @@
-import { FireAttackSkillTrigger } from "@/core/ai/skills/cards/fire_attack";
-import { CardId } from "@/core/cards/libs/card_props";
+import { FireAttackSkillTrigger } from "../../../ai/skills/cards/fire_attack";
+import { CardId } from "../../../cards/libs/card_props";
 import {
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
-import { Sanguosha } from "@/core/game/engine";
-import { DamageType } from "@/core/game/game_props";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { Functional } from "@/core/shares/libs/functional";
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
-import { ActiveSkill, AI, CommonSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
+import { Sanguosha } from "../../../game/engine";
+import { DamageType } from "../../../game/game_props";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { Functional } from "../../../shares/libs/functional";
+import { Precondition } from "../../../shares/libs/precondition/precondition";
+import { ActiveSkill, AI, CommonSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { ExtralCardSkillProperty } from "../interface/extral_property";
 
 @AI(FireAttackSkillTrigger)

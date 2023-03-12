@@ -1,10 +1,10 @@
-import { CardType } from "@/core/cards/card";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, CardUseStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { CompulsorySkill, TriggerSkill } from "@/core/skills/skill";
+import { CardType } from "../../../cards/card";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, CardUseStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { CompulsorySkill, TriggerSkill } from "../../skill";
 
 @CompulsorySkill({ name: "fuji", description: "fuji_description" })
 export class FuJi extends TriggerSkill {

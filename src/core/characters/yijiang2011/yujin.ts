@@ -1,6 +1,6 @@
-import { GameCharacterExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { JieYue } from "@/core/skills/characters/yijiang2011/jieyue";
+import { GameCharacterExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { JieYue } from "../../skills/characters/yijiang2011/jieyue";
 import { Character, CharacterGender, CharacterNationality } from "../character";
 
 const skillLoaderInstance = SkillLoader.getInstance();

@@ -1,18 +1,18 @@
-import { CardType, VirtualCard } from "@/core/cards/card";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Slash } from "@/core/cards/standard/slash";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_DISTANCE } from "@/core/game/game_props";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { CardType, VirtualCard } from "../../../cards/card";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { Slash } from "../../../cards/standard/slash";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_DISTANCE } from "../../../game/game_props";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   RulesBreakerSkill,
   ShadowSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CommonSkill({ name: "duanliang", description: "duanliang_description" })
 export class DuanLiang extends ViewAsSkill {

@@ -2,8 +2,8 @@ import {
   EventPicker,
   GameEventIdentifiers,
   WorkPlace,
-} from "@/core/event/event";
-// import { compress, decompress } from "@/core/shares/libs/utils/shrink_string";
+} from "../../event/event";
+// import { compress, decompress } from "../../shares/libs/utils/shrink_string";
 
 export class RoomEventStacker<T extends WorkPlace> {
   private eventStack: EventPicker<GameEventIdentifiers, T>[] = [];

@@ -1,4 +1,4 @@
-import { Precondition } from "@/core/shares/libs/precondition/precondition";
+import { Precondition } from "../shares/libs/precondition/precondition";
 import {
   Languages,
   PatchedTranslationObject,

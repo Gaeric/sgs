@@ -1,15 +1,15 @@
-import { Player } from "@/core/player/player";
-import { ClientPlayer } from "@/core/player/player.client";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ImageLoader } from "@/image_loader/image_loader";
+import { Player } from "../../../../core/player/player";
+import { ClientPlayer } from "../../../../core/player/player.client";
+import { ClientTranslationModule } from "../../../../core/translations/translation_module.client";
+import { ImageLoader } from "../../../../image_loader/image_loader";
 import * as mobx from "mobx";
 import * as mobxReact from "mobx-react";
-import { MoveCard } from "@/pages/room/animations/move_card/move_card";
-import { RoomPresenter } from "@/pages/room/room.presenter";
-import { RoomStore } from "@/pages/room/room.store";
+import { MoveCard } from "../../animations/move_card/move_card";
+import { RoomPresenter } from "../../room.presenter";
+import { RoomStore } from "../../room.store";
 import * as React from "react";
-import { CharacterSkinInfo } from "@/skins/skins";
-import { Button } from "@/ui/button/button";
+import { CharacterSkinInfo } from "../../../../skins/skins";
+import { Button } from "../../../../ui/button/button";
 import styles from "./seats_layout.module.css";
 import { PlayerCard } from "../player/player";
 

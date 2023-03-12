@@ -1,4 +1,4 @@
-import type { Word } from "@/languages";
+import type { Word } from "../..";
 
 export const characterDictionary: Word[] = [
   { source: "benevolence", target: "仁包" },

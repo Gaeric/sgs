@@ -1,11 +1,11 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { AllStage, PlayerDyingStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { TiaoXin } from "@/core/skills";
-import { TriggerSkill } from "@/core/skills/skill";
-import { AwakeningSkill } from "@/core/skills/skill_wrappers";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { AllStage, PlayerDyingStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { TiaoXin } from "../..";
+import { TriggerSkill } from "../../skill";
+import { AwakeningSkill } from "../../skill_wrappers";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 import { KunFen, KunFenEX } from "./kunfen";
 
 @AwakeningSkill({ name: "fengliang", description: "fengliang_description" })

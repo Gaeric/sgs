@@ -1,17 +1,17 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { INFINITE_DISTANCE } from "@/core/game/game_props";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { INFINITE_DISTANCE } from "../../../game/game_props";
 import {
   AllStage,
   PhaseStageChangeStage,
   PlayerPhaseStages,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { MarkEnum } from "@/core/shares/types/mark_list";
-import { GlobalRulesBreakerSkill, TriggerSkill } from "@/core/skills/skill";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { MarkEnum } from "../../../shares/types/mark_list";
+import { GlobalRulesBreakerSkill, TriggerSkill } from "../../skill";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "yingfeng", description: "yingfeng_description" })
 export class YingFeng extends TriggerSkill {

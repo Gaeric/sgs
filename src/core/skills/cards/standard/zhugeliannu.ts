@@ -1,8 +1,8 @@
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId } from "@/core/cards/libs/card_props";
-import { Sanguosha } from "@/core/game/engine";
-import { INFINITE_TRIGGERING_TIMES } from "@/core/game/game_props";
-import { CommonSkill, RulesBreakerSkill } from "@/core/skills/skill";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId } from "../../../cards/libs/card_props";
+import { Sanguosha } from "../../../game/engine";
+import { INFINITE_TRIGGERING_TIMES } from "../../../game/game_props";
+import { CommonSkill, RulesBreakerSkill } from "../../skill";
 
 @CommonSkill({ name: "zhugeliannu", description: "zhugeliannu_description" })
 export class ZhuGeLianNuSlashSkill extends RulesBreakerSkill {

@@ -1,9 +1,9 @@
-import { PlayerAI } from "@/core/ai/ai";
-import { SmartAI } from "@/core/ai/smart_ai";
-import { TrustAI } from "@/core/ai/trust_ai";
-import { CharacterId } from "@/core/characters/character";
-import { Player } from "@/core/player/player";
-import { GameMode } from "@/core/shares/types/room_props";
+import { PlayerAI } from "../ai/ai";
+import { SmartAI } from "../ai/smart_ai";
+import { TrustAI } from "../ai/trust_ai";
+import { CharacterId } from "../characters/character";
+import { Player } from "./player";
+import { GameMode } from "../shares/types/room_props";
 import {
   PlayerCards,
   PlayerCardsArea,

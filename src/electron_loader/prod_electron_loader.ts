@@ -1,5 +1,5 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
+import { GameEventIdentifiers, ServerEventFinder } from "../core/event/event";
+import { Sanguosha } from "../core/game/engine";
 import {
   DELETE_DATA,
   DO_UPDATE,
@@ -11,8 +11,8 @@ import {
   REQUEST_CORE_VERSION,
   SAVE_REPLAY,
   SET_DATA,
-} from "@/electron.port";
-import { ReplayDataType } from "@/types/replay_props";
+} from "../electron.port";
+import { ReplayDataType } from "../types/replay_props";
 import { ElectronData } from "./electron_data";
 import { ElectronLoader } from "./electron_loader";
 

@@ -1,15 +1,15 @@
-import { AiLibrary } from "@/core/ai/ai_lib";
-import { ActiveSkillTriggerClass } from "@/core/ai/skills/base/active_skill_trigger";
-import type { CardId } from "@/core/cards/libs/card_props";
+import { AiLibrary } from "../../ai_lib";
+import { ActiveSkillTriggerClass } from "../base/active_skill_trigger";
+import type { CardId } from "../../../cards/libs/card_props";
 import type {
   ClientEventFinder,
   GameEventIdentifiers,
-} from "@/core/event/event";
-import { DamageType } from "@/core/game/game_props";
-import type { Player } from "@/core/player/player";
-import type { PlayerId } from "@/core/player/player_props";
-import type { Room } from "@/core/room/room";
-import type { SlashSkill } from "@/core/skills";
+} from "../../../event/event";
+import { DamageType } from "../../../game/game_props";
+import type { Player } from "../../../player/player";
+import type { PlayerId } from "../../../player/player_props";
+import type { Room } from "../../../room/room";
+import type { SlashSkill } from "../../../skills";
 
 export class SlashSkillTrigger extends ActiveSkillTriggerClass<SlashSkill> {
   protected filterTargets(

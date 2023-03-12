@@ -1,4 +1,4 @@
-import { Word } from "@/languages";
+import { Word } from "../../..";
 
 export const dictionary: Word[] = [
   { source: "landowners", target: "地主" },

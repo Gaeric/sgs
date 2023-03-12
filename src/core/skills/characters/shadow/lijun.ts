@@ -1,16 +1,16 @@
-import { CharacterNationality } from "@/core/characters/character";
+import { CharacterNationality } from "../../../characters/character";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import { AllStage, CardUseStage } from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { Room } from "@/core/room/room";
-import { CommonSkill, LordSkill, TriggerSkill } from "@/core/skills/skill";
-import { TranslationPack } from "@/core/translations/translation_json_tool";
+} from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import { AllStage, CardUseStage } from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { Room } from "../../../room/room";
+import { CommonSkill, LordSkill, TriggerSkill } from "../../skill";
+import { TranslationPack } from "../../../translations/translation_json_tool";
 
 @LordSkill
 @CommonSkill({ name: "lijun", description: "lijun_description" })

@@ -1,23 +1,23 @@
-import { CardType, VirtualCard } from "@/core/cards/card";
-import { Alcohol } from "@/core/cards/legion_fight/alcohol";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
+import { CardType, VirtualCard } from "../../../cards/card";
+import { Alcohol } from "../../../cards/legion_fight/alcohol";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
 import {
   CardMoveArea,
   CardMoveReason,
   GameEventIdentifiers,
   ServerEventFinder,
-} from "@/core/event/event";
-import { EventPacker } from "@/core/event/event_packer";
+} from "../../../event/event";
+import { EventPacker } from "../../../event/event_packer";
 import {
   AllStage,
   DamageEffectStage,
   TurnOverStage,
-} from "@/core/game/stage_processor";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea, PlayerId } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
-import { TriggerSkill, ViewAsSkill } from "@/core/skills/skill";
-import { CommonSkill, ShadowSkill } from "@/core/skills/skill_wrappers";
+} from "../../../game/stage_processor";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea, PlayerId } from "../../../player/player_props";
+import { Room } from "../../../room/room";
+import { TriggerSkill, ViewAsSkill } from "../../skill";
+import { CommonSkill, ShadowSkill } from "../../skill_wrappers";
 
 @CommonSkill({ name: "jiushi", description: "jiushi_description" })
 export class JiuShi extends ViewAsSkill {

@@ -1,4 +1,4 @@
-import { PlayerCardsArea } from "@/core/player/player_props";
+import { PlayerCardsArea } from "../../player/player_props";
 
 export const enum CardSuit {
   NoSuit,

@@ -1,8 +1,8 @@
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { AllStage, DamageEffectStage } from "@/core/game/stage_processor";
-import { Room } from "@/core/room/room";
-import { TriggerSkill } from "@/core/skills/skill";
-import { CompulsorySkill } from "@/core/skills/skill_wrappers";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { AllStage, DamageEffectStage } from "../../../game/stage_processor";
+import { Room } from "../../../room/room";
+import { TriggerSkill } from "../../skill";
+import { CompulsorySkill } from "../../skill_wrappers";
 
 @CompulsorySkill({ name: "renzheng", description: "renzheng_description" })
 export class RenZheng extends TriggerSkill {

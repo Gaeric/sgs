@@ -2,9 +2,9 @@ import {
   Character,
   CharacterGender,
   CharacterNationality,
-} from "@/core/characters/character";
-import { GameCharacterExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
+} from "../character";
+import { GameCharacterExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
 import {
   PveClassicLianZhen,
   PveClassicQiSha,
@@ -12,7 +12,7 @@ import {
   PveClassicTianLiang,
   PveClassicTianTong,
   PveClassicTianXiang,
-} from "@/core/skills";
+} from "../../skills";
 
 const skillLoaderInstance = SkillLoader.getInstance();
 

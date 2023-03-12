@@ -1,4 +1,4 @@
-import { Character } from "@/core/characters/character";
+import { Character } from "../character";
 import { CaiMaoZhangYun } from "./caimaozhangyun";
 import { CaoXing } from "./caoxing";
 import { DecadeDengZhi } from "./decade_dengzhi";

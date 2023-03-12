@@ -1,6 +1,6 @@
-import { GameCardExtensions } from "@/core/game/game_props";
-import { SkillLoader } from "@/core/game/package_loader/loader.skills";
-import { FireSlashSkill } from "@/core/skills/cards/legion_fight/fire_slash";
+import { GameCardExtensions } from "../../game/game_props";
+import { SkillLoader } from "../../game/package_loader/loader.skills";
+import { FireSlashSkill } from "../../skills/cards/legion_fight/fire_slash";
 import { CardSuit, RealCardId } from "../libs/card_props";
 import { Slash } from "../standard/slash";
 

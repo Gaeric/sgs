@@ -1,6 +1,6 @@
-import type { Player } from "@/core/player/player";
-import type { Room } from "@/core/room/room";
-import { GuDingDaoSkill } from "@/core/skills";
+import type { Player } from "../../../player/player";
+import type { Room } from "../../../room/room";
+import { GuDingDaoSkill } from "../../../skills";
 import { TriggerSkillTriggerClass } from "../base/trigger_skill_trigger";
 
 export class GuDingDaoSkillTrigger extends TriggerSkillTriggerClass<GuDingDaoSkill> {

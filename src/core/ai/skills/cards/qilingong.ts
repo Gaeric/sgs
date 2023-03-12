@@ -1,10 +1,10 @@
-import { CardType } from "@/core/cards/card";
-import { CardId } from "@/core/cards/libs/card_props";
-import { GameEventIdentifiers, ServerEventFinder } from "@/core/event/event";
-import { Sanguosha } from "@/core/game/engine";
-import type { Player } from "@/core/player/player";
-import type { Room } from "@/core/room/room";
-import { QiLinGongSkill } from "@/core/skills";
+import { CardType } from "../../../cards/card";
+import { CardId } from "../../../cards/libs/card_props";
+import { GameEventIdentifiers, ServerEventFinder } from "../../../event/event";
+import { Sanguosha } from "../../../game/engine";
+import type { Player } from "../../../player/player";
+import type { Room } from "../../../room/room";
+import { QiLinGongSkill } from "../../../skills";
 import { TriggerSkillTriggerClass } from "../base/trigger_skill_trigger";
 
 export class QiLinGongSkillTrigger extends TriggerSkillTriggerClass<QiLinGongSkill> {

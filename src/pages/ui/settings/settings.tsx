@@ -1,16 +1,16 @@
 import {
   getAllLanguages,
   Languages,
-} from "@/core/translations/translation_json_tool";
-import { ClientTranslationModule } from "@/core/translations/translation_module.client";
-import { ElectronData } from "@/electron_loader/electron_data";
-import { ElectronLoader } from "@/electron_loader/electron_loader";
-import { ImageLoader } from "@/image_loader/image_loader";
+} from "../../../core/translations/translation_json_tool";
+import { ClientTranslationModule } from "../../../core/translations/translation_module.client";
+import { ElectronData } from "../../../electron_loader/electron_data";
+import { ElectronLoader } from "../../../electron_loader/electron_loader";
+import { ImageLoader } from "../../../image_loader/image_loader";
 import * as React from "react";
-import { Button } from "@/ui/button/button";
-import { Dialog } from "@/ui/dialog/dialog";
-import { Picture } from "@/ui/picture/picture";
-import { Slider } from "@/ui/slider/slider";
+import { Button } from "../../../ui/button/button";
+import { Dialog } from "../../../ui/dialog/dialog";
+import { Picture } from "../../../ui/picture/picture";
+import { Slider } from "../../../ui/slider/slider";
 import styles from "./settings.module.css";
 
 export type SettingsProps = {

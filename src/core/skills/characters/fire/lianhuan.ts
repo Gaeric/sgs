@@ -1,17 +1,17 @@
-import { VirtualCard } from "@/core/cards/card";
-import { TieSuoLianHuan } from "@/core/cards/legion_fight/tiesuolianhuan";
-import { CardMatcher } from "@/core/cards/libs/card_matcher";
-import { CardId, CardSuit } from "@/core/cards/libs/card_props";
-import { Sanguosha } from "@/core/game/engine";
-import { Player } from "@/core/player/player";
-import { PlayerCardsArea } from "@/core/player/player_props";
-import { Room } from "@/core/room/room";
+import { VirtualCard } from "../../../cards/card";
+import { TieSuoLianHuan } from "../../../cards/legion_fight/tiesuolianhuan";
+import { CardMatcher } from "../../../cards/libs/card_matcher";
+import { CardId, CardSuit } from "../../../cards/libs/card_props";
+import { Sanguosha } from "../../../game/engine";
+import { Player } from "../../../player/player";
+import { PlayerCardsArea } from "../../../player/player_props";
+import { Room } from "../../../room/room";
 import {
   CommonSkill,
   RulesBreakerSkill,
   ShadowSkill,
   ViewAsSkill,
-} from "@/core/skills/skill";
+} from "../../skill";
 
 @CommonSkill({ name: "lianhuan", description: "lianhuan_description" })
 export class LianHuan extends ViewAsSkill {
