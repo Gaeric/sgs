@@ -1,4 +1,3 @@
-
 # Table of Contents
 
 1.  [简介](#orgf698d22)
@@ -6,26 +5,21 @@
     1.  [技能](#org8f605d3)
         1.  [英姿（旧）](#org6a22432)
 
-
-
 <a id="orgf698d22"></a>
 
 # 简介
 
-fancy分支的主要目的之一，是为玩家开放diy能力。
+fancy 分支的主要目的之一，是为玩家开放 diy 能力。
 
-当前diy的架构仍在设计中，其接口可能会随着版本更迭而变更。但是武将做为diy中最核心的部分，其实现已经相对稳定，本手册以一个示例为基础，说明如何向dsgs增加一个自己想要的武将。
-
+当前 diy 的架构仍在设计中，其接口可能会随着版本更迭而变更。但是武将做为 diy 中最核心的部分，其实现已经相对稳定，本手册以一个示例为基础，说明如何向 dsgs 增加一个自己想要的武将。
 
 <a id="orgd5b1988"></a>
 
 # 武将
 
-
 <a id="org8f605d3"></a>
 
 ## 技能
-
 
 <a id="org6a22432"></a>
 
@@ -45,7 +39,7 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
 
 1.  这个技能在摸牌阶段触发。
 2.  首先，你需要拥有这个技能；其次，你是因为游戏的摸牌阶段的摸牌规则而摸牌时才能使用这个技能。
-3.  触发后，你的摸牌数量应当加1。
+3.  触发后，你的摸牌数量应当加 1。
 
 它的实现如下：
 
@@ -61,7 +55,7 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
       ) {
         return stage === DrawCardStage.CardDrawing;
       }
-    
+
       // room代表玩家所在的房间，owner表示技能的所有者，而content是当前事件
       canUse(
         room: Room,
@@ -77,12 +71,12 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
           content.bySpecialReason === CardDrawReason.GameStage
         );
       }
-    
+
       // onTrigger可先跳过
       async onTrigger() {
         return true;
       }
-    
+
       // onEffect是技能效果，它的event固定为ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
       async onEffect(
         room: Room,
@@ -94,7 +88,7 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
           event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
         // 将摸牌事件中的摸牌数＋1
         drawCardEvent.drawAmount += 1;
-    
+
         return true;
       }
     }
@@ -106,7 +100,7 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
       ) {
         return stage === DrawCardStage.CardDrawing;
       }
-    
+
       canUse(
         room: Room,
         owner: Player,
@@ -118,11 +112,11 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
           content.bySpecialReason === CardDrawReason.GameStage
         );
       }
-    
+
       async onTrigger() {
         return true;
       }
-    
+
       async onEffect(
         room: Room,
         event: ServerEventFinder<GameEventIdentifiers.SkillEffectEvent>
@@ -130,8 +124,7 @@ fancy分支的主要目的之一，是为玩家开放diy能力。
         const drawCardEvent =
           event.triggeredOnEvent as ServerEventFinder<GameEventIdentifiers.DrawCardEvent>;
         drawCardEvent.drawAmount += 1;
-    
+
         return true;
       }
     }
-
