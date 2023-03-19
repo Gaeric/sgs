@@ -8,6 +8,26 @@
   fancy分支的主要目的之一，是为玩家开放diy能力。
 
   当前diy的架构仍在设计中，其接口可能会随着版本更迭而变更。但是武将做为diy中最核心的部分，其实现已经相对稳定，本手册以一个示例为基础，说明如何向dsgs增加一个自己想要的武将。
+* 流程分析
+** GameStart流程
+   1. 以gameprocessor为主体，首先将绑定room
+   2. 然后根据玩家信息选择和设置武将以及对应的势力信息
+   3. 开始前准备项，目前暂无
+   4. 产生GameStartEvent，并onHandle
+   5. 令所有玩家获得初始卡牌
+   6. 轮次和回合交替并触发时机事件
+** 以GameStartEvent为例，说明onHandle
+   1. onHandle有三个参数，分别是：event_identifier，event本身，onActualExecuted
+   2. onHandle进入后，首先保护现场，存储当前处理的事件，并将传入事件列为当前处理事件
+   3. 依据事件类型，调用对应的处理函数，调用onHandleGameStartEvent
+   4. 首先向房间广播该事件
+   5. 再迭代处理事件的每个阶段，即为iterateEachStage
+** TODO iterateEachStage
+   一个事件可能会涉及对个处理阶段，此处对每一个stage进行处理
+
+   1. 得到该事件涉及的全部阶段
+   2. 确认事件是否终止，如果终止则清空剩余阶段并返回
+   3. todo
 * 武将
 ** 技能
 *** 英姿（旧）
