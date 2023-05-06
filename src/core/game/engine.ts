@@ -257,7 +257,6 @@ export class Sanguosha {
       GameCharacterExtensions.Biographies,
       GameCharacterExtensions.Mobile,
       GameCharacterExtensions.Wisdom,
-      GameCharacterExtensions.Sincerity,
       GameCharacterExtensions.Benevolence,
       GameCharacterExtensions.Strategem,
       GameCharacterExtensions.Sincerity,
