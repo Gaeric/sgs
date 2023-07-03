@@ -1223,6 +1223,7 @@ export class ServerRoom extends Room<WorkPlace.Server> {
           });
 
           EventPacker.copyPropertiesTo(event, aimEvent);
+          event.additionalDamage = 0;
           collabroatorsIndex[toId] = 1;
           initialEvent = true;
         } else {
