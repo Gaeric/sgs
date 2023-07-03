@@ -190,8 +190,8 @@ export class ServerRoom extends Room<WorkPlace.Server> {
 
   public async gameStart() {
     this.shuffle();
-    this.shuffleSeats();
     this.gameProcessor.assignRoles(this.players);
+    this.sortPlayers();
 
     const event: ServerEventFinder<GameEventIdentifiers.GameReadyEvent> = {
       gameStartInfo: {

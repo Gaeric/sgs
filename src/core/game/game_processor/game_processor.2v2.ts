@@ -28,6 +28,7 @@ export class TwoVersusTwoGameProcessor extends StandardGameProcessor {
     const reverse = Math.random() >= 0.5;
     for (let i = 0; i < players.length; i++) {
       players[i].Role = reverse ? reverseRole[roles[i]] : roles[i];
+      players[i].Position = i;
     }
   }
 

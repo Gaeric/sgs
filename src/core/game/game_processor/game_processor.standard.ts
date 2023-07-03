@@ -87,10 +87,15 @@ export class StandardGameProcessor extends GameProcessor {
     for (let i = 0; i < players.length; i++) {
       players[i].Role = roles[i];
     }
-    const lordIndex = players.findIndex(player => player.Role === PlayerRole.Lord);
-    if (lordIndex !== 0) {
-      [players[0], players[lordIndex]] = [players[lordIndex], players[0]];
-      [players[0].Position, players[lordIndex].Position] = [players[lordIndex].Position, players[0].Position];
+
+    const postions = Array.from(Array(players.length - 1), (_, k) => k + 1);
+    Algorithm.shuffle(postions);
+    for (let i = 0; i < players.length; i++) {
+      if ((players[i].Role = PlayerRole.Lord)) {
+        players[i].Position = 0;
+      } else {
+        players[i].Position = postions.pop()!;
+      }
     }
   }
 
