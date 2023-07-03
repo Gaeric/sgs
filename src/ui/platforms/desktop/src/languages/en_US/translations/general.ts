@@ -472,7 +472,7 @@ export const eventDictionary: Word[] = [
     target: 'Please choose a player to take 1 damage from {0}',
   },
   {
-    source: 'Obtain Basic Card, Equip Card and Duel in display cards?',
+    source: 'Obtain Basic Card, Weapon Card and Duel in display cards?',
     target: 'Obtain basic card, weapon and Duel in revealed cards?',
   },
   {

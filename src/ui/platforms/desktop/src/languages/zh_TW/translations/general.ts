@@ -445,8 +445,8 @@ export const eventDictionary: Word[] = [
   },
   { source: 'please choose a player to get a damage from {0}', target: '請選擇一名角色受到來自 {0} 的 1 點傷害' },
   {
-    source: 'Obtain Basic Card, Equip Card and Duel in display cards?',
-    target: '裸衣：是否放棄摸牌，然後獲取展示牌中的基本牌、裝備牌和【決鬥】',
+    source: 'Obtain Basic Card, Weapon Card and Duel in display cards?',
+    target: '裸衣：是否放棄摸牌，然後獲取展示牌中的基本牌、武器牌和【決鬥】',
   },
   {
     source: '{0} used skill {1}, display cards: {2}',
