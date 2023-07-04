@@ -134,7 +134,7 @@ export const skillDescriptions: Word[] = [
   {
     source: 'qixing_description',
     target:
-      '游戏开始时，你将牌堆顶七张牌扣置于你的武将牌上，称为“星”；摸牌阶段结束时，你可以用至少一张手牌交换等量的“星”。',
+      '游戏开始时，你将牌堆顶七张牌扣置于你的武将牌上，称为“星”，然后你可以用任意张手牌替换等量的星；摸牌阶段结束时，你可以用至少一张手牌交换等量的“星”。',
   },
   {
     source: 'kuangfeng_description',
