@@ -124,8 +124,7 @@ export const skillDescriptions: Word[] = [
   },
   {
     source: 'qinyin_description',
-    target:
-      '<b>鎖定技</b>，棄牌階段結束時，若你於此階段內棄置過不少於兩張手牌，則你令所有角色失去1點體力或回覆1點體力。',
+    target: '棄牌階段結束時，若你於此階段內棄置過不少於兩張手牌，則你令所有角色失去1點體力或回覆1點體力。',
   },
   {
     source: 'yeyan_description',

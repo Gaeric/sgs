@@ -5,9 +5,9 @@ import { AllStage, PhaseStageChangeStage, PlayerPhase, PlayerPhaseStages } from 
 import { Player } from 'core/player/player';
 import { Room } from 'core/room/room';
 import { TriggerSkill } from 'core/skills/skill';
-import { CompulsorySkill } from 'core/skills/skill_wrappers';
+import { CommonSkill } from 'core/skills/skill_wrappers';
 
-@CompulsorySkill({ name: 'qinyin', description: 'qinyin_description' })
+@CommonSkill({ name: 'qinyin', description: 'qinyin_description' })
 export class QinYin extends TriggerSkill {
   public isTriggerable(
     event: ServerEventFinder<GameEventIdentifiers.PhaseStageChangeEvent>,

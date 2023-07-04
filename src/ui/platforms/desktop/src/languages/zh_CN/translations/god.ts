@@ -124,8 +124,7 @@ export const skillDescriptions: Word[] = [
   },
   {
     source: 'qinyin_description',
-    target:
-      '<b>锁定技</b>，弃牌阶段结束时，若你于此阶段内弃置过不少于两张手牌，则你令所有角色失去1点体力或回复1点体力。',
+    target: '弃牌阶段结束时，若你于此阶段内弃置过不少于两张手牌，则你令所有角色失去1点体力或回复1点体力。',
   },
   {
     source: 'yeyan_description',
