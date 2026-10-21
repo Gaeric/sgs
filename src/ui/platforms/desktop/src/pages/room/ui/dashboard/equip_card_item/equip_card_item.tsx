@@ -23,6 +23,11 @@ type EquipCardItemProps = {
 
 @mobxReact.observer
 export class EquipCardItem extends React.Component<EquipCardItemProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   selected: boolean = false;
   @mobx.observable.ref

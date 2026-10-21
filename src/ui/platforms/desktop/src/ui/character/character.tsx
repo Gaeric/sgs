@@ -23,6 +23,11 @@ export type CharacterCardProps = {
 
 @mobxReact.observer
 export class CharacterCard extends React.Component<CharacterCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private characterImage: string | undefined;
 

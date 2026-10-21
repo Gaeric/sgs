@@ -31,6 +31,10 @@ export type DisplayCardProp = {
 };
 
 export class RoomStore {
+  constructor() {
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   clientRoomInfo: ClientRoomInfo;
   @mobx.observable.ref

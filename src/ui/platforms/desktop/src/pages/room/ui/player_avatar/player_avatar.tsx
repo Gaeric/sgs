@@ -51,6 +51,11 @@ type PlayerAvatarProps = {
 
 @mobxReact.observer
 export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   skillSelected: boolean = false;
   @mobx.observable.ref

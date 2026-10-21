@@ -19,6 +19,11 @@ export type ConversationProps = {
 
 @mobxReact.observer
 export class Conversation extends React.Component<ConversationProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   onTooltipOpened: string | undefined;
 

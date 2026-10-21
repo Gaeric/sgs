@@ -16,6 +16,11 @@ type FlatClientCardProps = {
 
 @mobxReact.observer
 export class FlatDemoCard extends React.Component<FlatClientCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private cardImage: string | undefined;
   private readonly onClick = () => {

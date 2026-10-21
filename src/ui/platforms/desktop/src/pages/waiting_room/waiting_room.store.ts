@@ -15,7 +15,9 @@ export type WaitingRoomSeatInfo = { seatId: number } & (
 );
 
 export class WaitingRoomStore {
-  constructor(public readonly selfPlayerId: PlayerId) {}
+  constructor(public readonly selfPlayerId: PlayerId) {
+    mobx.makeObservable(this);
+  }
 
   @mobx.observable.deep
   gameSettings: WaitingRoomGameSettings = {} as any;

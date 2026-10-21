@@ -60,6 +60,11 @@ export type DashboardProps = {
 
 @mobxReact.observer
 export class Dashboard extends React.Component<DashboardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private readonly onClick = (card: Card) => (selected: boolean) => {
     this.props.onClick && this.props.onClick(card, selected);
   };

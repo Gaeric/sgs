@@ -18,6 +18,11 @@ export type GameDialogProps = {
 
 @mobxReact.observer
 export class GameDialog extends React.Component<GameDialogProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private dialogElementRef = React.createRef<HTMLDivElement>();
   private borderElementRef = React.createRef<HTMLDivElement>();
   @mobx.observable.ref

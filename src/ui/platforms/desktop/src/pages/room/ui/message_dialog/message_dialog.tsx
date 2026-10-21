@@ -61,6 +61,11 @@ const Tab = ({
 
 @mobxReact.observer
 export class MessageDialog extends React.Component<MessageDialogProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private userMessageDialogElementRef = React.createRef<HTMLDivElement>();
   private readonly textMessageMinHeight = 160;
 

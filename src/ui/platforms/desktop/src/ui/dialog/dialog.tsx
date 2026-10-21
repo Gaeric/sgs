@@ -7,6 +7,11 @@ import styles from './dialog.module.css';
 
 @mobxReact.observer
 export class Dialog extends React.Component<{ className?: string; children?: React.ReactNode; onClose?(): void }> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private moving = false;
   private onElementRendered = React.createRef<HTMLDivElement>();
   private Container = (props: { children?: React.ReactNode }) =>

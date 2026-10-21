@@ -8,6 +8,7 @@ import { ElectronData } from 'electron_loader/electron_data';
 import { ElectronLoader } from 'electron_loader/electron_loader';
 import { getElectronLoader } from 'electron_loader/electron_loader_util';
 import { English, SimplifiedChinese, TraditionalChinese } from 'languages';
+import * as mobx from 'mobx';
 import { ClientFlavor } from 'props/config_props';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -16,6 +17,10 @@ import { App } from './app';
 import { emojiLoader } from './emoji_loader/emoji_loader';
 import * as serviceWorker from './serviceWorker';
 import './index.css';
+
+// Keep MobX 5's permissive update behavior during the MobX 6 migration.
+// Switch to 'observed' after all direct mutations are wrapped in actions.
+mobx.configure({ enforceActions: 'never' });
 
 const mode = (process.env.REACT_APP_DEV_MODE as ClientFlavor) || ClientFlavor.Dev;
 const config = getClientConfig(mode);

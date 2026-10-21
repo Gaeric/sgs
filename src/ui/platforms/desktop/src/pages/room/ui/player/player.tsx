@@ -56,6 +56,11 @@ type PlayerCardProps = {
 
 @mobxReact.observer
 export class PlayerCard extends React.Component<PlayerCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   onTooltipOpened: boolean = false;
   @mobx.observable.ref

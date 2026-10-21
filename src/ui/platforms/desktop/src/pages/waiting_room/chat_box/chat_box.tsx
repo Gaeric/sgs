@@ -19,6 +19,11 @@ export type ChatBoxProps = {
 
 @mobxReact.observer
 export class ChatBox extends React.Component<ChatBoxProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private typing: string;
 

@@ -53,6 +53,11 @@ type HostRoomInfo = {
 
 @mobxReact.observer
 export class Lobby extends React.Component<LobbyProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.shallow
   private roomList: { info: RoomInfo; host: ServerHostTag; ping: number }[] = [];
   @mobx.observable.ref

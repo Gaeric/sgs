@@ -41,6 +41,11 @@ class ClickableSeat extends React.Component<{
   selfPlayerId: PlayerId;
   clickable: boolean;
 }> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private characterAvatar = this.props.imageLoader.getEmptySeatImage();
 
@@ -111,6 +116,11 @@ class ClickableSeat extends React.Component<{
 
 @mobxReact.observer
 export class Seats extends React.Component<SeatsProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private isReady = false;
 
   onClickSeat = (closeSeat: boolean, seatId: number, kickedPlayerId?: PlayerId) => {

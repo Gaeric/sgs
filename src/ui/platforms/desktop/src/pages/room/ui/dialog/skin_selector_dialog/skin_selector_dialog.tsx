@@ -20,6 +20,11 @@ type SkinSelectorDialogProps = {
 
 @mobxReact.observer
 export class SkinSelectorDialog extends React.Component<SkinSelectorDialogProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.shallow
   private selectedSkins: string[] = [];
 

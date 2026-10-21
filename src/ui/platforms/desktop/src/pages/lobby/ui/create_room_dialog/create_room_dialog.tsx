@@ -27,6 +27,11 @@ export class CreateRoomDialog extends React.Component<{
   imageLoader: ImageLoader;
   electronLoader: ElectronLoader;
 }> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private username: string = this.props.electronLoader.getData(ElectronData.PlayerName);
   @mobx.observable.ref
   private numberOfPlayers = 2;

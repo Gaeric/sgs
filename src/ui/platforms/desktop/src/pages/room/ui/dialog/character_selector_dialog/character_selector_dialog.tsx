@@ -22,6 +22,11 @@ type CharacterSelectorDialogProps = {
 
 @mobxReact.observer
 export class CharacterSelectorDialog extends React.Component<CharacterSelectorDialogProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private tooltipCharacter: Character | undefined;
   @mobx.observable.shallow

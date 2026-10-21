@@ -88,6 +88,7 @@ export class ReplayRoomPage extends React.Component<
     }>,
   ) {
     super(props);
+    mobx.makeObservable(this);
     const { translator } = this.props;
 
     this.presenter = new RoomPresenter(this.props.imageLoader);

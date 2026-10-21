@@ -30,6 +30,11 @@ export type HeaderBarProps = {
 
 @mobxReact.observer
 export class HeaderBar extends React.Component<HeaderBarProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   openSettings = false;
   @mobx.observable.ref

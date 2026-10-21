@@ -23,6 +23,11 @@ export type SkinCardProps = {
 
 @mobxReact.observer
 export class SkinCard extends React.Component<SkinCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private skinImage: string | undefined;
 

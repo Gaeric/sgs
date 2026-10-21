@@ -34,6 +34,7 @@ export class SeatsLayout extends React.Component<SeatsLayoutProps> {
 
   constructor(props: SeatsLayoutProps) {
     super(props);
+    mobx.makeObservable(this);
 
     this.sideNumberOfPlayers = Math.floor(this.numberOfPlayers / 3);
     this.topNumberOfPlayers = this.numberOfPlayers - this.sideNumberOfPlayers * 2;

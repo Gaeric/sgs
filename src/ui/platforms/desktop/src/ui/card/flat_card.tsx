@@ -20,6 +20,11 @@ type FlatClientCardProps = {
 
 @mobxReact.observer
 export class FlatClientCard extends React.PureComponent<FlatClientCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private equipImage: string | undefined;
   @mobx.observable.ref

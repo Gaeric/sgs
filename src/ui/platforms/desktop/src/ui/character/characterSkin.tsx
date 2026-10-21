@@ -29,6 +29,11 @@ export type CharacterSkinCardProps = {
 
 @mobxReact.observer
 export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private skinNameList: string[] = [this.props.character.Name];
   private skinNameLists: string[] = [];
   @mobx.observable.ref
@@ -212,6 +217,11 @@ export type CharacterSpecProps = {
 };
 
 export class CharacterSpec extends React.Component<CharacterSpecProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private currentAudioIndexMapper: { [skillName: string]: number } = {};
 
   @mobx.observable.ref

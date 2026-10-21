@@ -34,6 +34,11 @@ export type GameSettingsProps = {
 
 @mobxReact.observer
 export class GameSettings extends React.Component<GameSettingsProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private translationMessage = createTranslationMessages(this.props.translator);
   private inputDebounceTimer: NodeJS.Timer | undefined;
   private passwordInputDebounceTimer: NodeJS.Timer | undefined;

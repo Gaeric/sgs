@@ -107,6 +107,7 @@ export class RoomPage extends React.Component<
     }>,
   ) {
     super(props);
+    mobx.makeObservable(this);
     const { match, translator } = this.props;
 
     this.roomId = parseInt(match.params.slug, 10);

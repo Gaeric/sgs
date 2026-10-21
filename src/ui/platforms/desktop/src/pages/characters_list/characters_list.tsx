@@ -32,6 +32,11 @@ export type CharactersListProps = PagePropsWithConfig<{
 
 @mobxReact.observer
 export class CharactersList extends React.Component<CharactersListProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private backgroundImage = this.props.imageLoader.getLobbyBackgroundImage();
   private roomListBackgroundImage = this.props.imageLoader.getRoomListBackgroundImage();
   private audioService = installAudioPlayerService(this.props.audioLoader, this.props.electronLoader);

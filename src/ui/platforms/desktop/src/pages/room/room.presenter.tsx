@@ -23,7 +23,9 @@ import { Conversation, ConversationProps } from './ui/conversation/conversation'
 import { CardCategoryDialog, CardCategoryDialogProps } from './ui/dialog/card_category_dialog/card_category_dialog';
 
 export class RoomPresenter {
-  constructor(private imageLoader: ImageLoader) {}
+  constructor(private imageLoader: ImageLoader) {
+    mobx.makeObservable(this);
+  }
 
   private store: RoomStore;
   public createStore() {

@@ -38,6 +38,11 @@ export type ClientCardProps = {
 
 @mobxReact.observer
 export class ClientCard extends React.Component<ClientCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   @mobx.observable.ref
   private cardImage: string | undefined;
   @mobx.observable.ref

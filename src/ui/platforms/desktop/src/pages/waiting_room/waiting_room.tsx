@@ -63,6 +63,7 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
 
   constructor(props: WaitingRoomProps) {
     super(props);
+    mobx.makeObservable(this);
     const { match, electronLoader, translator, imageLoader, audioLoader } = this.props;
 
     const { ping, roomInfo, hostConfig } = this.props.location.state as {

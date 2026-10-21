@@ -48,6 +48,11 @@ const EmptyCardSlots = (props: { slotName: string; length: number; translator: C
 
 @mobxReact.observer
 export class GuanXingCardSlots extends React.Component<GuanXingDialogProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private readonly cardWidth = 100;
   private readonly cardMargin = 2;
   private topCards: Card[] = [];

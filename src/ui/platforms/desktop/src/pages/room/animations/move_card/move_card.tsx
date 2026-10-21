@@ -19,6 +19,11 @@ type MoveCardProps = {
 
 @mobxReact.observer
 export class MoveCard extends React.Component<MoveCardProps> {
+  constructor(props: any) {
+    super(props);
+    mobx.makeObservable(this);
+  }
+
   private displayedCardsRef = React.createRef<HTMLDivElement>();
   private readonly cardWidth = 120;
   private readonly cardMargin = 2;

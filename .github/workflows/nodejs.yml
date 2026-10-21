@@ -14,19 +14,24 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [14.x]
+        node-version: [24.x, 26.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install -g yarn
-      - run: yarn
-      - run: yarn lint
-      - run: yarn transpile
-      - run: yarn transpile:client
+          cache: yarn
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        run: yarn lint
+      - name: Build server
+        run: yarn transpile
+      - name: Build client
+        run: yarn transpile:client
         env:
           CI: true

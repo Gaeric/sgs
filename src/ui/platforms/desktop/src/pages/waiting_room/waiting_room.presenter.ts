@@ -7,6 +7,10 @@ import { ChatPacketObject } from 'services/connection_service/connection_service
 import { WaitingRoomSeatInfo, WaitingRoomStore } from './waiting_room.store';
 
 export class WaitingRoomPresenter {
+  constructor() {
+    mobx.makeObservable(this);
+  }
+
   static readonly defaultNumberOfPlayers = 8;
   createStore(playerId: PlayerId, defaultSettings?: WaitingRoomGameSettings) {
     const store = new WaitingRoomStore(playerId);
