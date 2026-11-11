@@ -61,7 +61,7 @@ export class CharactersList extends React.Component<CharactersListProps> {
   }));
 
   private readonly backToLobby = () => {
-    this.props.history.push('/lobby');
+    this.props.navigate('/lobby');
   };
 
   @mobx.observable.shallow

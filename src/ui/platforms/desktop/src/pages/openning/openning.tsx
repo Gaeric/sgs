@@ -8,7 +8,7 @@ export class OpenningPage extends React.PureComponent<PagePropsWithConfig> {
   private timeoutId: NodeJS.Timeout;
 
   private readonly jumpToLobby = () => {
-    this.props.history.push('/lobby');
+    this.props.navigate('/lobby');
   };
 
   componentDidMount() {

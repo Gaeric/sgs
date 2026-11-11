@@ -219,13 +219,15 @@ export class Lobby extends React.Component<LobbyProps> {
         if (packet) {
           const { roomId, roomInfo: gameInfo } = packet;
           const hostConfig = this.props.config.host.find(config => config.hostTag === hostTag);
-          this.props.history.push(`/room/${roomId}`, {
-            gameMode: gameInfo.gameMode,
-            ping,
-            hostConfig,
-            roomMode: RoomMode.Campaign,
-            hostPlayerId: roomInfo.hostPlayerId,
-            roomName,
+          this.props.navigate(`/room/${roomId}`, {
+            state: {
+              gameMode: gameInfo.gameMode,
+              ping,
+              hostConfig,
+              roomMode: RoomMode.Campaign,
+              hostPlayerId: roomInfo.hostPlayerId,
+              roomName,
+            },
           });
         } else {
           this.props.logger.error(error);
@@ -237,10 +239,12 @@ export class Lobby extends React.Component<LobbyProps> {
         if (packet && 'roomId' in packet) {
           const { roomId, roomInfo } = packet;
           const hostConfig = this.props.config.host.find(config => config.hostTag === hostTag);
-          this.props.history.push(`/waiting-room/${roomId}`, {
-            roomInfo,
-            ping,
-            hostConfig,
+          this.props.navigate(`/waiting-room/${roomId}`, {
+            state: {
+              roomInfo,
+              ping,
+              hostConfig,
+            },
           });
         } else {
           this.props.logger.error(error);
@@ -251,7 +255,7 @@ export class Lobby extends React.Component<LobbyProps> {
 
   componentWillUnmount() {
     const excludedBgmStopList = ['/characters'];
-    if (!excludedBgmStopList.includes(this.props.history.location.pathname)) {
+    if (!excludedBgmStopList.includes(this.props.getCurrentLocation().pathname)) {
       this.audioService.stop();
     }
   }
@@ -282,9 +286,11 @@ export class Lobby extends React.Component<LobbyProps> {
     } else {
       this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
         if (exist) {
-          this.props.history.push(`/waiting-room/${info.id}`, {
-            ping,
-            hostConfig: this.props.config.host.find(config => config.hostTag === host),
+          this.props.navigate(`/waiting-room/${info.id}`, {
+            state: {
+              ping,
+              hostConfig: this.props.config.host.find(config => config.hostTag === host),
+            },
           });
         } else {
           //TODO: add error popout
@@ -306,10 +312,12 @@ export class Lobby extends React.Component<LobbyProps> {
     const { info, host } = hostInfo;
     this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
       if (exist) {
-        this.props.history.push(`/room/${info.id}`, {
-          ping,
-          hostConfig: this.props.config.host.find(config => config.hostTag === host),
-          roomMode: RoomMode.Observer,
+        this.props.navigate(`/room/${info.id}`, {
+          state: {
+            ping,
+            hostConfig: this.props.config.host.find(config => config.hostTag === host),
+            roomMode: RoomMode.Observer,
+          },
         });
       } else {
         //TODO: add error popout
@@ -342,7 +350,7 @@ export class Lobby extends React.Component<LobbyProps> {
   };
 
   private readonly onClickCharactersList = () => {
-    this.props.history.push('/characters');
+    this.props.navigate('/characters');
   };
 
   @mobx.action
@@ -371,10 +379,12 @@ export class Lobby extends React.Component<LobbyProps> {
         this.currentInteractiveRoomInfo.info.id,
         exist => {
           if (exist) {
-            this.props.history.push(`/waiting-room/${this.currentInteractiveRoomInfo.info.id}`, {
-              hostConfig: this.props.config.host.find(
-                config => config.hostTag === this.currentInteractiveRoomInfo.host,
-              ),
+            this.props.navigate(`/waiting-room/${this.currentInteractiveRoomInfo.info.id}`, {
+              state: {
+                hostConfig: this.props.config.host.find(
+                  config => config.hostTag === this.currentInteractiveRoomInfo.host,
+                ),
+              },
             });
           } else {
             //TODO: add error popout
@@ -425,7 +435,7 @@ export class Lobby extends React.Component<LobbyProps> {
         return;
       }
 
-      this.props.history.push('/replay', { replayData: replay });
+      this.props.navigate('/replay', { state: { replayData: replay } });
     });
   };
 

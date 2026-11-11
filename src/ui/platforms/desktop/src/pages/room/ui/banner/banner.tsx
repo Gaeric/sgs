@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { ClientTranslationModule } from 'core/translations/translation_module.client';
 import { ServerHostTag } from 'props/config_props';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ConnectionService } from 'services/connection_service/connection_service';
 import { Button } from 'ui/button/button';
 import { SignalBar } from 'ui/signal_bar/signal_bar';
@@ -33,13 +33,13 @@ const BreadCrumb = (props: { content: string[] }) => (
 );
 
 export const Banner = (props: BannerProps) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { roomIndex, roomName, translator, host, defaultPing, variant = 'room' } = props;
   const [isSideBarOpened, switchSideBar] = React.useState(true);
   const breadcrumb: string[] = roomIndex ? [roomName, `${translator.tr('room id')}: ${roomIndex}`] : [roomName];
 
   const onClick = () => {
-    history.push('/lobby');
+    navigate('/lobby');
   };
 
   return (

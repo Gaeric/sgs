@@ -20,7 +20,6 @@ import { SettingsDialog } from 'pages/ui/settings/settings';
 import { ServerHostTag } from 'props/config_props';
 import type { ServiceConfig } from 'props/config_props';
 import * as React from 'react';
-import { match } from 'react-router-dom';
 import { ConnectionService } from 'services/connection_service/connection_service';
 import { CharacterSkinInfo } from 'skins/skins';
 import type { PagePropsWithConfig } from 'types/page_props';
@@ -40,7 +39,6 @@ import { SeatsLayout } from './ui/seats_layout/seats_layout';
 @mobxReact.observer
 export class RoomPage extends React.Component<
   PagePropsWithConfig<{
-    match: match<{ slug: string }>;
     translator: ClientTranslationModule;
     imageLoader: ImageLoader;
     audioLoader: AudioLoader;
@@ -98,7 +96,6 @@ export class RoomPage extends React.Component<
 
   constructor(
     props: PagePropsWithConfig<{
-      match: match<{ slug: string }>;
       translator: ClientTranslationModule;
       imageLoader: ImageLoader;
       audioLoader: AudioLoader;
@@ -109,9 +106,9 @@ export class RoomPage extends React.Component<
   ) {
     super(props);
     mobx.makeObservable(this);
-    const { match, translator } = this.props;
+    const { params, translator } = this.props;
 
-    this.roomId = parseInt(match.params.slug, 10);
+    this.roomId = parseInt(Precondition.exists(params.slug, 'Unknown room id'), 10);
     this.presenter = new RoomPresenter(this.props.imageLoader);
     this.store = this.presenter.createStore();
 
@@ -153,9 +150,11 @@ export class RoomPage extends React.Component<
   }
 
   private readonly createWaitingRoomCaller = (roomInfo: TemporaryRoomCreationInfo, roomId: number) => {
-    this.props.history.push(`/waiting-room/${roomId}`, {
-      ping: 0,
-      hostConfig: this.props.config.host.find(host => host.hostTag === this.gameHostedServer),
+    this.props.navigate(`/waiting-room/${roomId}`, {
+      state: {
+        ping: 0,
+        hostConfig: this.props.config.host.find(host => host.hostTag === this.gameHostedServer),
+      },
     });
   };
 
@@ -184,7 +183,7 @@ export class RoomPage extends React.Component<
     }
 
     this.socket.on(GameEventIdentifiers.PlayerEnterRefusedEvent, () => {
-      this.props.history.push('/lobby');
+      this.props.navigate('/lobby');
     });
 
     clientActiveListenerEvents().forEach(identifier => {
@@ -210,7 +209,7 @@ export class RoomPage extends React.Component<
     this.setupReconnection();
     this.joinRoom();
 
-    window.addEventListener('beforeunload', () => this.disconnect());
+    window.addEventListener('beforeunload', this.disconnect);
   }
 
   private readonly setupReconnection = () => {
@@ -258,6 +257,7 @@ export class RoomPage extends React.Component<
   };
 
   componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.disconnect);
     this.disconnect();
     this.audioService.stop();
   }

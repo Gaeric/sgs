@@ -15,7 +15,6 @@ import { Background } from 'pages/room/ui/background/background';
 import { ServerHostTag } from 'props/config_props';
 import type { ServiceConfig } from 'props/config_props';
 import * as React from 'react';
-import { match } from 'react-router-dom';
 import { ConnectionService } from 'services/connection_service/connection_service';
 import IOSocketClient from 'socket.io-client';
 import type { PagePropsWithConfig } from 'types/page_props';
@@ -29,7 +28,6 @@ import { WaitingRoomPresenter } from './waiting_room.presenter';
 import { WaitingRoomStore } from './waiting_room.store';
 
 type WaitingRoomProps = PagePropsWithConfig<{
-  match: match<{ slug: string }>;
   translator: ClientTranslationModule;
   imageLoader: ImageLoader;
   audioLoader: AudioLoader;
@@ -65,7 +63,7 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   constructor(props: WaitingRoomProps) {
     super(props);
     mobx.makeObservable(this);
-    const { match, electronLoader, translator, imageLoader, audioLoader } = this.props;
+    const { params, electronLoader, translator, imageLoader, audioLoader } = this.props;
 
     const { ping, roomInfo, hostConfig } = this.props.location.state as {
       roomInfo?: TemporaryRoomCreationInfo;
@@ -73,12 +71,12 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
       hostConfig: ServiceConfig;
     };
 
-    if (!match.params.slug) {
+    if (!params.slug) {
       this.backwardsToLoddy();
     }
 
     mobx.runInAction(() => {
-      this.roomIdString = match.params.slug;
+      this.roomIdString = Precondition.exists(params.slug, 'Unknown room id');
     });
 
     this.connectToServer(hostConfig);
@@ -137,17 +135,19 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   }
 
   private readonly backwardsToLoddy = () => {
-    this.props.history.push('/lobby');
+    this.props.navigate('/lobby');
   };
 
   private readonly joinIntoTheGame = (ping: number) => (roomId: RoomId, roomInfo: GameInfo) => {
     const hostConfig = this.props.config.host.find(config => config.hostTag === this.gameHostedServer);
 
-    this.props.history.push(`/room/${roomId}`, {
-      gameMode: roomInfo.gameMode,
-      ping,
-      hostConfig,
-      roomMode: RoomMode.Online,
+    this.props.navigate(`/room/${roomId}`, {
+      state: {
+        gameMode: roomInfo.gameMode,
+        ping,
+        hostConfig,
+        roomMode: RoomMode.Online,
+      },
     });
   };
 
@@ -191,7 +191,7 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   };
 
   render() {
-    const { match, location, ...props } = this.props;
+    const { location, ...props } = this.props;
     const { ping } = location.state as {
       ping: number;
     };

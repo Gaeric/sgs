@@ -201,9 +201,10 @@ MobX 装饰器类检查: 35/35 都有 makeObservable
 - [x] `react`/`react-dom` → 19.3.1（Phase 4b）
 - [x] `@types/react`/`@types/react-dom` → 19.3.0（Phase 4b）
 - [x] `ReactDOM.render` / `unmountComponentAtNode` → `createRoot` / `root.unmount`（入口与动画）
-- [ ] `react-router-dom` 5 → 7，迁移 Route API
+- [x] `react-router-dom` 5 → 7.18.5，迁移 Route API（Phase 4c）
 - [x] 暂不开启 StrictMode（React 19 迁移保持关闭）
-- [ ] 检查生命周期与 socket 订阅清理
+- [x] 路由生命周期检查：参数变化重建房间实例、修复 beforeunload listener 泄漏并补测试
+- [ ] 全流程 socket / 异步任务清理审计（仍有旧代码待独立处理）
 
 验收：
 
@@ -423,6 +424,31 @@ desktop yarn build:mac            CRA 回退通过
 - 完整游戏交互、视觉动画、Electron 运行与 Node 24 验证仍待执行；Phase 4 的 Router/全流程验收项未完成。
 
 下一步：审查并提交 React 19 检查点，再独立迁移 Router 5 API，扩展路由与房间订阅清理测试。MobX 7 与 Electron 升级不混入本阶段。
+
+### 2026-11-11：Phase 4c Router 7 检查点
+
+变更：
+
+- desktop `react-router-dom` 固定到 7.18.5，移除 Router 5 的 `@types/react-router` / `@types/react-router-dom` 和对应 resolution；使用包内置类型并更新 lockfile。
+- 保留入口唯一的 `MemoryRouter`，App 移除自己的 history/Router，改用 `Routes` / `Route element` / `Navigate`。不改为 BrowserRouter，保留桌面与内存路由模型。
+- 新增 hook-to-class `PageRoute` adapter，向原有 class 页面传递 `navigate` / `location` / `params`；移除 legacy history/match API。所有 push state 改为 `{ state: ... }`，字段与对象引用保持不变。
+- routing provider 的 `getCurrentLocation()` 让 outgoing lifecycle 读取目标位置，保留 lobby → characters 不停止 BGM 的逻辑；支持 back/forward。
+- 房间/回放的路径或 history entry 变化时 remount，避免旧构造函数继续绑定前一个 room socket。
+- 新增边界 guard：无效 room id、缺少 host/mode 或 replay 基本结构时 replace 到 lobby，不进入依赖 state 的页面构造函数。campaign 不强制网络 host；waiting-room 保留可缺 ping/roomInfo 的旧入口。guard 不替代完整 replay 内容校验。
+- Banner 改用 `useNavigate`；房间的 beforeunload listener 改为稳定函数并在卸载时移除。保留原 online/observer leave 通知与 campaign disconnect 行为，不更改 socket 协议或关闭策略。
+- Jest 26 不支持 Router 7 的 exports-only `react-router/dom` 子路径，测试映射到已安装包的 CJS dom 入口；jsdom 缺少 TextEncoder/TextDecoder，在 test setup 使用 Node util 补齐。未全量升级 Jest。
+
+验证（本容器 Node 26.12.0）：
+
+- desktop frozen-lockfile install、Vite build、TypeScript check、根 lint、服务端 build 全部通过。
+- 全套 headless tests：6 suites / 69 tests 通过。App 路由测试覆盖真实开场页、state 引用传递、online/observer/campaign、roomId 参数、回放、无效入口、replace 和 back/forward。
+- 实际 RoomPage 构造与生命周期测试使用 mock engine/transport/services：覆盖三次 mount/unmount、beforeunload 精确注册/移除、离房通知、observer/campaign 模式、返回 waiting-room state 和拒绝加入后的导航；不等同真实联机对局。
+- 编译后服务端启动与真实 Socket.IO 2 lobby ping 通过，检查后进程已清理。
+- 不再有业务源码 Router 5 imports / history.push / useHistory / match.params；保留 React 19、MobX 6、Electron、服务器协议版本。
+- Vite chunk/import、旧 CRA peer dependency 与 css-loader 重复声明 warning 仍在；Node 24、人工 UI/游戏/回放/Electron 验收仍待执行。
+- 旧 online socket 关闭/事件解绑及 async 回调取消仍需独立审计；本阶段没有宣称全流程无订阅泄漏。
+
+下一步：审查并提交 Router 检查点，再按计划推进 MobX 迁移或先补房间连接清理回归；不要将 Electron 升级混入同一个变更。
 
 ## 9. 手动 Smoke 清单
 
