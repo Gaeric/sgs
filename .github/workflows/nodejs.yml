@@ -36,6 +36,11 @@ jobs:
         env:
           CI: true
           ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      # Uses the installed desktop client against production server channels on
+      # ephemeral ports; no fixed-port server or engine initialization required.
+      - name: Test server network lifecycle
+        working-directory: src/server
+        run: yarn test:network
       # Build first: build:vite syncs src/core, so these checks must be sequential.
       - name: Type-check client
         working-directory: src/ui/platforms/desktop

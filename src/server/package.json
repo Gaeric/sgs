@@ -26,6 +26,7 @@
     "dev:watch": "NODE_PATH=../ nodemon",
     "dev": "NODE_PATH=../ ts-node -r tsconfig-paths/register ./main.ts --files",
     "build": "NODE_PATH=../ tsc -p ./tsconfig.server.json",
+    "test:network": "yarn build && NODE_PATH=./build node --test tests/network.integration.test.cjs",
     "dev:win": "cross-env NODE_PATH=../ ts-node -r tsconfig-paths/register ./main.ts --files",
     "dev:win:watch": "cross-env NODE_PATH=../ nodemon",
     "build:win": "cross-env NODE_PATH=../ tsc -p ./tsconfig.server.json",

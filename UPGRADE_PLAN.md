@@ -509,3 +509,24 @@ desktop yarn build:mac            CRA 回退通过
 - 先增加测试复现：新增回归中 7 项在修复前失败；修复后 lobby 26 项全部通过，无重复 key warning。
 - 验证（Node 26.12.0）：根 lint、Vite build、desktop TypeScript check、server build、`git diff --check` 通过；全套 18 suites / 203 tests 通过。Vite build 完成后才运行 frontend typecheck / tests，避免 core sync 竞争。
 - 没有依赖/协议升级或 commit；未执行完整 UI / 联机 / Electron / Node 24 验收，现有构建与环境 warning 不变。并发请求保留原有完成处理策略，本次不引入“只允许最新请求导航”的新交互规则。
+
+### 2026-11-11：Socket.IO 升级准备（未升级依赖）
+
+- 保留 Socket.IO server 2.4.1 / desktop client 2.3.0、Express 4 与 Electron；没有运行时业务逻辑修改或 lockfile 变化。
+- 新增 `src/server/tests/network.integration.test.cjs`：Node 内置 test runner 启动真实 Socket.IO 与编译后的 LobbyEventChannel / WaitingRoomSocket / RoomService，分别验证 polling 和 WebSocket 的 create → host/guest join → ready/chat → explicit leave/disconnect → room removal，包含版本拒绝与 lobby sibling namespace 存活。只解析 core version 元数据，不初始化引擎 registry 或启动游戏。
+- 测试绑定临时 loopback 端口，不启动固定 2020 服务；有界等待、失败清理与 server disconnect barrier，不用任意 sleep。Engine.IO 3 失败清理使用版本相关内部 API，后续升级必须同步调整 fixture。
+- 新增 `yarn --cwd src/server test:network`（先编译 server 再运行）；依赖 root/server/desktop 均已安装。CI 在 client 安装/构建完成后运行，仍保持 frontend sync/build 与 frontend reads 顺序执行。
+- `src/server/tests/README.md` 记录运行方式、精确覆盖边界、源码 API/协议审计、后续验收 gate 与官方参考链接。2026-11-11 实查 npm registry：server/client latest 均为 4.8.4，仅作候选，不代表已安装或兼容验收完成。
+- 官方 2→3 与 3→4 指南确认：Server/CORS 初始化、Manager reconnect 事件、Namespace sockets Map、自带类型、默认 payload / heartbeat 与 EIO3 兼容策略都需显式处理，不能只改依赖版本。
+
+审计发现的既有问题（本检查点不修复）：
+
+- RealConnectionService 每个操作共享单一可变 callback，重叠请求/多 host 回复可能被分发到错误 callback；上一检查点修复了页面捕获目标，但不能解决 service 层关联。version query 也发送了错误事件且缺 payload。优先独立补 service 回归与修复后，再进行 major upgrade。
+- waiting-room abrupt disconnect 不移除 authoritative players；explicit leave 后 disconnect 会重复广播 leave；重复 enter、room namespace/map teardown、game resolver / AI timer / reentry 边界均需独立覆盖。新增测试验证 explicit leave 路径，未声称这些缺陷已修复。
+
+验证（本地 Node 26.12.0）：
+
+- `yarn --cwd src/server test:network`：server build 与 2 个真实 transport lifecycle tests 通过；格式化后重复运行两次均通过。
+- desktop Vite build → TypeScript check → 全套 Jest：18 suites / 203 tests 通过。
+- 根 `yarn lint`、新增 CJS Prettier check、`git diff --check` 通过。根 lint 只覆盖 TS/TSX；CJS 由 Node 执行、语法与格式检查覆盖。
+- 既有 Vite chunk/import、css-loader / Yarn cache / Node experimental warning 不变。未检查远程 CI 结果或本地 Node 24；真实浏览器 CORS、断线重连、完整对局/回放与 Electron 仍待验收。未创建 commit。
