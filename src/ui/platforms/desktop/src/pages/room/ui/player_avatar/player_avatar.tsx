@@ -96,24 +96,25 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
     }
   };
 
-  @mobx.action
-  private readonly onClickSkill = (skill: Skill) => () => {
-    if (this.props.store.selectedSkill !== undefined && skill !== this.props.store.selectedSkill) {
-      return;
-    }
+  private readonly onClickSkill = (skill: Skill) =>
+    mobx.action(() => {
+      if (this.props.store.selectedSkill !== undefined && skill !== this.props.store.selectedSkill) {
+        return;
+      }
 
-    if (skill instanceof TriggerSkill) {
-      return;
-    }
+      if (skill instanceof TriggerSkill) {
+        return;
+      }
 
-    this.skillSelected = !this.skillSelected;
-    this.props.onClickSkill && this.props.onClickSkill(skill, this.skillSelected);
-  };
+      this.skillSelected = !this.skillSelected;
+      this.props.onClickSkill && this.props.onClickSkill(skill, this.skillSelected);
+    });
 
-  @mobx.action
   getSkillSelected() {
     if (this.props.store.selectedSkill === undefined) {
-      this.skillSelected = false;
+      mobx.runInAction(() => {
+        this.skillSelected = false;
+      });
     }
 
     return this.skillSelected;
@@ -279,9 +280,12 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
 
   @mobx.action
   private readonly openTooltip = () => {
-    this.onTooltipOpeningTimer = setTimeout(() => {
-      this.onTooltipOpened = true;
-    }, 500);
+    this.onTooltipOpeningTimer = setTimeout(
+      mobx.action(() => {
+        this.onTooltipOpened = true;
+      }),
+      500,
+    );
   };
   @mobx.action
   private readonly closeTooltip = () => {
@@ -355,7 +359,9 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
           this.skinName,
         )
         .then(imageProps => {
-          this.newMainImage = imageProps;
+          mobx.runInAction(() => {
+            this.newMainImage = imageProps;
+          });
         });
     }
   }
@@ -363,11 +369,14 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
   private renderCharacterImage() {
     if (this.props.presenter.ClientPlayer && this.props.presenter.ClientPlayer.CharacterId !== undefined) {
       if (this.props.skinData) {
-        this.skinName = getSkinName(
+        const skinName = getSkinName(
           this.props.presenter.ClientPlayer.Character?.Name,
           this.props.presenter.ClientPlayer?.Id,
           this.props.skinData,
         ).skinName;
+        mobx.runInAction(() => {
+          this.skinName = skinName;
+        });
 
         this.props.imageLoader
           .getCharacterSkinPlay(
@@ -399,7 +408,9 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
           .getCharacterImage(huashenCharacter.Name, this.props.presenter.ClientPlayer.Id)
           .then(image => {
             if (this.sideImage?.src !== image.src) {
-              this.sideImage = image;
+              mobx.runInAction(() => {
+                this.sideImage = image;
+              });
             }
           });
       }

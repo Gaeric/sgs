@@ -100,11 +100,11 @@ export class CharactersList extends React.Component<CharactersListProps> {
       .filter(character => this.selectedNationalities.includes(character.Nationality));
   }
 
-  @mobx.action
-  private readonly onHoverCharacter = (characterId: CharacterId) => () => {
-    this.focusedCharacterId = characterId;
-    this.focusedSkinName = Sanguosha.getCharacterById(this.focusedCharacterId).Name;
-  };
+  private readonly onHoverCharacter = (characterId: CharacterId) =>
+    mobx.action(() => {
+      this.focusedCharacterId = characterId;
+      this.focusedSkinName = Sanguosha.getCharacterById(this.focusedCharacterId).Name;
+    });
   @mobx.action
   private readonly onfocusedSkinName = (skinName: string) => {
     this.focusedSkinName = skinName;

@@ -165,8 +165,8 @@ yarn build:mac（CRA 回退）: 通过
 - [x] 为所有 observable class 增加 `makeObservable`（35 个 class，322 个装饰成员）
 - [x] 保留 legacy decorators，由装饰器提供注解（MobX 6 不允许装饰器和 annotations map 混用）
 - [x] 迁移期 `configure({ enforceActions: 'never' })`
-- [ ] async action 改用 `runInAction`
-- [ ] 迁移完成后切 `enforceActions: 'observed'`
+- [x] 审计 async / timer / 延迟回调的 observable 写入，补 `action` / `runInAction`（2026-11-11）
+- [x] 切换 `enforceActions: 'observed'`，headless 回归通过；人工全流程验收仍待进行
 
 执行结果（2026-10-21）：
 
@@ -221,7 +221,7 @@ MobX 装饰器类检查: 35/35 都有 makeObservable
 - [ ] `observable.shallow` → `observableShallow`
 - [ ] `observable.deep` → `observableDeep`
 - [ ] `@observer class` → `observer(Class)` HOC
-- [ ] 开启 `enforceActions: 'observed'`
+- [x] 开启 `enforceActions: 'observed'`（已在 MobX 6 阶段完成）
 
 验收：
 
@@ -249,7 +249,7 @@ MobX 装饰器类检查: 35/35 都有 makeObservable
 - [ ] Prettier 2 → 3
 - [ ] 移除 tslint / prettier-eslint
 - [ ] 统一 lockfile / workspace（可选）
-- [ ] 补 RoomStore / WaitingRoomStore 单测
+- [x] 补 RoomStore / WaitingRoomStore 单测（ref / shallow / deep、presenter action 与回调）
 - [ ] 更新 README 启动说明
 
 ## 5. MobX 迁移约定
@@ -471,3 +471,30 @@ desktop yarn build:mac            CRA 回退通过
 - 无依赖/协议升级。真实 Socket.IO 2 测试覆盖 polling/WebSocket leave 后断开与 sibling namespace 存活；不保证断网或进程退出时 leave 必达。
 - 验证：Vite build、desktop type-check、服务端 build、根 lint 通过；12 suites / 154 tests 通过。
 - 限制：mock-based 页面测试不替代完整联机/UI验收；不能撤销已开始的 core 操作或取消所有 action selection promise；共享 Electron updater 的旧 callback 以 guard 阻止副作用，未新增取消 API。Node 24/桌面端人工验证仍待进行。
+
+
+### 2026-11-11：MobX 6 mutation audit 与 observed enforcement
+
+变更：
+
+- 检查失败子任务留下的部分修改后继续完成，不将失败视为已回滚或已完成。
+- 入口与 Jest setup 使用 `configure({ enforceActions: 'observed' })`。Jest 收集 strict-mode warning 并在 afterEach 断言，避免 callback / reaction 的错误处理吞掉违规；其他 warning 仍正常输出。部分新测试使用更严格的 `always`，结束后恢复 `observed`。
+- 图片加载 await / promise completion 使用显式 `runInAction`；tooltip timer、选牌回调和返回的 hover / join / skill / quick-chat / drag handler 在实际执行的回调上使用 `action`，不依赖注册函数或 async 前半段的 action。
+- render-facing selection / skill helper 保持 observable 读取可跟踪，只对必要写入建立窄 action，避免把整个读取 helper 标为 action 后丢失 observer 依赖。
+- 保留 legacy decorators + `makeObservable(this)`；RoomStore / WaitingRoomStore 的 ref / shallow / deep 注解未改。没有 `makeAutoObservable`、引擎重写、依赖升级或协议变化。
+- 新增 6 个测试文件，并增强 lobby 回归：RoomStore 17 项测试覆盖独立实例、JSX / function / domain instance 引用、shallow 容器、显式 broadcastUIUpdate、presenter action / retained callback / timer；其他测试覆盖 deferred image、tooltip、curried handler、真实 observer 装备选择与依赖跟踪。
+
+验证（本容器 Node 26.12.0 / Yarn 1.22.22）：
+
+- 根 `yarn lint`：通过。首次检查发现新测试空 async 方法的 lint 错误，修正后复验通过。
+- desktop `yarn build:vite`：通过；完成 sync/build 后再执行 `yarn tsc --noEmit --pretty false` 与测试，避免复制 core 的读写竞争。
+- desktop 全套 `CI=true yarn test --watchAll=false --runInBand`：18 suites / 194 tests 全部通过（之前 12 suites / 154 tests），未记录 MobX strict-mode warning。
+- 服务端 `yarn build`、`git diff --check`：通过。此次没有重跑实际服务端网络 smoke，不将 build 视为运行时联机验收。
+- 仍有既有 Vite chunk / ineffective dynamic import、css-loader 重复声明、Yarn cache fallback 与 Node experimental localStorage 提示。
+
+限制与后续：
+
+- 自动化覆盖不等于完整 UI / 对局 / 回放 / Electron 验收；Node 24 本地执行和远程 CI 结果仍未验证。`observed` 仅检查被观察状态的写入，不能据此声称所有路径完全覆盖。
+- 保留已有生命周期清理边界：不能撤销已开始的 engine 操作，也未新增图片加载取消或共享服务 unsubscribe API。
+- 审计另发现既有 lobby 失败 join / observer 回调使用 `currentInteractiveRoomInfo.info.id`（普通非密码 join 不一定初始化该字段），可能抛错或移除错误房间；本次不混入该业务修复，需独立补回归处理。
+- 本检查点未创建 commit。建议先审查/提交，再单独决定下一阶段；Phase 5 列出的 MobX 7 版本与 API 仍是原计划假设，执行前必须核实实际发布版本和迁移文档，不直接照表升级。

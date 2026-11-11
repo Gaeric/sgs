@@ -314,25 +314,58 @@ export class Lobby extends React.Component<LobbyProps> {
     this.queryRoomList();
   };
 
-  @mobx.action
-  private readonly enterRoom = (hostInfo: HostRoomInfo) => () => {
-    if (this.disposed) {
-      return;
-    }
-    const { info, host } = hostInfo;
-    if (info.passcode) {
-      this.openPasscodeEnterDialog = true;
-      this.currentInteractiveRoomInfo = hostInfo;
-    } else {
+  private readonly enterRoom = (hostInfo: HostRoomInfo) =>
+    mobx.action(() => {
+      if (this.disposed) {
+        return;
+      }
+      const { info, host } = hostInfo;
+      if (info.passcode) {
+        this.openPasscodeEnterDialog = true;
+        this.currentInteractiveRoomInfo = hostInfo;
+      } else {
+        this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
+          if (this.disposed) {
+            return;
+          }
+          if (exist) {
+            this.props.navigate(`/waiting-room/${info.id}`, {
+              state: {
+                ping,
+                hostConfig: this.props.config.host.find(config => config.hostTag === host),
+              },
+            });
+          } else {
+            //TODO: add error popout
+            mobx.runInAction(() => {
+              const deadRoomIndex = this.roomList.findIndex(
+                roomHostInfo => roomHostInfo.info.id === this.currentInteractiveRoomInfo.info.id,
+              );
+              if (deadRoomIndex >= 0) {
+                this.roomList.splice(deadRoomIndex, 1);
+              }
+            });
+          }
+        });
+      }
+    });
+
+  private readonly enterRoomAsObserver = (hostInfo: HostRoomInfo) =>
+    mobx.action(() => {
+      if (this.disposed) {
+        return;
+      }
+      const { info, host } = hostInfo;
       this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
         if (this.disposed) {
           return;
         }
         if (exist) {
-          this.props.navigate(`/waiting-room/${info.id}`, {
+          this.props.navigate(`/room/${info.id}`, {
             state: {
               ping,
               hostConfig: this.props.config.host.find(config => config.hostTag === host),
+              roomMode: RoomMode.Observer,
             },
           });
         } else {
@@ -347,40 +380,7 @@ export class Lobby extends React.Component<LobbyProps> {
           });
         }
       });
-    }
-  };
-
-  @mobx.action
-  private readonly enterRoomAsObserver = (hostInfo: HostRoomInfo) => () => {
-    if (this.disposed) {
-      return;
-    }
-    const { info, host } = hostInfo;
-    this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
-      if (this.disposed) {
-        return;
-      }
-      if (exist) {
-        this.props.navigate(`/room/${info.id}`, {
-          state: {
-            ping,
-            hostConfig: this.props.config.host.find(config => config.hostTag === host),
-            roomMode: RoomMode.Observer,
-          },
-        });
-      } else {
-        //TODO: add error popout
-        mobx.runInAction(() => {
-          const deadRoomIndex = this.roomList.findIndex(
-            roomHostInfo => roomHostInfo.info.id === this.currentInteractiveRoomInfo.info.id,
-          );
-          if (deadRoomIndex >= 0) {
-            this.roomList.splice(deadRoomIndex, 1);
-          }
-        });
-      }
     });
-  };
 
   @mobx.action
   private readonly onRoomCreated = (roomInfo: TemporaryRoomCreationInfo, roomName: string, passcode?: string) => {
@@ -505,13 +505,13 @@ export class Lobby extends React.Component<LobbyProps> {
     this.openFeedback = false;
   };
 
-  @mobx.action
-  private readonly viewGameCharaterExtensions = (index: number) => () => {
-    if (this.disposed) {
-      return;
-    }
-    this.viewCharacterExtenstions = index;
-  };
+  private readonly viewGameCharaterExtensions = (index: number) =>
+    mobx.action(() => {
+      if (this.disposed) {
+        return;
+      }
+      this.viewCharacterExtenstions = index;
+    });
   @mobx.action
   private readonly closeGameCharaterExtensions = () => {
     if (this.disposed) {

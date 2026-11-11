@@ -88,6 +88,7 @@ export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
     this.skinNameLists = this.skinNameList;
     return this.skinNameLists;
   }
+  @mobx.action
   nextSkin() {
     const next = this.skinNameLists.shift();
     if (next) {
@@ -96,6 +97,7 @@ export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
     this.skinName = this.skinNameLists[0];
     this.getSkinImage();
   }
+  @mobx.action
   preSkin() {
     const p = this.skinNameLists.pop();
     if (p) {
@@ -107,7 +109,7 @@ export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
 
   @mobx.action
   async getSkinImage() {
-    this.characterImage = (
+    const characterImage = (
       await this.props.imageLoader.getCharacterSkinPlay(
         this.props.character.Name,
         this.props.skinData,
@@ -115,7 +117,10 @@ export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
         this.skinNameLists[0],
       )
     ).src;
-    this.characterSkinImageL =
+    mobx.runInAction(() => {
+      this.characterImage = characterImage;
+    });
+    const characterSkinImageL =
       this.skinNameLists.length > 2
         ? (
             await this.props.imageLoader.getCharacterSkinPlay(
@@ -125,9 +130,12 @@ export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
               this.skinNameLists[this.skinNameLists.length - 1],
             )
           ).src
-        : (this.characterSkinImageL = '');
+        : '';
+    mobx.runInAction(() => {
+      this.characterSkinImageL = characterSkinImageL;
+    });
 
-    this.characterSkinImageR =
+    const characterSkinImageR =
       this.skinNameLists.length > 1
         ? (
             await this.props.imageLoader.getCharacterSkinPlay(
@@ -138,6 +146,9 @@ export class CharacterSkinCard extends React.Component<CharacterSkinCardProps> {
             )
           ).src
         : '';
+    mobx.runInAction(() => {
+      this.characterSkinImageR = characterSkinImageR;
+    });
   }
 
   @mobx.action
@@ -229,9 +240,11 @@ export class CharacterSpec extends React.Component<CharacterSpecProps> {
   @mobx.observable.ref
   skinName;
 
-  @mobx.action
   getSkillName() {
-    this.skills = this.props.character.Skills.filter(skill => !skill.isShadowSkill());
+    const skills = this.props.character.Skills.filter(skill => !skill.isShadowSkill());
+    mobx.runInAction(() => {
+      this.skills = skills;
+    });
     return this.skills;
   }
   @mobx.action

@@ -7,6 +7,7 @@ import { ClientPlayer } from 'core/player/player.client';
 import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
 import { ActiveSkill, GlobalFilterSkill, ResponsiveSkill, Skill, TriggerSkill, ViewAsSkill } from 'core/skills/skill';
 import { ClientTranslationModule } from 'core/translations/translation_module.client';
+import { runInAction } from 'mobx';
 import { RoomPresenter } from '../room.presenter';
 import { RoomStore } from '../room.store';
 
@@ -99,7 +100,9 @@ export abstract class BaseAction {
   }
 
   public readonly resetAction = () => {
-    this.store.selectedCards = [];
+    runInAction(() => {
+      this.store.selectedCards = [];
+    });
     this.selectedCardToPlay = undefined;
     this.selectedSkillToPlay = undefined;
     this.equipSkillCardId = undefined;
@@ -498,7 +501,7 @@ export abstract class BaseAction {
 
   protected unselectCard(cardId: CardId) {
     if (this.equipSkillCardId === cardId) {
-      this.store.selectedSkill = undefined;
+      this.presenter.resetSelectedSkill();
       this.resetAction();
       return;
     }
@@ -526,7 +529,9 @@ export abstract class BaseAction {
     }
 
     this.selectedSkillToPlay = skill;
-    this.store.selectedSkill = skill;
+    runInAction(() => {
+      this.store.selectedSkill = skill;
+    });
     this.equipSkillCardId = this.player
       .getCardIds(PlayerCardsArea.EquipArea)
       .find(cardId => Sanguosha.getCardById(cardId).Skill === skill);
@@ -536,7 +541,7 @@ export abstract class BaseAction {
   protected unselectSkill(skill: Skill) {
     if (this.selectedSkillToPlay === skill) {
       this.selectedSkillToPlay = undefined;
-      this.store.selectedSkill = undefined;
+      this.presenter.resetSelectedSkill();
     }
   }
 

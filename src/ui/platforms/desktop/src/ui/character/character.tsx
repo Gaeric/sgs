@@ -40,12 +40,18 @@ export class CharacterCard extends React.Component<CharacterCardProps> {
 
   @mobx.action
   async componentDidMount() {
-    this.characterImage = (await this.props.imageLoader.getCharacterImage(this.props.character.Name)).src;
+    const characterImage = (await this.props.imageLoader.getCharacterImage(this.props.character.Name)).src;
+    mobx.runInAction(() => {
+      this.characterImage = characterImage;
+    });
   }
 
   @mobx.action
   async componentDidUpdate() {
-    this.characterImage = (await this.props.imageLoader.getCharacterImage(this.props.character.Name)).src;
+    const characterImage = (await this.props.imageLoader.getCharacterImage(this.props.character.Name)).src;
+    mobx.runInAction(() => {
+      this.characterImage = characterImage;
+    });
   }
   render() {
     const { character, translator, className, size, selected, onClick } = this.props;

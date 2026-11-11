@@ -39,7 +39,7 @@ export class SkinCard extends React.Component<SkinCardProps> {
 
   @mobx.action
   async componentDidMount() {
-    this.skinImage = (
+    const skinImage = (
       await this.props.imageLoader.getCharacterSkinPlay(
         this.props.character,
         this.props.skinData,
@@ -47,11 +47,14 @@ export class SkinCard extends React.Component<SkinCardProps> {
         this.props.skinName,
       )
     ).src;
+    mobx.runInAction(() => {
+      this.skinImage = skinImage;
+    });
   }
 
   @mobx.action
   async componentDidUpdate() {
-    this.skinImage = (
+    const skinImage = (
       await this.props.imageLoader.getCharacterSkinPlay(
         this.props.character,
         this.props.skinData,
@@ -59,6 +62,9 @@ export class SkinCard extends React.Component<SkinCardProps> {
         this.props.skinName,
       )
     ).src;
+    mobx.runInAction(() => {
+      this.skinImage = skinImage;
+    });
   }
 
   render() {

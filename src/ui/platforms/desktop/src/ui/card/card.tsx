@@ -87,11 +87,20 @@ export class ClientCard extends React.Component<ClientCardProps> {
 
     if (card.isVirtualCard() && (card as VirtualCard).ActualCardIds.length === 1) {
       this.originalCard = Sanguosha.getCardById((card as VirtualCard).ActualCardIds[0]);
-      this.realFlatCardImage = (await imageLoader.getSlimCard(card.Name)).src;
-      this.cardImage = (await imageLoader.getCardImage(this.originalCard.Name)).src;
+      const realFlatCardImage = (await imageLoader.getSlimCard(card.Name)).src;
+      mobx.runInAction(() => {
+        this.realFlatCardImage = realFlatCardImage;
+      });
+      const cardImage = (await imageLoader.getCardImage(this.originalCard.Name)).src;
+      mobx.runInAction(() => {
+        this.cardImage = cardImage;
+      });
     } else {
       this.originalCard = this.props.card;
-      this.cardImage = (await imageLoader.getCardImage(card.Name)).src;
+      const cardImage = (await imageLoader.getCardImage(card.Name)).src;
+      mobx.runInAction(() => {
+        this.cardImage = cardImage;
+      });
     }
   }
 
@@ -155,9 +164,12 @@ export class ClientCard extends React.Component<ClientCardProps> {
   @mobx.action
   private readonly openTooltip = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     this.props.onMouseEnter?.(e);
-    this.onTooltipOpeningTimer = setTimeout(() => {
-      this.onTooltipOpened = true;
-    }, 1000);
+    this.onTooltipOpeningTimer = setTimeout(
+      mobx.action(() => {
+        this.onTooltipOpened = true;
+      }),
+      1000,
+    );
   };
   @mobx.action
   private readonly closeTooltip = () => {

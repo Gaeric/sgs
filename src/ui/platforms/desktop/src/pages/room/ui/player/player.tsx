@@ -172,9 +172,12 @@ export class PlayerCard extends React.Component<PlayerCardProps> {
 
   @mobx.action
   private readonly openTooltip = (event: React.MouseEvent<HTMLSpanElement>) => {
-    this.onTooltipOpeningTimer = setTimeout(() => {
-      this.onTooltipOpened = true;
-    }, 500);
+    this.onTooltipOpeningTimer = setTimeout(
+      mobx.action(() => {
+        this.onTooltipOpened = true;
+      }),
+      500,
+    );
   };
 
   @mobx.action
@@ -322,11 +325,14 @@ export class PlayerCard extends React.Component<PlayerCardProps> {
   private renderCharacterImage() {
     if (this.PlayerCharacter && this.props.player) {
       if (this.props.skinData) {
-        this.skinName = getSkinName(
+        const skinName = getSkinName(
           this.props.player.Character.Name,
           this.props.player?.Id,
           this.props.skinData,
         ).skinName;
+        mobx.runInAction(() => {
+          this.skinName = skinName;
+        });
 
         this.props.imageLoader
           .getCharacterSkinPlay(
@@ -356,7 +362,9 @@ export class PlayerCard extends React.Component<PlayerCardProps> {
       if (huashenCharacter) {
         this.props.imageLoader.getCharacterImage(huashenCharacter.Name, this.props.player?.Id).then(image => {
           if (this.sideImage?.src !== image.src) {
-            this.sideImage = image;
+            mobx.runInAction(() => {
+              this.sideImage = image;
+            });
           }
         });
       }

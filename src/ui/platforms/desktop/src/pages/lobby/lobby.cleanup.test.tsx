@@ -1,7 +1,6 @@
 import { TemporaryRoomCreationInfo } from 'core/game/game_props';
 import { GameMode, RoomMode } from 'core/shares/types/room_props';
 import { RoomInfo } from 'core/shares/types/server_types';
-import { runInAction } from 'mobx';
 import * as React from 'react';
 import { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
@@ -43,6 +42,10 @@ type LobbyFixture = {
   enterRoom(info: HostRoom): () => void;
   enterRoomAsObserver(info: HostRoom): () => void;
   onPasscodeSubmit(passcode: string): void;
+  openPasscodeEnterDialog: boolean;
+  viewCharacterExtenstions: number | undefined;
+  viewGameCharaterExtensions(index: number): () => void;
+  closeGameCharaterExtensions(): void;
 };
 
 type Deferred<T> = { promise: Promise<T>; resolve(value: T): void; reject(error: Error): void };
@@ -246,16 +249,14 @@ describe('Lobby async cleanup', () => {
       const target = room(1, kind === 'passcode' ? 'secret' : undefined);
       receiveRooms(0, target);
       act(() => {
-        runInAction(() => {
-          if (kind === 'observe') {
-            page.enterRoomAsObserver(target)();
-          } else {
-            page.enterRoom(target)();
-            if (kind === 'passcode') {
-              page.onPasscodeSubmit('secret');
-            }
+        if (kind === 'observe') {
+          page.enterRoomAsObserver(target)();
+        } else {
+          page.enterRoom(target)();
+          if (kind === 'passcode') {
+            page.onPasscodeSubmit('secret');
           }
-        });
+        }
       });
       const callback = lobby.checkRoomExist.mock.calls[0][2];
       unmount();
@@ -265,6 +266,18 @@ describe('Lobby async cleanup', () => {
       expect(page.roomList.map(item => item.info.id)).toEqual([1]);
     },
   );
+
+  test('curried child handlers own their action boundary when invoked later', async () => {
+    const enter = page.enterRoom(room(1, 'secret'));
+    const hover = page.viewGameCharaterExtensions(0);
+    await flush();
+    act(() => enter());
+    expect(page.openPasscodeEnterDialog).toBe(true);
+    act(() => hover());
+    expect(page.viewCharacterExtenstions).toBe(0);
+    act(() => page.closeGameCharaterExtensions());
+    expect(page.viewCharacterExtenstions).toBeUndefined();
+  });
 
   test('retained child callbacks cannot start another request after unmount', () => {
     const join = page.enterRoom(room(1));

@@ -99,7 +99,7 @@ export class MessageDialog extends React.Component<MessageDialogProps> {
   };
 
   componentDidMount() {
-    this.chatMessages = this.props.connectionService.Chat.chatHistory().map((message, index) => {
+    const chatMessages = this.props.connectionService.Chat.chatHistory().map((message, index) => {
       const date = new Date(message.timestamp);
       return (
         <span className={styles.message} key={index}>
@@ -107,6 +107,10 @@ export class MessageDialog extends React.Component<MessageDialogProps> {
           {` [${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}]: ${message.message}`}
         </span>
       );
+    });
+
+    mobx.runInAction(() => {
+      this.chatMessages = chatMessages;
     });
 
     this.props.connectionService.Chat.received(
@@ -153,16 +157,16 @@ export class MessageDialog extends React.Component<MessageDialogProps> {
     this.hideQuickChatItems = !this.hideQuickChatItems;
   };
 
-  @mobx.action
-  private onClickQuickChatItem = (content: string) => () => {
-    !this.props.replayMode &&
-      this.props.store.room.broadcast(GameEventIdentifiers.UserMessageEvent, {
-        message: content,
-        playerId: this.props.presenter.ClientPlayer!.Id,
-      });
+  private onClickQuickChatItem = (content: string) =>
+    mobx.action(() => {
+      !this.props.replayMode &&
+        this.props.store.room.broadcast(GameEventIdentifiers.UserMessageEvent, {
+          message: content,
+          playerId: this.props.presenter.ClientPlayer!.Id,
+        });
 
-    this.hideQuickChatItems = !this.hideQuickChatItems;
-  };
+      this.hideQuickChatItems = !this.hideQuickChatItems;
+    });
 
   private getSkillAudios() {
     return this.props.presenter.ClientPlayer !== undefined && this.props.presenter.ClientPlayer.Character

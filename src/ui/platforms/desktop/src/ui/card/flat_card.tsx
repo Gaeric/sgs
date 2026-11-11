@@ -38,8 +38,10 @@ export class FlatClientCard extends React.PureComponent<FlatClientCardProps> {
     const { card, imageLoader } = this.props;
     if (this.equipName !== card.Name) {
       const { src, alt } = await imageLoader.getOthersEquipCard(card.Name);
-      this.equipName = alt;
-      this.equipImage = src;
+      mobx.runInAction(() => {
+        this.equipName = alt;
+        this.equipImage = src;
+      });
     }
   }
 
@@ -47,15 +49,20 @@ export class FlatClientCard extends React.PureComponent<FlatClientCardProps> {
   async componentDidMount() {
     const { card, imageLoader } = this.props;
     const { src, alt } = await imageLoader.getOthersEquipCard(card.Name);
-    this.equipName = alt;
-    this.equipImage = src;
+    mobx.runInAction(() => {
+      this.equipName = alt;
+      this.equipImage = src;
+    });
   }
 
   @mobx.action
   private readonly openTooltip = () => {
-    this.onTooltipOpeningTimer = setTimeout(() => {
-      this.onTooltipOpened = true;
-    }, 1000);
+    this.onTooltipOpeningTimer = setTimeout(
+      mobx.action(() => {
+        this.onTooltipOpened = true;
+      }),
+      1000,
+    );
   };
   @mobx.action
   private readonly closeTooltip = () => {

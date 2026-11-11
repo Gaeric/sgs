@@ -18,9 +18,8 @@ import { emojiLoader } from './emoji_loader/emoji_loader';
 import * as serviceWorker from './serviceWorker';
 import './index.css';
 
-// Keep MobX 5's permissive update behavior during the MobX 6 migration.
-// Switch to 'observed' after all direct mutations are wrapped in actions.
-mobx.configure({ enforceActions: 'never' });
+// Observable writes must enter actions, including timer/network/await continuations.
+mobx.configure({ enforceActions: 'observed' });
 
 const mode = (process.env.REACT_APP_DEV_MODE as ClientFlavor) || ClientFlavor.Dev;
 const config = getClientConfig(mode);

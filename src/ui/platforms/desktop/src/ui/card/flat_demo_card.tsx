@@ -29,7 +29,10 @@ export class FlatDemoCard extends React.Component<FlatClientCardProps> {
 
   @mobx.action
   async componentDidMount() {
-    this.cardImage = (await this.props.imageLoader.getSlimCard(this.props.cardName)).src;
+    const cardImage = (await this.props.imageLoader.getSlimCard(this.props.cardName)).src;
+    mobx.runInAction(() => {
+      this.cardImage = cardImage;
+    });
   }
 
   render() {

@@ -214,73 +214,76 @@ export class GuanXingCardSlots extends React.Component<GuanXingDialogProps> {
     }
   }
 
-  @mobx.action
-  onDrag = (card: Card, index: number) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    if (this.movingCardPosition === undefined || this.focusedCard !== card) {
-      return;
-    }
-
-    const left = e.clientX - this.movingCardPosition.x;
-    const top = e.clientY - this.movingCardPosition.y;
-
-    this.cardStyles[index] = {
-      ...this.cardStyles[index],
-      top,
-      left,
-    };
-  };
-
-  onMouseDown = (card: Card, index: number) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    const { topMaxCard, bottomMaxCard } = this.props;
-
-    let canMove = true;
-    if (this.bottomCards.includes(card)) {
-      if (topMaxCard !== undefined && this.topCards.length === topMaxCard) {
-        canMove = false;
+  onDrag = (card: Card, index: number) =>
+    mobx.action((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      if (this.movingCardPosition === undefined || this.focusedCard !== card) {
+        return;
       }
-    } else {
-      if (bottomMaxCard !== undefined && this.bottomCards.length === bottomMaxCard) {
-        canMove = false;
+
+      const left = e.clientX - this.movingCardPosition.x;
+      const top = e.clientY - this.movingCardPosition.y;
+
+      this.cardStyles[index] = {
+        ...this.cardStyles[index],
+        top,
+        left,
+      };
+    });
+
+  onMouseDown = (card: Card, index: number) =>
+    mobx.action((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      const { topMaxCard, bottomMaxCard } = this.props;
+
+      let canMove = true;
+      if (this.bottomCards.includes(card)) {
+        if (topMaxCard !== undefined && this.topCards.length === topMaxCard) {
+          canMove = false;
+        }
+      } else {
+        if (bottomMaxCard !== undefined && this.bottomCards.length === bottomMaxCard) {
+          canMove = false;
+        }
       }
-    }
-    if (!canMove) {
-      return false;
-    }
+      if (!canMove) {
+        return false;
+      }
 
-    this.movingCardPosition = {
-      x: e.clientX,
-      y: e.clientY,
-    };
-    this.focusedCard = card;
-    this.cardStyles[index] = { ...this.cardStyles[index], zIndex: 10, transition: 'none' };
-  };
+      this.movingCardPosition = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+      this.focusedCard = card;
+      this.cardStyles[index] = { ...this.cardStyles[index], zIndex: 10, transition: 'none' };
+    });
 
-  onMouseUp = (card: Card, index: number) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    if (this.movingCardPosition === undefined || this.focusedCard !== card) {
-      return;
-    }
+  onMouseUp = (card: Card, index: number) =>
+    mobx.action((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      if (this.movingCardPosition === undefined || this.focusedCard !== card) {
+        return;
+      }
 
-    const left = e.clientX - this.movingCardPosition.x;
-    const top = e.clientY - this.movingCardPosition.y;
-    const { to: place, index: targetIndex } = this.calculateMovingPosition(card, top, left);
-    this.addToStack(card, place, targetIndex);
-    this.updateCardOffset(card, place, targetIndex);
+      const left = e.clientX - this.movingCardPosition.x;
+      const top = e.clientY - this.movingCardPosition.y;
+      const { to: place, index: targetIndex } = this.calculateMovingPosition(card, top, left);
+      this.addToStack(card, place, targetIndex);
+      this.updateCardOffset(card, place, targetIndex);
 
-    this.movingCardPosition = undefined;
-    this.focusedCard = undefined;
-    this.cardStyles[index] = {
-      top: 0,
-      left: 0,
-    };
-  };
-  onMouseLeave = (card: Card, index: number) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    this.movingCardPosition = undefined;
-    this.focusedCard = undefined;
-    this.cardStyles[index] = {
-      top: 0,
-      left: 0,
-    };
-  };
+      this.movingCardPosition = undefined;
+      this.focusedCard = undefined;
+      this.cardStyles[index] = {
+        top: 0,
+        left: 0,
+      };
+    });
+  onMouseLeave = (card: Card, index: number) =>
+    mobx.action((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      this.movingCardPosition = undefined;
+      this.focusedCard = undefined;
+      this.cardStyles[index] = {
+        top: 0,
+        left: 0,
+      };
+    });
 
   getInsertIndex = (card: Card, from: 'top' | 'bottom') => {
     const { cards } = this.props;

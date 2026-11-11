@@ -45,32 +45,42 @@ export class EquipCardItem extends React.Component<EquipCardItemProps> {
     }
   };
 
-  @mobx.action
   getSelected() {
     if (!!this.props.disabled) {
-      this.selected = false;
+      mobx.runInAction(() => {
+        this.selected = false;
+      });
     }
     return this.selected;
   }
 
   @mobx.action
   async componentDidMount() {
-    this.equipCardImage = (await this.props.imageLoader.getSlimEquipCard(this.props.card.Name)).src;
+    const equipCardImage = (await this.props.imageLoader.getSlimEquipCard(this.props.card.Name)).src;
+    mobx.runInAction(() => {
+      this.equipCardImage = equipCardImage;
+    });
   }
 
   @mobx.action
   async componentDidUpdate() {
     if (this.cardName !== this.props.card.Name) {
       this.cardName = this.props.card.Name;
-      this.equipCardImage = (await this.props.imageLoader.getSlimEquipCard(this.props.card.Name)).src;
+      const equipCardImage = (await this.props.imageLoader.getSlimEquipCard(this.props.card.Name)).src;
+      mobx.runInAction(() => {
+        this.equipCardImage = equipCardImage;
+      });
     }
   }
 
   @mobx.action
   private readonly openTooltip = () => {
-    this.onTooltipOpeningTimer = setTimeout(() => {
-      this.onTooltipOpened = true;
-    }, 1000);
+    this.onTooltipOpeningTimer = setTimeout(
+      mobx.action(() => {
+        this.onTooltipOpened = true;
+      }),
+      1000,
+    );
   };
   @mobx.action
   private readonly closeTooltip = () => {

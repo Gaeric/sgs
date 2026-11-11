@@ -10,6 +10,7 @@ import { PlayerCardsArea, PlayerId } from 'core/player/player_props';
 import { ExtralCardSkillProperty } from 'core/skills/cards/interface/extral_property';
 import { ActiveSkill } from 'core/skills/skill';
 import { ClientTranslationModule } from 'core/translations/translation_module.client';
+import { action } from 'mobx';
 import { BaseAction } from './base_action';
 import { RoomPresenter } from '../room.presenter';
 import { RoomStore } from '../room.store';
@@ -248,7 +249,7 @@ export class SelectAction<T extends GameEventIdentifiers> extends BaseAction {
       });
 
       this.presenter.setValidSelectionReflectAction(() => this.availableToConfirm(cardAmount));
-      const onClickCard = (card: Card, selected: boolean) => {
+      const onClickCard = action((card: Card, selected: boolean) => {
         if (selected) {
           this.presenter.selectCard(card);
         } else {
@@ -260,7 +261,7 @@ export class SelectAction<T extends GameEventIdentifiers> extends BaseAction {
         }
 
         this.availableToConfirm(cardAmount);
-      };
+      });
 
       this.presenter.onClickPlayerCard(onClickCard);
       this.presenter.onClickEquipment(onClickCard);
