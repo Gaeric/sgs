@@ -34,7 +34,10 @@ export abstract class ConnectionService {
 
   protected abstract readonly lobbyService: {
     getRoomList(callback: (response: RoomListListenerResponse) => void): void;
+    // Real service: one reply per responding host/request. Unavailable hosts,
+    // request deadlines and service close cancel silently (no error channel).
     checkCoreVersion(callback: (response: VersionCheckListenerResponse) => void): void;
+    // Only a valid server boolean invokes the callback; network failure is not false.
     checkRoomExist(host: ServerHostTag, id: RoomId, callback: (exist: boolean, ping: number) => void): void;
     createWaitingRoom(
       gameInfo: TemporaryRoomCreationInfo & { roomId?: number },

@@ -43,8 +43,9 @@ fixture**, not production; replace it during a major-version migration.
 
 The tests pin the current server version and wire enum values intentionally.
 Update these assertions deliberately during migration, not merely to silence a
-failure. These tests do **not** exercise `RealConnectionService`, browser CORS,
-transport upgrades, abrupt disconnect/reentry, an actual game, or Electron.
+failure. These server-only tests do **not** exercise `RealConnectionService`, browser CORS,
+transport upgrades, abrupt disconnect/reentry, an actual game, or Electron. The
+separate desktop service tests described below cover the selected service paths.
 
 ## Migration audit (2026-11-11)
 
@@ -67,21 +68,21 @@ The official 2→3 and 3→4 guides must both inform the migration.
 These are source-audit findings, not assertions that the new happy-path tests
 cover or fix them:
 
-1. **Request correlation:** `RealConnectionService` has one mutable callback per
-   operation shared across hosts. Overlapping checks replace the callback; a reply
-   contains no room/request identifier. The lobby page fix captures destinations,
-   but cannot solve this lower-level routing issue. Use a separately designed
-   correlation strategy (for example, request IDs/acknowledgements with timeouts)
-   or a carefully bounded serialized legacy protocol. Add real service tests.
-2. **Version-query mismatch:** the desktop service emits `VersionMismatch` without
-   a payload, while the server listens for `QueryVersion` with `{ version }`.
-   This fixture sends the correct server protocol directly; it does not prove the
-   desktop version check works.
-3. **Ping/creation lifetime:** ping promises are reused after settlement, nested
-   registration adds redundant listeners, and one timestamp is shared across
-   operations. Creation continuations can outlive `close()`. Chat `disconnect()`
-   adds a listener instead of removing subscriptions. Audit these as App-owned
-   service resources, without closing shared sockets from page cleanup.
+1. **Request correlation (partially addressed):** room-existence and version
+   requests now use isolated, short-lived `forceNew` connections, preserving the
+   old server wire protocol while preventing replies crossing requests/hosts.
+   Room-list, ping and creation operations still use mutable shared callbacks;
+   this checkpoint does not solve correlation for those operations.
+2. **Version-query mismatch (fixed):** the desktop service now emits `QueryVersion`
+   with `{ version: Sanguosha.Version }`, matching the production lobby handler.
+   Real service/transport tests cover that exchange with controlled version
+   metadata; actual application version initialization is not tested there.
+3. **Ping/creation lifetime (partially addressed):** terminal service `close()`
+   removes owned handlers, cancels boolean requests and guards pending creation
+   continuations. Reused ping promises, redundant registrations, shared timestamps
+   and chat subscription behavior during the open service lifetime remain. Chat
+   `disconnect()` still adds a history listener rather than unsubscribing; no chat
+   lifecycle redesign was included.
 4. **Waiting-room disconnect:** only explicit leave removes authoritative players;
    disconnect alone can leave stale seats. Disconnect after explicit leave emits
    another PlayerLeave. Repeated enter and host reassignment need dedicated tests.
@@ -98,8 +99,9 @@ cover or fix them:
 
 ### Recommended next gates
 
-1. Fix/test the desktop service version query and overlapping request correlation
-   in an isolated checkpoint, preserving legacy wire compatibility where possible.
+1. Selected desktop service checks are fixed/tested below. Extend correlation
+   coverage separately to creation, refresh and ping; do not claim those paths are
+   safe merely because boolean checks are now isolated.
 2. Add abrupt-disconnect/reentry, duplicate-entry and room-disposal regressions;
    fix confirmed lifecycle defects separately.
 3. Upgrade server and client together in source, port exported types/CORS/reconnect
@@ -107,6 +109,44 @@ cover or fix them:
    compatibility tests. Keep Express, Electron and game rules unchanged.
 4. Validate browser origins, polling→WebSocket upgrade, payload boundaries, server
    restart/replay recovery and packaged Electron clients before deployment.
+
+## Desktop service request checkpoint
+
+`src/ui/platforms/desktop/src/services/connection_service/real_connection_service.test.ts`
+and `real_connection_service.integration.test.ts` add 20 unit and 10 real transport
+cases. Build the server before running them (the integration suite imports the
+compiled production lobby channel), then use the existing desktop Jest command:
+
+```sh
+yarn --cwd src/server build
+cd src/ui/platforms/desktop
+CI=true yarn test --watchAll=false --runInBand
+```
+
+Each boolean check has its own non-reconnecting `/lobby` connection/Manager, room
+ID or version payload, one-shot validated boolean response, elapsed-time clock,
+owned listeners and default **10-second deadline**. It disconnects and clears its
+timer/listeners before invoking the callback. Reported ping is half the total
+elapsed duration, including connection establishment, not a precise network RTT.
+Independent sockets cost extra handshakes per check; they avoid requiring a new
+request-ID/acknowledgement contract on deployed v2 servers. No server runtime
+change or dependency bump is needed for this fix.
+
+On timeout, transport failure or service close, requests cancel **without calling
+the boolean callback**. The public API has no error channel: manufacturing `false`
+would remove valid rooms or report a version mismatch. No new timeout popup was
+added. Page-unmount guards remain necessary because the App owns the service;
+leaving a page must not close shared service sockets. `close()` is terminal and
+idempotent, cancels pending checks and prevents later emissions/subscriptions and
+captured callbacks. Shared operations keep their existing open-service behavior.
+
+Unit coverage includes reordered/multi-host replies, malformed/duplicate/stale
+packets, synchronous connect/reply, independent timing, deadline/error/close cleanup
+and pending create-continuation suppression. Integration tests exercise actual v2
+polling and WebSocket separately with the compiled `LobbyEventChannel`; room-service
+existence and engine version are controlled fixtures, not a running game engine.
+The tests check legacy wire shape, request isolation, late/expired responses,
+service shutdown and survival of shared lobby/chat connections.
 
 ## References checked
 

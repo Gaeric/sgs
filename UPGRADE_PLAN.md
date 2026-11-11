@@ -530,3 +530,20 @@ desktop yarn build:mac            CRA 回退通过
 - desktop Vite build → TypeScript check → 全套 Jest：18 suites / 203 tests 通过。
 - 根 `yarn lint`、新增 CJS Prettier check、`git diff --check` 通过。根 lint 只覆盖 TS/TSX；CJS 由 Node 执行、语法与格式检查覆盖。
 - 既有 Vite chunk/import、css-loader / Yarn cache / Node experimental warning 不变。未检查远程 CI 结果或本地 Node 24；真实浏览器 CORS、断线重连、完整对局/回放与 Electron 仍待验收。未创建 commit。
+
+### 2026-11-11：RealConnectionService boolean 请求隔离与版本查询修复
+
+- `checkCoreVersion` 改为发送 server 实际监听的 `QueryVersion` + `{ version: Sanguosha.Version }`，仍接收原 `VersionMismatch` boolean（true 表示匹配），不改 server wire contract。
+- `checkRoomExist` / version query 每个请求使用独立 `forceNew`、非自动重连的短连接，先注册 handler / deadline 再 connect，connect 后仅发送一次。旧 server 只回复 boolean，不能在共享 socket 上可靠关联并发请求；独立连接避免同 host / 多 host / 乱序 / 过期回复误发到新 callback，代价是每次检查额外 handshake。
+- 默认 10 秒 deadline（构造参数可用于测试）；严格验证 boolean payload，完成前清 timer、精确解绑 listener、断开该请求连接，保证 callback 最多执行一次。ping 按各请求总 elapsed/2 计算，包含建连时间，不宣称纯网络 RTT。
+- timeout / transport failure / service close 静默取消，不伪造 `false` 导致移除正常房间。现有 callback API 没有 error channel，本次不新增 UI popup；interface 注释与 networking README 说明该行为。
+- service `close()` terminal / 幂等：取消 pending boolean requests，移除自身注册的共享 socket handler，禁止关闭后 emit / 新订阅 / 迟到 callback，creation Promise continuation 加 close guard。共享连接仅在 service close 时关闭，不从页面卸载关闭。
+- 不改变 room-list / ping / creation / chat 在 service 打开期间的既有协议与共享操作；其剩余关联、ping cache、chat subscription 问题仍明确列为后续项。没有 server runtime、依赖、Socket.IO major、引擎或 Electron 变化。
+- 新增 20 项 unit + 10 项真实 transport 回归（polling / WebSocket 分别运行），涵盖同 host 反序、多 host、版本 query wire、非法/重复/捕获的 stale handler、同步 connect/reply、deadline/error/close、超时后的新请求及共享连接存活。integration 使用编译后的生产 LobbyEventChannel 与真实 Socket.IO 2，room existence / engine version 使用受控 fixture；先 build server，避免读取旧产物。
+
+验证（本容器 Node 26.12.0）：
+
+- 根 lint、server build + 2 项 `test:network`、Vite build、desktop typecheck、`git diff --check` 全部通过。
+- desktop 全套：20 suites / 233 tests 通过（之前 18 suites / 203 tests）。Vite sync/build 完成后再执行 frontend typecheck/tests，无 core 复制竞争。
+- 新增测试先在旧实现运行并复现失败，修复后 30 项 focused tests 全部通过；独立只读审查无阻塞问题。
+- 未创建 commit。浏览器 CORS、polling→WebSocket upgrade、真实版本初始化/游戏流程、Node 24 本地执行、远程 CI 与 Electron 仍未验收；既有构建/环境 warning 不变。
