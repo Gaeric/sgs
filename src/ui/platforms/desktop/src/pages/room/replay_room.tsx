@@ -16,7 +16,7 @@ import { ServerHostTag } from 'props/config_props';
 import * as React from 'react';
 import { ConnectionService } from 'services/connection_service/connection_service';
 import { CharacterSkinInfo } from 'skins/skins';
-import { PagePropsWithConfig } from 'types/page_props';
+import type { PagePropsWithConfig } from 'types/page_props';
 import { ReplayDataType } from 'types/replay_props';
 import { installAudioPlayerService } from 'ui/audio/install';
 import { ReplayClientProcessor } from './game_processor.replay';

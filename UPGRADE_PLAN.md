@@ -116,22 +116,46 @@ TypeScript 5.9 试升级结果：79 个类型错误，集中在 `room.server.ts`
 
 ### Phase 2：构建链迁移 Vite 8
 
-- [ ] 新增 `vite.config.ts`
-- [ ] 替换 `scripts/start.js`、`scripts/build.js`
-- [ ] 配置 `base: './'` 兼容 Electron
-- [ ] `vite-tsconfig-paths` 处理 `baseUrl: src`
-- [ ] `vite-plugin-svgr` 处理 SVG ReactComponent
-- [ ] 迁移 `REACT_APP_*` 环境变量
-- [ ] 迁移 `PUBLIC_URL`
-- [ ] 移除 `--openssl-legacy-provider`
-- [ ] Web build / dev 验证
-- [ ] Electron 资源路径验证
+- [x] 新增 `vite.config.mts`
+- [x] 新增 `start:vite`、`build:vite`、`preview:vite`
+- [x] `transpile:client` 切换到 Vite
+- [x] 配置 `base: './'`
+- [x] 使用 Vite 8 原生 `resolve.tsconfigPaths`（移除 `vite-tsconfig-paths`）
+- [x] 迁移 `REACT_APP_DEV_MODE`、`PUBLIC_URL`、`NODE_ENV`
+- [x] Web 构建移除 `--openssl-legacy-provider`
+- [x] Web build / dev / preview 验证
+- [ ] Electron 仍保留 CRA 构建，后续单独迁移
+- [ ] `vite-plugin-svgr` 暂不需要（项目没有 SVG ReactComponent 用法）
 
 验收：
 
-- `yarn build` 在 Node 26 无 MD4 错误。
+- `yarn build:vite` 在 Node 26 无 MD4 错误。
 - Web 页面可加载，静态资源路径正确。
-- Electron 可加载构建产物。
+- Electron 当前仍用 CRA 构建，未迁移到 Vite。
+
+执行结果（2026-10-21）：
+
+```text
+yarn build:vite: 通过（约 2s）
+yarn start:vite: 启动成功，http://localhost:3000/
+yarn preview:vite: 启动成功，http://localhost:4173/
+yarn build:mac（CRA 回退）: 通过
+```
+
+迁移中处理的问题：
+
+- Vite 8 / Oxc 不会像 TypeScript 一样自动 elide 跨模块 type-only imports，
+  导致 Rolldown 报 `MISSING_EXPORT`。已把相关 import 改为 `import type`：
+  - `waiting_room.tsx`
+  - `waiting_room.store.ts`
+  - `waiting_room.presenter.ts`
+  - `room.tsx`
+  - `room.presenter.tsx`
+  - `replay_room.tsx`
+- `public/index.html` 改为根目录 `index.cra.html`，继续供 CRA 使用；
+  Vite 使用根目录 `index.html`，避免 public 目录覆盖构建产物。
+- `dev_image_loader.ts` 移除了对外部 COS URL 的动态 `import()`，直接返回 URL 字符串。
+- 仍有 chunk size 和 `INEFFECTIVE_DYNAMIC_IMPORT` 警告，不影响构建。
 
 ### Phase 3：MobX 5 → 6.16
 
@@ -263,6 +287,7 @@ MobX 装饰器类检查: 35/35 都有 makeObservable
 
 - Phase 0：`.nvmrc`、`engines`、CI Node 24/26 矩阵、升级计划。
 - Phase 1 部分：`ts-node@10.9.2`、`nodemon@3.1.10`、`@types/express` 升级；服务端 build/dev 通过。
+- Phase 2：Vite 8 构建链接入；Web build/dev/preview 通过；CRA 保留给 Electron。
 - Phase 3：MobX 5.15.2 → 6.16.1，mobx-react 6.1.5 → 9.2.2；35 个 class 增加 `makeObservable`；Web 构建通过。
 
 验证命令：
@@ -273,22 +298,27 @@ yarn lint                         通过
 src/server yarn build             通过
 src/server yarn dev               启动成功
 desktop tsc --noEmit              通过
-desktop webpack production build  通过（--openssl-legacy-provider）
+desktop yarn build:vite           通过
+desktop yarn start:vite           启动成功
+desktop yarn preview:vite         启动成功
+desktop yarn build:mac            CRA 回退通过
 ```
 
 已知阻塞：
 
 - TypeScript 5.9：79 个 core 类型错误，Phase 1b 处理。
-- Vite 迁移未开始；webpack 4 仍依赖 `--openssl-legacy-provider`。
+- Electron 仍走 CRA/webpack 4，因此 Electron 构建仍依赖 `--openssl-legacy-provider`。
+- Vite 产物使用 ES module，Electron `file://` 加载需要单独验证；当前不切换 Electron 构建。
 - socket.io 2 / Express 5 未升级。
 - Electron 二进制下载受本机缓存目录权限影响，未做桌面端运行验证。
 - MobX `enforceActions` 仍为 `never`，未切到 `observed`。
 
 下一步优先级：
 
-1. Phase 2：Vite 8 构建迁移（解除 Node 26 的 MD4 依赖）。
-2. Phase 1b：TypeScript 5 类型修复。
-3. Phase 4/5：React 19 + MobX 7。
+1. Phase 1b：TypeScript 5 类型修复。
+2. Phase 4/5：React 19 + MobX 7。
+3. Phase 6：Electron 45 + Vite/本地服务加载方案。
+4. Phase 7：ESLint 10、lockfile/workspace 收尾。
 
 ## 9. 手动 Smoke 清单
 

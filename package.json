@@ -36,7 +36,7 @@
     "lint": "eslint --max-warnings 0 -c .eslintrc.js \"./src/**/*.{ts,tsx}\"",
     "build": "rm -rf build && tsc",
     "transpile": "cd ./src/server && yarn install && yarn build",
-    "transpile:client": "cd ./src/ui/platforms/desktop && yarn install && yarn build:mac",
+    "transpile:client": "cd ./src/ui/platforms/desktop && yarn install && yarn build:vite",
     "patch": "ts-node ./src/pre_release.ts",
     "check-translations": "tsc -p ./tools/tsconfig.json && node --max-old-space-size=8192 ./tools/missing_translation_check.js"
   },

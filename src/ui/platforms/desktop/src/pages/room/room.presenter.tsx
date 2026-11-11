@@ -17,8 +17,9 @@ import { Skill } from 'core/skills/skill';
 import { ImageLoader } from 'image_loader/image_loader';
 import * as mobx from 'mobx';
 import * as React from 'react';
-import { Point } from './animations/position';
-import { ClientRoomInfo, DisplayCardProp, RoomStore } from './room.store';
+import type { Point } from './animations/position';
+import { RoomStore } from './room.store';
+import type { ClientRoomInfo, DisplayCardProp } from './room.store';
 import { Conversation, ConversationProps } from './ui/conversation/conversation';
 import { CardCategoryDialog, CardCategoryDialogProps } from './ui/dialog/card_category_dialog/card_category_dialog';
 

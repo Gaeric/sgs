@@ -124,8 +124,7 @@ export class DevImageLoader implements ImageLoader {
         throw Precondition.UnreachableError(section);
     }
 
-    const image: string = (await import(`${cosRepo}/images/slim_equips/${sectionName}.png`)).default;
-    return { alt: 'Aborted Slim Equip Card', src: image };
+    return { alt: 'Aborted Slim Equip Card', src: `${cosRepo}/images/slim_equips/${sectionName}.png` };
   }
 
   public async getSlimEquipCard(cardName: string) {
