@@ -21,6 +21,7 @@ export class RoomService {
   private waitingRooms: WaitingRoomInfo[] = [];
   private hostPlayerIps: Map<string, number> = new Map();
   private waitingRoomMaps: Map<number | string, WaitingRoomSocket> = new Map();
+  private readonly waitingRoomGames = new WeakMap<WaitingRoomInfo, Set<ServerRoom>>();
 
   constructor(
     private readonly lobbySocket: SocketIO.Server,
@@ -80,6 +81,8 @@ export class RoomService {
     roomInfo: TemporaryRoomCreationInfo & { roomId?: number },
     waitingRoomId: number,
   ): { roomId: RoomId; gameInfo: GameInfo } {
+    const waitingRoom = this.waitingRooms.find(room => room.roomId === waitingRoomId);
+    const waitingRoomSocket = this.waitingRoomMaps.get(waitingRoomId);
     const roomId = roomInfo.roomId || Date.now();
     const roomSocket = this.createGameServerSocket(this.lobbySocket.of(`/room-${roomId}`), roomId);
     const room = this.createServerRoom(
@@ -96,24 +99,35 @@ export class RoomService {
       { roomInfo, roomId: waitingRoomId },
     );
 
+    if (waitingRoom && waitingRoomSocket) {
+      const games = this.waitingRoomGames.get(waitingRoom) || new Set<ServerRoom>();
+      games.add(room);
+      this.waitingRoomGames.set(waitingRoom, games);
+      waitingRoomSocket.markGameStarted();
+    }
+    let closing = false;
     room.onClosed(async () => {
+      if (closing) {
+        return;
+      }
+      closing = true;
       this.rooms = this.rooms.filter(r => r !== room);
 
-      /**
-       * To wait for players joining waiting room and room info being updated
-       */
+      // Keep the existing grace period for game clients to return. Capture the
+      // exact backing room/channel and game owner: the numeric ID may be reused,
+      // or returned players may already have started another game during it.
       await System.MainThread.sleep(1500);
-
-      const waitingRoomIndex = this.waitingRooms.findIndex(r => r.roomId === room.WaitingRoomInfo.roomId);
-      const waitingRoom = this.waitingRooms[waitingRoomIndex];
-
-      if (waitingRoom?.players.length === 0) {
-        this.waitingRooms.splice(waitingRoomIndex, 1);
-        this.waitingRoomMaps.delete(waitingRoom.roomId);
-      } else if (waitingRoom && waitingRoom.players.find(p => p.playerId === waitingRoom.hostPlayerId) == null) {
-        this.waitingRoomMaps
-          .get(waitingRoom.roomId)
-          ?.reassigHost(waitingRoom.hostPlayerId, waitingRoom.players[0].playerId);
+      const games = waitingRoom && this.waitingRoomGames.get(waitingRoom);
+      games?.delete(room);
+      if (
+        waitingRoom &&
+        waitingRoomSocket &&
+        this.waitingRooms.includes(waitingRoom) &&
+        this.waitingRoomMaps.get(waitingRoomId) === waitingRoomSocket &&
+        games?.size === 0
+      ) {
+        this.waitingRoomGames.delete(waitingRoom);
+        waitingRoomSocket.finishGame();
       }
     });
 
@@ -133,20 +147,26 @@ export class RoomService {
     const roomSocket = this.createWaitingRoomSocket(this.lobbySocket.of(`/waiting-room-${room.roomId}`), room);
     this.waitingRoomMaps.set(room.roomId, roomSocket);
 
+    let quotaReleased = false;
+    const releaseQuota = () => {
+      if (quotaReleased) {
+        return;
+      }
+      quotaReleased = true;
+      const createdRooms = this.hostPlayerIps.get(hostIp) || 0;
+      if (createdRooms > 0) {
+        this.hostPlayerIps.set(hostIp, createdRooms - 1);
+      }
+    };
     roomSocket.onClosed(() => {
+      roomSocket.dispose();
       this.waitingRooms = this.waitingRooms.filter(r => r !== room);
-      const createdRooms = this.hostPlayerIps.get(hostIp) || 0;
-      if (createdRooms > 0) {
-        this.hostPlayerIps.set(hostIp, createdRooms - 1);
+      if (this.waitingRoomMaps.get(room.roomId) === roomSocket) {
+        this.waitingRoomMaps.delete(room.roomId);
       }
+      releaseQuota();
     });
-
-    roomSocket.onGameStarting(() => {
-      const createdRooms = this.hostPlayerIps.get(hostIp) || 0;
-      if (createdRooms > 0) {
-        this.hostPlayerIps.set(hostIp, createdRooms - 1);
-      }
-    });
+    roomSocket.onGameStarting(releaseQuota);
 
     this.waitingRooms.push(room);
     const createdRooms = this.hostPlayerIps.get(hostIp) || 0;

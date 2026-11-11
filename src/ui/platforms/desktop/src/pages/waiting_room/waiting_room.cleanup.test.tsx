@@ -10,6 +10,8 @@ import { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import IOSocketClient from 'socket.io-client';
 import { installAudioPlayerService } from 'ui/audio/install';
+import { GameSettings } from './game_settings/game_settings';
+import { Seats } from './seats/seats';
 import { RoomAvatarService } from './services/avatar_service';
 import { WaitingRoomSender } from './services/sender_service';
 import { WaitingRoom } from './waiting_room';
@@ -29,9 +31,9 @@ jest.mock('socket.io-client', () => jest.fn());
 jest.mock('ui/audio/install', () => ({ installAudioPlayerService: jest.fn() }));
 jest.mock('pages/room/ui/background/background', () => ({ Background: () => null }));
 jest.mock('./chat_box/chat_box', () => ({ ChatBox: () => null }));
-jest.mock('./game_settings/game_settings', () => ({ GameSettings: () => null }));
+jest.mock('./game_settings/game_settings', () => ({ GameSettings: jest.fn(() => null) }));
 jest.mock('./header_bar/header_bar', () => ({ HeaderBar: () => null }));
-jest.mock('./seats/seats', () => ({ Seats: () => null }));
+jest.mock('./seats/seats', () => ({ Seats: jest.fn(() => null) }));
 jest.mock('./messages', () => ({
   createTranslationMessages: () => ({
     systemNotification: () => 'system',
@@ -109,6 +111,54 @@ const roomInfo = {
   hostPlayerId: 'self',
   coreVersion: 'test-version',
 } as TemporaryRoomCreationInfo;
+
+function selfEntry(hostPlayerId: string, snapshotHostPlayerId = hostPlayerId) {
+  return {
+    playerInfo: { playerId: 'self', playerName: 'tester', avatarId: 3, seatId: 0 },
+    otherPlayersInfo: [{ playerId: 'old-host', playerName: 'old host', avatarId: 1, seatId: 1 }],
+    disableSeats: [],
+    hostPlayerId,
+    roomInfo: { ...roomInfo, hostPlayerId: snapshotHostPlayerId },
+  };
+}
+
+describe('WaitingRoomProcessor host synchronization', () => {
+  test('self-entry reports the actual host without mutating an older room snapshot', () => {
+    const { processor, socket, presenter, store } = processorFixture();
+    const entered = jest.fn();
+    processor.on(WaitingRoomEvent.PlayerEnter, entered);
+    presenter.initSeatsInfo(store);
+    processor.initWaitingRoomConnectionListeners();
+    const event = selfEntry('new-host', 'old-host');
+    socket.receive(WaitingRoomEvent.PlayerEnter, event);
+    expect(entered).toHaveBeenCalledWith({ roomInfo: { ...event.roomInfo, hostPlayerId: 'new-host' } });
+    expect(event.roomInfo.hostPlayerId).toBe('old-host');
+    processor.dispose();
+  });
+
+  test('forwards host departure and manual transfer, but ignores them after disposal', () => {
+    const { processor, socket, presenter, store } = processorFixture();
+    const hostChanged = jest.fn();
+    processor.on('hostChange', hostChanged);
+    presenter.initSeatsInfo(store);
+    processor.initWaitingRoomConnectionListeners();
+    socket.receive(WaitingRoomEvent.PlayerEnter, selfEntry('old-host'));
+    const departure = { leftPlayerId: 'old-host', newHostPlayerId: 'self' };
+    const transfer = { newHostPlayerId: 'new-host' };
+    socket.receive(WaitingRoomEvent.PlayerLeave, departure);
+    expect(store.seats.find(seat => seat.seatId === 1)).toEqual({ seatDisabled: false, seatId: 1 });
+    socket.receive(WaitingRoomEvent.ChangeHost, transfer);
+    expect(hostChanged.mock.calls).toEqual([[{ newHostPlayerId: 'self' }], [transfer]]);
+    const captured = socket.on.mock.calls.filter(([event]) =>
+      [WaitingRoomEvent.PlayerLeave, WaitingRoomEvent.ChangeHost].includes(event as WaitingRoomEvent),
+    );
+    processor.dispose();
+    for (const [event, handler] of captured) {
+      handler(event === WaitingRoomEvent.PlayerLeave ? departure : transfer);
+    }
+    expect(hostChanged).toHaveBeenCalledTimes(2);
+  });
+});
 
 describe('WaitingRoomProcessor and WaitingRoomSender disposal', () => {
   test('disposal before initialization is terminal and harmless', () => {
@@ -227,6 +277,8 @@ describe('WaitingRoomProcessor and WaitingRoomSender disposal', () => {
 
 type WaitingRoomProps = React.ComponentProps<typeof WaitingRoom>;
 type PageFixture = {
+  readonly hostPlayerId: string;
+  readonly isHost: boolean;
   services: {
     roomProcessorService: WaitingRoomProcessor;
     eventSenderService: WaitingRoomSender;
@@ -315,6 +367,59 @@ describe('WaitingRoom page cleanup', () => {
     unmount();
     container.remove();
     jest.restoreAllMocks();
+  });
+
+  test('keeps host identity, seat flags and settings controls synchronized through transfers and entry', () => {
+    mount();
+    const expectHost = (hostPlayerId: string, isHost: boolean) => {
+      expect(page.hostPlayerId).toBe(hostPlayerId);
+      expect(page.isHost).toBe(isHost);
+      expect((Seats as jest.Mock).mock.calls.slice(-1)[0][0]).toEqual(
+        expect.objectContaining({ hostPlayerId, isHost }),
+      );
+      expect((GameSettings as jest.Mock).mock.calls.slice(-1)[0][0]).toEqual(
+        expect.objectContaining({ controlable: isHost }),
+      );
+    };
+    // A later entrant must not inherit the original host from a stale room snapshot.
+    act(() => socket.receive(WaitingRoomEvent.PlayerEnter, selfEntry('old-host', 'self')));
+    expectHost('old-host', false);
+    const departure = { leftPlayerId: 'old-host', newHostPlayerId: 'self' };
+    act(() => socket.receive(WaitingRoomEvent.PlayerLeave, departure));
+    expectHost('self', true);
+    act(() => socket.receive(WaitingRoomEvent.ChangeHost, { newHostPlayerId: 'new-host' }));
+    expectHost('new-host', false);
+    act(() => socket.receive(WaitingRoomEvent.ChangeHost, { newHostPlayerId: 'self' }));
+    expectHost('self', true);
+    // Another player's entry must not reset the current host using its room snapshot.
+    act(() =>
+      socket.receive(WaitingRoomEvent.PlayerEnter, {
+        ...selfEntry('self', 'old-host'),
+        playerInfo: { playerId: 'newcomer', playerName: 'newcomer', avatarId: 2, seatId: 2 },
+      }),
+    );
+    expectHost('self', true);
+
+    const lateEvents = new Map<WaitingRoomEvent, unknown>([
+      [WaitingRoomEvent.PlayerEnter, selfEntry('late-host')],
+      [WaitingRoomEvent.PlayerLeave, { leftPlayerId: 'newcomer', newHostPlayerId: 'late-host' }],
+      [WaitingRoomEvent.ChangeHost, { newHostPlayerId: 'late-host' }],
+    ]);
+    const captured = socket.on.mock.calls.filter(([event]) => lateEvents.has(event as WaitingRoomEvent));
+    unmount();
+    const seatRenders = (Seats as jest.Mock).mock.calls.length;
+    const settingsRenders = (GameSettings as jest.Mock).mock.calls.length;
+    act(() => {
+      for (const [event, handler] of captured) {
+        const content = lateEvents.get(event as WaitingRoomEvent);
+        handler(content);
+        socket.receive(event as WaitingRoomEvent, content);
+      }
+    });
+    expectHost('self', true);
+    expect(Seats).toHaveBeenCalledTimes(seatRenders);
+    expect(GameSettings).toHaveBeenCalledTimes(settingsRenders);
+    expect(props.navigate).not.toHaveBeenCalled();
   });
 
   test('leaves first, disposes listeners before disconnect, stops audio once and preserves shared services', () => {

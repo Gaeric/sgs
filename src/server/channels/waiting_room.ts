@@ -12,6 +12,10 @@ export class WaitingRoomSocket {
   private hangOutCallback: () => void;
   private connectedPlayersMap: Record<string, string> = {};
   private readonly defaultNumberOfPlayers = 8;
+  private disposed = false;
+  private activeGame = false;
+  private gameHangoutNotified = false;
+  private readonly socketHandlers = new Map<SocketIO.Socket, { event: string; handler: (...args: any[]) => void }[]>();
 
   constructor(
     private roomService: RoomService,
@@ -20,39 +24,133 @@ export class WaitingRoomSocket {
     private logger: Logger,
     private waitingRoomInfo: WaitingRoomInfo,
   ) {
-    this.socket.on('connection', socket => {
-      logger.info('user ' + socket.id + ' connected');
-      socket.on(WaitingRoomEvent.RoomCreated, this.onRoomCreated(socket));
-      socket.on(WaitingRoomEvent.GameInfoUpdate, this.onGameInfoUpdate(socket));
-      socket.on(WaitingRoomEvent.GameStart, this.onGameStart(socket));
-      socket.on(WaitingRoomEvent.PlayerChatMessage, this.onSendMessage(socket));
-      socket.on(WaitingRoomEvent.PlayerEnter, this.onPlayerEnter(socket));
-      socket.on(WaitingRoomEvent.PlayerLeave, this.onPlayerLeave(socket));
-      socket.on(WaitingRoomEvent.PlayerReady, this.onPlayerReady(socket));
-      socket.on(WaitingRoomEvent.SeatDisabled, this.onSeatDisabled(socket));
-      socket.on(WaitingRoomEvent.ChangeHost, this.onHostChanged(socket));
+    this.socket.on('connection', this.onConnection);
+  }
 
-      socket.on('disconnect', () => {
-        logger.info('user ' + socket.id + ' disconnected');
-        if (this.connectedPlayersMap[socket.id]) {
-          this.broadcast(WaitingRoomEvent.PlayerLeave, {
-            leftPlayerId: this.connectedPlayersMap[socket.id],
-            byKicked: false,
-          });
-          socket.leave(this.waitingRoomInfo.roomId.toString());
-
-          delete this.connectedPlayersMap[socket.id];
-        }
-
-        if (Object.keys(this.connectedPlayersMap).length === 0) {
-          if (this.waitingRoomInfo.isPlaying) {
-            this.hangOutCallback?.();
-          } else {
-            this.disposeCallback?.();
+  private readonly onConnection = (socket: SocketIO.Socket) => {
+    if (this.disposed) {
+      return;
+    }
+    this.logger.info('user ' + socket.id + ' connected');
+    const handlers = [
+      { event: WaitingRoomEvent.RoomCreated, handler: this.onRoomCreated(socket) },
+      { event: WaitingRoomEvent.GameInfoUpdate, handler: this.onGameInfoUpdate(socket) },
+      { event: WaitingRoomEvent.GameStart, handler: this.onGameStart(socket) },
+      { event: WaitingRoomEvent.PlayerChatMessage, handler: this.onSendMessage(socket) },
+      { event: WaitingRoomEvent.PlayerEnter, handler: this.onPlayerEnter(socket) },
+      { event: WaitingRoomEvent.PlayerLeave, handler: this.onPlayerLeave(socket) },
+      { event: WaitingRoomEvent.PlayerReady, handler: this.onPlayerReady(socket) },
+      { event: WaitingRoomEvent.SeatDisabled, handler: this.onSeatDisabled(socket) },
+      { event: WaitingRoomEvent.ChangeHost, handler: this.onHostChanged(socket) },
+      {
+        event: 'disconnect',
+        handler: () => {
+          this.logger.info('user ' + socket.id + ' disconnected');
+          const playerId = this.connectedPlayersMap[socket.id];
+          if (playerId !== undefined) {
+            this.removePlayer(playerId);
           }
+          this.detachSocket(socket);
+        },
+      },
+    ].map(({ event, handler }) => ({
+      event,
+      handler: (...args: any[]) => {
+        if (!this.disposed) {
+          (handler as (...args: any[]) => void)(...args);
         }
-      });
-    });
+      },
+    }));
+    this.socketHandlers.set(socket, handlers);
+    for (const { event, handler } of handlers) {
+      socket.on(event, handler);
+    }
+  };
+
+  private detachSocket(socket: SocketIO.Socket) {
+    for (const { event, handler } of this.socketHandlers.get(socket) || []) {
+      socket.removeListener(event, handler);
+    }
+    this.socketHandlers.delete(socket);
+  }
+
+  public dispose() {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    this.socket.removeListener('connection', this.onConnection);
+    for (const socket of Array.from(this.socketHandlers.keys())) {
+      this.detachSocket(socket);
+    }
+    this.connectedPlayersMap = {};
+  }
+
+  private removePlayer(playerId: PlayerId, byKicked = false) {
+    const exists = this.waitingRoomInfo.players.some(player => player.playerId === playerId);
+    // Explicit leave/kick consumes the socket mapping too, so its subsequent
+    // disconnect cannot broadcast or release the room a second time.
+    for (const [socketId, mappedPlayer] of Object.entries(this.connectedPlayersMap)) {
+      if (mappedPlayer === playerId) {
+        delete this.connectedPlayersMap[socketId];
+      }
+    }
+    if (!exists) {
+      return;
+    }
+    this.waitingRoomInfo.players = this.waitingRoomInfo.players.filter(player => player.playerId !== playerId);
+    let newHostPlayerId: PlayerId | undefined;
+    // GameStart navigates everyone out of this namespace. Retain its host and
+    // backing room while the game is active, rather than treating it as a quit.
+    if (!this.activeGame && playerId === this.waitingRoomInfo.hostPlayerId) {
+      newHostPlayerId = this.waitingRoomInfo.players[0]?.playerId;
+      if (newHostPlayerId !== undefined) {
+        this.setHost(newHostPlayerId);
+      }
+    }
+    this.broadcast(WaitingRoomEvent.PlayerLeave, { leftPlayerId: playerId, byKicked, newHostPlayerId });
+    this.handleEmptyRoom();
+  }
+
+  private handleEmptyRoom() {
+    if (this.disposed || this.waitingRoomInfo.players.length > 0) {
+      return;
+    }
+    if (this.activeGame) {
+      if (!this.gameHangoutNotified) {
+        this.gameHangoutNotified = true;
+        this.hangOutCallback?.();
+      }
+    } else {
+      this.dispose();
+      this.disposeCallback?.();
+    }
+  }
+
+  public markGameStarted() {
+    this.activeGame = true;
+    this.gameHangoutNotified = false;
+    this.waitingRoomInfo.isPlaying = true;
+  }
+
+  public finishGame() {
+    if (this.disposed) {
+      return;
+    }
+    this.activeGame = false;
+    this.waitingRoomInfo.isPlaying = false;
+    if (
+      this.waitingRoomInfo.players.length > 0 &&
+      !this.waitingRoomInfo.players.some(player => player.playerId === this.waitingRoomInfo.hostPlayerId)
+    ) {
+      this.reassigHost(this.waitingRoomInfo.hostPlayerId, this.waitingRoomInfo.players[0].playerId);
+    }
+    this.handleEmptyRoom();
+  }
+
+  private setHost(playerId: PlayerId) {
+    this.waitingRoomInfo.hostPlayerId = playerId;
+    this.waitingRoomInfo.roomInfo.hostPlayerId = playerId;
   }
 
   private broadcast<Event extends WaitingRoomEvent>(e: Event, content: WaitingRoomServerEventFinder<Event>) {
@@ -80,6 +178,9 @@ export class WaitingRoomSocket {
 
   private readonly onGameStart =
     (socket: SocketIO.Socket) => (evt: WaitingRoomClientEventFinder<WaitingRoomEvent.GameStart>) => {
+      if (this.waitingRoomInfo.isPlaying || this.connectedPlayersMap[socket.id] !== this.waitingRoomInfo.hostPlayerId) {
+        return;
+      }
       const { roomId, gameInfo } = this.roomService.createRoom(
         {
           ...evt.roomInfo,
@@ -90,7 +191,11 @@ export class WaitingRoomSocket {
         this.waitingRoomInfo.roomId,
       );
 
-      this.waitingRoomInfo.isPlaying = true;
+      // RoomService marks the actual game lifetime; keep the same boundary for
+      // alternate service implementations without resetting an existing owner.
+      if (!this.activeGame) {
+        this.markGameStarted();
+      }
       this.broadcast(WaitingRoomEvent.GameStart, {
         roomId,
         otherPlayersId: this.waitingRoomInfo.players.map(player => player.playerId),
@@ -105,39 +210,42 @@ export class WaitingRoomSocket {
 
   private readonly onPlayerEnter =
     (socket: SocketIO.Socket) => (evt: WaitingRoomClientEventFinder<WaitingRoomEvent.PlayerEnter>) => {
-      this.waitingRoomInfo.isPlaying = false;
-
+      const playerId = evt.playerInfo.playerId;
+      const mappedPlayer = this.connectedPlayersMap[socket.id];
+      // A repeated packet on the same live connection is a no-op. A different
+      // connection must not take over another player's seat or eject that owner.
+      if (mappedPlayer === playerId) {
+        return;
+      }
       const seatId = this.getAvailabeSeatId();
       if (
+        mappedPlayer !== undefined ||
+        this.waitingRoomInfo.players.some(player => player.playerId === playerId) ||
         seatId < 0 ||
-        this.waitingRoomInfo.players.length > this.waitingRoomInfo.roomInfo.numberOfPlayers ||
+        this.waitingRoomInfo.players.length >= this.waitingRoomInfo.roomInfo.numberOfPlayers ||
         evt.coreVersion !== Sanguosha.Version
       ) {
-        this.broadcast(WaitingRoomEvent.PlayerLeave, { leftPlayerId: evt.playerInfo.playerId, byKicked: false });
-      } else {
-        this.connectedPlayersMap[socket.id] = evt.playerInfo.playerId;
-
-        const playerInfo = { ...evt.playerInfo, seatId, playerReady: false };
-        this.waitingRoomInfo.players.push(playerInfo);
-        this.broadcast(WaitingRoomEvent.PlayerEnter, {
-          hostPlayerId: this.waitingRoomInfo.hostPlayerId,
-          playerInfo,
-          otherPlayersInfo: this.waitingRoomInfo.players.filter(p => p.playerId !== playerInfo.playerId),
-          roomInfo: this.waitingRoomInfo.roomInfo,
-          disableSeats: this.waitingRoomInfo.closedSeats,
-        });
+        socket.emit(WaitingRoomEvent.PlayerLeave, { leftPlayerId: playerId, byKicked: false });
+        return;
       }
+      this.waitingRoomInfo.isPlaying = false;
+      this.connectedPlayersMap[socket.id] = playerId;
+      const playerInfo = { ...evt.playerInfo, seatId, playerReady: false };
+      this.waitingRoomInfo.players.push(playerInfo);
+      this.broadcast(WaitingRoomEvent.PlayerEnter, {
+        hostPlayerId: this.waitingRoomInfo.hostPlayerId,
+        playerInfo,
+        otherPlayersInfo: this.waitingRoomInfo.players.filter(player => player.playerId !== playerId),
+        roomInfo: this.waitingRoomInfo.roomInfo,
+        disableSeats: this.waitingRoomInfo.closedSeats,
+      });
     };
 
   private readonly onPlayerLeave =
     (socket: SocketIO.Socket) => (evt: WaitingRoomClientEventFinder<WaitingRoomEvent.PlayerLeave>) => {
-      this.waitingRoomInfo.players = this.waitingRoomInfo.players.filter(p => p.playerId !== evt.leftPlayerId);
-
-      let newHostPlayerId: PlayerId | undefined;
-      if (evt.leftPlayerId === this.waitingRoomInfo.hostPlayerId && this.waitingRoomInfo.players.length > 0) {
-        newHostPlayerId = this.waitingRoomInfo.players[0].playerId;
+      if (this.connectedPlayersMap[socket.id] === evt.leftPlayerId) {
+        this.removePlayer(evt.leftPlayerId);
       }
-      this.broadcast(WaitingRoomEvent.PlayerLeave, { ...evt, byKicked: false, newHostPlayerId });
     };
 
   private readonly onPlayerReady =
@@ -161,8 +269,7 @@ export class WaitingRoomSocket {
       }
 
       if (evt.kickedPlayerId) {
-        this.broadcast(WaitingRoomEvent.PlayerLeave, { leftPlayerId: evt.kickedPlayerId, byKicked: true });
-        this.waitingRoomInfo.players = this.waitingRoomInfo.players.filter(p => p.playerId !== evt.kickedPlayerId);
+        this.removePlayer(evt.kickedPlayerId, true);
       }
 
       this.broadcast(WaitingRoomEvent.SeatDisabled, evt);
@@ -170,7 +277,12 @@ export class WaitingRoomSocket {
 
   private readonly onHostChanged =
     (socket: SocketIO.Socket) => (evt: WaitingRoomClientEventFinder<WaitingRoomEvent.ChangeHost>) => {
-      this.broadcast(WaitingRoomEvent.ChangeHost, evt);
+      if (
+        this.connectedPlayersMap[socket.id] === this.waitingRoomInfo.hostPlayerId &&
+        evt.prevHostPlayerId === this.waitingRoomInfo.hostPlayerId
+      ) {
+        this.reassigHost(evt.prevHostPlayerId, evt.newHostPlayerId);
+      }
     };
 
   private readonly onRoomCreated =
@@ -196,6 +308,14 @@ export class WaitingRoomSocket {
   };
 
   public readonly reassigHost = (prevHostPlayerId: PlayerId, newHostPlayerId: PlayerId) => {
+    if (
+      this.disposed ||
+      !this.waitingRoomInfo.players.some(player => player.playerId === newHostPlayerId) ||
+      this.waitingRoomInfo.hostPlayerId === newHostPlayerId
+    ) {
+      return;
+    }
+    this.setHost(newHostPlayerId);
     this.broadcast(WaitingRoomEvent.ChangeHost, { prevHostPlayerId, newHostPlayerId });
   };
 }

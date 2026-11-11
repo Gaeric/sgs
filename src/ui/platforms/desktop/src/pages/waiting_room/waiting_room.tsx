@@ -122,6 +122,7 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
       'hostChange',
       mobx.action(content => {
         if (!this.disposed) {
+          this.hostPlayerId = content.newHostPlayerId;
           this.isHost = content.newHostPlayerId === this.selfPlayerId;
         }
       }),

@@ -194,7 +194,7 @@ export class WaitingRoomProcessor {
     });
 
     if (this.store.selfPlayerId === evt.playerInfo.playerId) {
-      this.playerEnterListener?.({ roomInfo: evt.roomInfo });
+      this.playerEnterListener?.({ roomInfo: { ...evt.roomInfo, hostPlayerId: evt.hostPlayerId } });
     }
   }
 

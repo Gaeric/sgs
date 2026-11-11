@@ -547,3 +547,20 @@ desktop yarn build:mac            CRA 回退通过
 - desktop 全套：20 suites / 233 tests 通过（之前 18 suites / 203 tests）。Vite sync/build 完成后再执行 frontend typecheck/tests，无 core 复制竞争。
 - 新增测试先在旧实现运行并复现失败，修复后 30 项 focused tests 全部通过；独立只读审查无阻塞问题。
 - 未创建 commit。浏览器 CORS、polling→WebSocket upgrade、真实版本初始化/游戏流程、Node 24 本地执行、远程 CI 与 Electron 仍未验收；既有构建/环境 warning 不变。
+
+### 2026-11-11：Waiting-room removal、host 与 game-return 生命周期修复
+
+- explicit leave / kick / abrupt disconnect 共用 authoritative player removal，同时移除 socket→player 映射；重复 leave/disconnect 不再重复广播。拒绝 join 仅回复请求 socket，未加入/拒绝的连接断开不会关闭合法空房间。
+- 相同 socket/player 重复 enter 幂等；不同 socket 的重复 player 拒绝，不抢占原连接。人数边界改为 `>=`，无效 core version 不再提前改 `isPlaying`。
+- 普通等待阶段 host 离开后更新 `WaitingRoomInfo.hostPlayerId` 与 `roomInfo.hostPlayerId`；手动转让也更新 authoritative state。客户端 hostChange 同步 hostPlayerId / isHost，self-entry 以 event host 为准，保留 observed action 和原 disposal guards。
+- 空房间关闭时精确移除自身 namespace connection / socket listeners，删除 service waitingRoomMaps 项；同 ID 在关闭后重建不复用旧 handler。IP quota 在 hangout / 后续 close 间只释放一次，不误减其他房间额度。
+- 单独跟踪 active game lifetime 与 room-list visibility：GameStart 离开和玩家返回后再次离开都不会提前销毁仍供游戏玩家返回的 backing room。game close 保留原 1500ms grace，捕获原 info/channel identity，按精确 game instance set 等待所有相关游戏完成，忽略重复关闭，避免旧回调销毁 replacement / newer room。grace 后空房间关闭，非空且原 host 缺席时再转让。
+- 新增 16 项真实 polling/WebSocket lifecycle tests、7 项 lightweight RoomService game-close tests、3 项客户端 host/控制状态回归；更新原 networking baseline 的终端 leave 预期。`test:network` 改为执行所有 `tests/*.test.cjs`，CI 已使用该脚本，无需额外配置。
+- 测试先复现旧实现失败；初次修复后的独立审查发现 return→leave backing room 与 delayed game-close replacement 边界，已补 game ownership guard 和相应回归。测试替代 game engine factories / grace 等待，不声称完整对局测试。
+
+验证（Node 26.12.0）：
+
+- `yarn --cwd src/server test:network`：server build 与 25 tests 全部通过（2 baseline + 16 transport lifecycle + 7 service lifecycle）。
+- Vite build 完成后 desktop typecheck / 全套 Jest：20 suites / 236 tests 全部通过。
+- 根 lint、新增/修改 CJS 语法与 Prettier check、`git diff --check` 通过。既有 Vite / css-loader / Yarn cache / Node warning 不变。
+- 没有依赖/Socket.IO major/Express/Electron 升级，没有引擎规则重写，没有创建 commit。自动 waiting-room reconnect/rejoin、完整身份认证/事件授权、game socket/timer 全量 disposal、namespace registry 对象回收仍未完成；Node 24、远程 CI、完整 UI/游戏/Electron 验收仍待进行。

@@ -1,6 +1,6 @@
 # Networking migration baseline
 
-This checkpoint adds tests and an audit, **not a Socket.IO upgrade**. Production
+These checkpoints add regression tests and targeted lifecycle fixes, **not a Socket.IO upgrade**. Production
 still uses Socket.IO server **2.4.1** and desktop client **2.3.0**; Express is unchanged.
 
 ## Run
@@ -43,9 +43,9 @@ fixture**, not production; replace it during a major-version migration.
 
 The tests pin the current server version and wire enum values intentionally.
 Update these assertions deliberately during migration, not merely to silence a
-failure. These server-only tests do **not** exercise `RealConnectionService`, browser CORS,
-transport upgrades, abrupt disconnect/reentry, an actual game, or Electron. The
-separate desktop service tests described below cover the selected service paths.
+failure. The original integration file does **not** exercise `RealConnectionService`, browser
+CORS, transport upgrades, abrupt disconnect/reentry, an actual game, or Electron.
+Additional lifecycle and desktop service tests below cover selected additional paths.
 
 ## Migration audit (2026-11-11)
 
@@ -83,14 +83,16 @@ cover or fix them:
    and chat subscription behavior during the open service lifetime remain. Chat
    `disconnect()` still adds a history listener rather than unsubscribing; no chat
    lifecycle redesign was included.
-4. **Waiting-room disconnect:** only explicit leave removes authoritative players;
-   disconnect alone can leave stale seats. Disconnect after explicit leave emits
-   another PlayerLeave. Repeated enter and host reassignment need dedicated tests.
-   The baseline intentionally verifies explicit leave only, not exactly-once leave.
-5. **Room lifetime:** close removes application collection entries but does not
-   fully dispose namespace listeners/maps. Recreating a supplied room ID can
-   accumulate handlers. Add teardown/room-ID reuse tests before promising leak-free
-   room lifecycle.
+4. **Waiting-room removal (fixed for tested paths):** explicit leave, kick and
+   abrupt disconnect share authoritative removal. It clears the socket mapping,
+   emits leave once, transfers host outside active games, and ignores repeated
+   enter packets; duplicate identities on different sockets are rejected only to
+   that requester. This is not authenticated identity or a general security audit.
+5. **Waiting-room lifetime (partially addressed):** terminal removal detaches owned
+   namespace/socket listeners and deletes the service map. Tests cover reuse after
+   disposal, active-game backing retention and exact room/channel identity during
+   delayed game close. Empty namespace objects are not removed from Socket.IO's
+   registry, and game `ServerSocket` teardown remains outside this checkpoint.
 6. **Game requests:** `ServerSocket` resolves by event/player, not request token;
    repeated waits can overwrite unresolved promises and stale replies/AI timers can
    target newer waits. One `lastResponsiveEvent` is shared across players. Game
@@ -102,13 +104,51 @@ cover or fix them:
 1. Selected desktop service checks are fixed/tested below. Extend correlation
    coverage separately to creation, refresh and ping; do not claim those paths are
    safe merely because boolean checks are now isolated.
-2. Add abrupt-disconnect/reentry, duplicate-entry and room-disposal regressions;
-   fix confirmed lifecycle defects separately.
+2. Waiting-room removal and return-lifetime regressions are added below. Actual
+   automatic transport reconnect/rejoin remains a separate gap: the waiting-room
+   client does not install a reconnect/reentry protocol.
 3. Upgrade server and client together in source, port exported types/CORS/reconnect
    ownership, then run real v4↔v4 lifecycle/reconnect tests and any required v2-client
    compatibility tests. Keep Express, Electron and game rules unchanged.
 4. Validate browser origins, polling→WebSocket upgrade, payload boundaries, server
    restart/replay recovery and packaged Electron clients before deployment.
+
+## Waiting-room lifecycle checkpoint
+
+The network script now runs **all** `tests/*.test.cjs` files:
+
+- `network.integration.test.cjs`: the original 2 complete transport baselines.
+- `waiting_room.lifecycle.test.cjs`: 16 real transport cases (8 each over polling
+  and WebSocket) for duplicate enter, requester-only rejection, capacity limits,
+  explicit leave/disconnect deduplication, abrupt peer loss, host transfer, kick,
+  final-player cleanup, unjoined/rejected peer safety, namespace ID reuse and
+  GameStart/return behavior with a stub game factory.
+- `room_service.lifecycle.test.cjs`: 7 focused service cases with lightweight game
+  factories and a controlled completion of the existing 1500ms return grace delay.
+  They verify exact game-instance removal, duplicate-close idempotence, returning
+  during grace, first return/leave while another game player still needs the room,
+  newer/older overlapping game closure, same-ID replacement safety and final host
+  reassignment. These are lifecycle fixtures, not a full game-engine run.
+
+The server now keeps **active-game lifetime separate from room-list visibility**.
+A valid return may make a room visible, but an empty roster cannot destroy its
+backing channel while associated games (including their return grace period) are
+still pending. When all associated games finish, an empty room closes; otherwise
+an absent host is reassigned. Each delayed callback captures the exact backing
+info/channel, tracks exact game instances, and cannot dispose a replacement ID or
+a room still owned by another game. Per-IP quota release is once-only across
+hangout and later closure, preserving existing no-recharge return policy.
+
+Client regressions in `waiting_room.cleanup.test.tsx` additionally cover both host
+fields, self-entry using the authoritative event host, rendered control flags,
+and stale events after disposal. Explicit transfer/new-host notifications keep
+`hostPlayerId` and `isHost` in sync; ref/shallow/deep semantics are unchanged.
+
+Known boundaries: no automatic waiting-room reconnect/rejoin, no authenticated
+player identity, no full action authorization or malformed-packet hardening, no
+change to game rules, and no complete game namespace/timer disposal claim. Tests
+use Engine.IO peer closure to simulate abrupt transport loss; they do not emulate
+all real network failure modes or validate browser/Electron behavior.
 
 ## Desktop service request checkpoint
 

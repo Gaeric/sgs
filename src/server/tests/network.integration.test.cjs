@@ -296,10 +296,10 @@ for (const transport of ['polling', 'websocket']) {
     ]);
     assert.deepEqual(hostSeesLeave, { leftPlayerId: 'guest', byKicked: false });
     assert.deepEqual(guestSeesLeave, hostSeesLeave);
-    // Explicit leave is what updates the authoritative player array today.
+    // Explicit leave updates the authoritative player array before disconnect.
     assert.deepEqual(await request(lobby, Lobby.QueryRoomList), [summary(1)]);
-    // Disconnect currently also broadcasts PlayerLeave, even after an explicit
-    // leave. Do not assert exactly-once delivery or disconnect-only removal.
+    // Disconnect consumes no second leave; detailed exactly-once and abrupt-loss
+    // assertions live in waiting_room.lifecycle.test.cjs.
     await disconnect(guest);
     assert.deepEqual(await request(lobby, Lobby.QueryRoomList), [summary(1)]);
     assert.equal(await request(lobby, Lobby.CheckRoomExist, roomId), true);
@@ -308,7 +308,9 @@ for (const transport of ['polling', 'websocket']) {
       leftPlayerId: 'host',
       byKicked: false,
     });
-    assert.deepEqual(await request(lobby, Lobby.QueryRoomList), [summary(0)]);
+    // The final explicit leave closes the waiting room immediately, even before
+    // its namespace transport disconnects.
+    assert.deepEqual(await request(lobby, Lobby.QueryRoomList), []);
     await disconnect(host);
     assert.equal(lobby.connected, true, 'disconnecting waiting-room must not disconnect its lobby sibling');
     assert.equal(await request(lobby, Lobby.PingServer), undefined);
