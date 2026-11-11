@@ -498,3 +498,14 @@ desktop yarn build:mac            CRA 回退通过
 - 保留已有生命周期清理边界：不能撤销已开始的 engine 操作，也未新增图片加载取消或共享服务 unsubscribe API。
 - 审计另发现既有 lobby 失败 join / observer 回调使用 `currentInteractiveRoomInfo.info.id`（普通非密码 join 不一定初始化该字段），可能抛错或移除错误房间；本次不混入该业务修复，需独立补回归处理。
 - 本检查点未创建 commit。建议先审查/提交，再单独决定下一阶段；Phase 5 列出的 MobX 7 版本与 API 仍是原计划假设，执行前必须核实实际发布版本和迁移文档，不直接照表升级。
+
+### 2026-11-11：Lobby join / observer / passcode 请求身份修复
+
+- 普通 join / observer 的失败回调不再读取可能未初始化或已变化的 `currentInteractiveRoomInfo`；请求发起时捕获 host 与 roomId。
+- passcode 请求也捕获提交时的 host / roomId：后续打开其他房间密码框不再改变旧请求成功时的导航目标，或失败时删除的房间。
+- 共用 action 方法只删除 host + roomId 同时匹配的房间；缺失房间或重复失败回复不误删其他项，保留 disposed guard。导航 state 字段、ping 与 observer roomMode 语义不变。
+- 跨 host 相同数字 roomId 的回归暴露 React key 冲突；列表 key 改为序列化的 `[host, roomId]`，不再只用数字 ID。
+- 新增 9 项回归：join / observer / passcode 的失败清理、相同 ID 不同 host、重复失败回复、乱序请求以及密码选择变化后的成功导航。既有卸载后成功/失败回调抑制测试保留。
+- 先增加测试复现：新增回归中 7 项在修复前失败；修复后 lobby 26 项全部通过，无重复 key warning。
+- 验证（Node 26.12.0）：根 lint、Vite build、desktop TypeScript check、server build、`git diff --check` 通过；全套 18 suites / 203 tests 通过。Vite build 完成后才运行 frontend typecheck / tests，避免 core sync 竞争。
+- 没有依赖/协议升级或 commit；未执行完整 UI / 联机 / Electron / Node 24 验收，现有构建与环境 warning 不变。并发请求保留原有完成处理策略，本次不引入“只允许最新请求导航”的新交互规则。

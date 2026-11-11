@@ -60,7 +60,7 @@ function deferred<T>(): Deferred<T> {
   return { promise, resolve, reject };
 }
 
-function room(id: number, passcode?: string): HostRoom {
+function room(id: number, passcode?: string, host = 'test-host'): HostRoom {
   return {
     info: {
       id,
@@ -73,7 +73,7 @@ function room(id: number, passcode?: string): HostRoom {
       totalPlayers: 8,
       passcode,
     },
-    host: 'test-host',
+    host,
     ping: 12,
   };
 }
@@ -264,6 +264,96 @@ describe('Lobby async cleanup', () => {
       callback(false, 12);
       expect(props.navigate).not.toHaveBeenCalled();
       expect(page.roomList.map(item => item.info.id)).toEqual([1]);
+    },
+  );
+
+  test.each(['join', 'observe', 'passcode'])(
+    'failed %s removes only the requested host/room and tolerates repeated missing-room replies',
+    kind => {
+      const target = room(1, kind === 'passcode' ? 'secret' : undefined);
+      const sibling = room(2);
+      const otherHost = room(1, undefined, 'other-host');
+      receiveRooms(0, target, sibling);
+      act(() => {
+        lobby.getRoomList.mock.calls[0][0]({ packet: [otherHost.info], hostTag: otherHost.host, ping: 12 });
+        if (kind === 'observe') {
+          page.enterRoomAsObserver(target)();
+        } else {
+          page.enterRoom(target)();
+          if (kind === 'passcode') {
+            page.onPasscodeSubmit('secret');
+          }
+        }
+      });
+      expect(lobby.checkRoomExist).toHaveBeenCalledWith('test-host', 1, expect.any(Function));
+      const callback = lobby.checkRoomExist.mock.calls[0][2];
+      act(() => callback(false, 12));
+      expect(page.roomList.map(item => [item.host, item.info.id])).toEqual([
+        ['test-host', 2],
+        ['other-host', 1],
+      ]);
+      act(() => callback(false, 12));
+      expect(page.roomList.map(item => [item.host, item.info.id])).toEqual([
+        ['test-host', 2],
+        ['other-host', 1],
+      ]);
+      expect(props.navigate).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each(['join', 'observe', 'passcode'])(
+    'overlapping failed %s checks retain their own room identity when password selection changes',
+    kind => {
+      const first = room(1, kind === 'passcode' ? 'first-secret' : undefined);
+      const second = room(2, 'second-secret');
+      receiveRooms(0, first, second, room(3));
+      act(() => {
+        if (kind === 'observe') {
+          page.enterRoomAsObserver(first)();
+        } else {
+          page.enterRoom(first)();
+          if (kind === 'passcode') {
+            page.onPasscodeSubmit('first-secret');
+          }
+        }
+        page.enterRoom(second)();
+        page.onPasscodeSubmit('second-secret');
+      });
+      const firstReply = lobby.checkRoomExist.mock.calls[0][2];
+      const secondReply = lobby.checkRoomExist.mock.calls[1][2];
+      // Complete out of order: the first reply must not consult dialog state.
+      act(() => secondReply(false, 12));
+      expect(page.roomList.map(item => item.info.id)).toEqual([1, 3]);
+      act(() => firstReply(false, 12));
+      expect(page.roomList.map(item => item.info.id)).toEqual([3]);
+      expect(props.navigate).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each(['join', 'observe', 'passcode'])(
+    'successful %s uses the original request destination after another password dialog opens',
+    kind => {
+      const target = room(1, kind === 'passcode' ? 'secret' : undefined);
+      act(() => {
+        if (kind === 'observe') {
+          page.enterRoomAsObserver(target)();
+        } else {
+          page.enterRoom(target)();
+          if (kind === 'passcode') {
+            page.onPasscodeSubmit('secret');
+          }
+        }
+        page.enterRoom(room(2, 'other-secret', 'other-host'))();
+      });
+      act(() => lobby.checkRoomExist.mock.calls[0][2](true, 12));
+      expect(props.navigate).toHaveBeenCalledTimes(1);
+      expect(props.navigate).toHaveBeenCalledWith(kind === 'observe' ? '/room/1' : '/waiting-room/1', {
+        state: {
+          hostConfig: props.config.host[0],
+          ...(kind === 'passcode' ? {} : { ping: 12 }),
+          ...(kind === 'observe' ? { roomMode: RoomMode.Observer } : {}),
+        },
+      });
     },
   );
 

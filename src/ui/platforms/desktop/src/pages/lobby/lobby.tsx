@@ -190,7 +190,7 @@ export class Lobby extends React.Component<LobbyProps> {
     <>
       {!this.unmatchedCoreVersion &&
         this.roomList.map((hostInfo, index) => (
-          <li className={styles.roomInfo} key={hostInfo.info.id}>
+          <li className={styles.roomInfo} key={JSON.stringify([hostInfo.host, hostInfo.info.id])}>
             <span className={styles.roomName}>
               <span>{hostInfo.info.name}</span>
             </span>
@@ -314,22 +314,34 @@ export class Lobby extends React.Component<LobbyProps> {
     this.queryRoomList();
   };
 
+  @mobx.action
+  private removeUnavailableRoom(host: ServerHostTag, roomId: RoomInfo['id']) {
+    if (this.disposed) {
+      return;
+    }
+    const index = this.roomList.findIndex(item => item.host === host && item.info.id === roomId);
+    if (index >= 0) {
+      this.roomList.splice(index, 1);
+    }
+  }
+
   private readonly enterRoom = (hostInfo: HostRoomInfo) =>
     mobx.action(() => {
       if (this.disposed) {
         return;
       }
       const { info, host } = hostInfo;
+      const roomId = info.id;
       if (info.passcode) {
         this.openPasscodeEnterDialog = true;
         this.currentInteractiveRoomInfo = hostInfo;
       } else {
-        this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
+        this.props.connectionService.Lobby.checkRoomExist(host, roomId, (exist, ping) => {
           if (this.disposed) {
             return;
           }
           if (exist) {
-            this.props.navigate(`/waiting-room/${info.id}`, {
+            this.props.navigate(`/waiting-room/${roomId}`, {
               state: {
                 ping,
                 hostConfig: this.props.config.host.find(config => config.hostTag === host),
@@ -337,14 +349,7 @@ export class Lobby extends React.Component<LobbyProps> {
             });
           } else {
             //TODO: add error popout
-            mobx.runInAction(() => {
-              const deadRoomIndex = this.roomList.findIndex(
-                roomHostInfo => roomHostInfo.info.id === this.currentInteractiveRoomInfo.info.id,
-              );
-              if (deadRoomIndex >= 0) {
-                this.roomList.splice(deadRoomIndex, 1);
-              }
-            });
+            this.removeUnavailableRoom(host, roomId);
           }
         });
       }
@@ -356,12 +361,13 @@ export class Lobby extends React.Component<LobbyProps> {
         return;
       }
       const { info, host } = hostInfo;
-      this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
+      const roomId = info.id;
+      this.props.connectionService.Lobby.checkRoomExist(host, roomId, (exist, ping) => {
         if (this.disposed) {
           return;
         }
         if (exist) {
-          this.props.navigate(`/room/${info.id}`, {
+          this.props.navigate(`/room/${roomId}`, {
             state: {
               ping,
               hostConfig: this.props.config.host.find(config => config.hostTag === host),
@@ -370,14 +376,7 @@ export class Lobby extends React.Component<LobbyProps> {
           });
         } else {
           //TODO: add error popout
-          mobx.runInAction(() => {
-            const deadRoomIndex = this.roomList.findIndex(
-              roomHostInfo => roomHostInfo.info.id === this.currentInteractiveRoomInfo.info.id,
-            );
-            if (deadRoomIndex >= 0) {
-              this.roomList.splice(deadRoomIndex, 1);
-            }
-          });
+          this.removeUnavailableRoom(host, roomId);
         }
       });
     });
@@ -445,36 +444,27 @@ export class Lobby extends React.Component<LobbyProps> {
       return;
     }
     if (this.currentInteractiveRoomInfo && passcode && this.currentInteractiveRoomInfo.info.passcode === passcode) {
+      // Dialog selection may change before this request completes. Keep the
+      // submitted room identity, not the mutable current dialog selection.
+      const { host, info } = this.currentInteractiveRoomInfo;
+      const roomId = info.id;
       this.openPasscodeEnterDialog = false;
       this.showPasscodeError = false;
-      this.props.connectionService.Lobby.checkRoomExist(
-        this.currentInteractiveRoomInfo.host,
-        this.currentInteractiveRoomInfo.info.id,
-        exist => {
-          if (this.disposed) {
-            return;
-          }
-          if (exist) {
-            this.props.navigate(`/waiting-room/${this.currentInteractiveRoomInfo.info.id}`, {
-              state: {
-                hostConfig: this.props.config.host.find(
-                  config => config.hostTag === this.currentInteractiveRoomInfo.host,
-                ),
-              },
-            });
-          } else {
-            //TODO: add error popout
-            mobx.runInAction(() => {
-              const deadRoomIndex = this.roomList.findIndex(
-                roomHostInfo => roomHostInfo.info.id === this.currentInteractiveRoomInfo.info.id,
-              );
-              if (deadRoomIndex >= 0) {
-                this.roomList.splice(deadRoomIndex, 1);
-              }
-            });
-          }
-        },
-      );
+      this.props.connectionService.Lobby.checkRoomExist(host, roomId, exist => {
+        if (this.disposed) {
+          return;
+        }
+        if (exist) {
+          this.props.navigate(`/waiting-room/${roomId}`, {
+            state: {
+              hostConfig: this.props.config.host.find(config => config.hostTag === host),
+            },
+          });
+        } else {
+          //TODO: add error popout
+          this.removeUnavailableRoom(host, roomId);
+        }
+      });
     } else {
       this.showPasscodeError = true;
     }
