@@ -66,8 +66,8 @@ Node 版本说明：2026-10-21 时最新版为 26.12.0，但尚未标记 LTS；2
 - [x] 根 `package.json` 增加 `engines`
 - [x] CI 改为 Node 24/26 矩阵，升级 actions
 - [x] 新增本升级计划
-- [ ] 根依赖安装与 lint 基线
-- [ ] 记录当前构建失败点
+- [x] 根依赖安装与 lint 基线（2026-11-11 复验通过）
+- [x] 记录当前构建失败点（见执行记录）
 
 验收：
 
@@ -78,9 +78,9 @@ Node 版本说明：2026-10-21 时最新版为 26.12.0，但尚未标记 LTS；2
 ### Phase 1：服务端低风险升级
 
 - [x] `ts-node` 8 → 10（10.9.2）
-- [ ] `typescript` 4.3 → 5.x（阻塞：79 个 core 类型错误，拆到 Phase 1b）
+- [x] `typescript` 4.3 → 5.9.3（Phase 1b，2026-11-11）
 - [x] `nodemon` 2 → 3（3.1.10）
-- [ ] `@types/node` 18 → 24（阻塞：需要先完成 TS 5 迁移）
+- [x] `@types/node` 18 → 24.19.2（Phase 1b）
 - [ ] 移除 `@types/socket.io`、`@types/socket.io-client`
 - [ ] Express 4 → 5：`res.sendfile` → `res.sendFile`
 - [ ] socket.io 2 → 4：`SocketIO.listen` → `new Server`，CORS 配置改写
@@ -104,15 +104,16 @@ TypeScript 5.9 试升级结果：79 个类型错误，集中在 `room.server.ts`
 
 ### Phase 1b：TypeScript 5 迁移
 
-- [ ] 先升级到 TypeScript 4.9，逐个修复 79 个类型错误
-- [ ] 再升级到 TypeScript 5.x
-- [ ] `@types/node` 18 → 24
-- [ ] 修复 `shrink_string.ts` 的 Buffer 类型
-- [ ] 修复 `system.ts` 重复对象属性
-- [ ] 修复 `wuxiekeji.ts` 的 `TimeLimitVariant` 类型
-- [ ] 服务端 build/dev 回归
+- [x] 用 TypeScript 4.9.5 试编译并修复类型错误（本次复现 54 个，修复后 0 个）
+- [x] 根目录、服务端、desktop 统一升级到 TypeScript 5.9.3
+- [x] 根目录、服务端、desktop 的 `@types/node` → 24.19.2
+- [x] 修复 `shrink_string.ts` 的 Buffer 类型推断并移除多余复制
+- [x] 修复 `system.ts` / `stage_processor.ts` 重复对象属性
+- [x] 修复 `wuxiekeji.ts` 的 `TimeLimitVariant` 类型
+- [x] 服务端 build/dev 回归（编译后入口与 ts-node 入口均通过 socket 连接/大厅 ping）
+- [x] desktop 类型检查、Vite 构建与无 GUI 自动化测试
 
-说明：TypeScript 5 的类型错误主要集中在 core，不影响 Node 26 运行，因此不阻塞 Phase 2。
+说明：代码和无 GUI 回归已完成；游戏交互与 Electron 人工验收仍待执行。
 
 ### Phase 2：构建链迁移 Vite 8
 
@@ -319,6 +320,61 @@ desktop yarn build:mac            CRA 回退通过
 2. Phase 4/5：React 19 + MobX 7。
 3. Phase 6：Electron 45 + Vite/本地服务加载方案。
 4. Phase 7：ESLint 10、lockfile/workspace 收尾。
+
+### 2026-11-11：容器内无 GUI 基线验证
+
+当前环境无法进行人工 UI 操作。可以继续代码迁移，但将自动化检查与人工验收分开记录；构建通过不代表交互行为通过。
+
+环境：Node v26.12.0、Yarn 1.22.22；尚未在本次验证中覆盖 `.nvmrc` 指定的 Node 24.22.0。
+
+| 检查 | 结果 |
+|---|---|
+| 根目录 `yarn lint` | 通过 |
+| `src/server`：`yarn build` | 通过（TypeScript 4.3.5） |
+| desktop：`yarn build:vite` | 通过；仍有 chunk size / ineffective dynamic import 警告 |
+| desktop：`yarn tsc --noEmit` | 通过（TypeScript 4.3.5） |
+| 编译后服务端启动 + Engine.IO v3 polling handshake | 通过；端口 2020 返回包含 session ID 的握手响应，检查后服务进程已停止 |
+| desktop：`CI=true yarn test --watchAll=false --runInBand` | 失败于测试初始化；`src/setupTests.ts` 引用的 `@testing-library/jest-dom/extend-expect` 无法解析，尚未执行测试用例 |
+| UI 导航、游戏交互、回放、Electron 启动 | 未验证；留待有 UI 环境时验收 |
+
+执行约束：
+
+- desktop 的 `build:vite` 会调用 `sync:mac` 删除并复制 `src/core`；不能同时运行前端 type-check 或其他读取此目录的检查。本次并行执行曾产生临时 missing-file 错误，构建完成后重新 type-check 已通过。
+- 迁移继续采用独立步骤：先修复自动化测试基线，再开展 Phase 1b TypeScript 升级。
+- 不因缺少 GUI 跳过类型检查，不以 Vite 构建替代类型检查，也不把未进行的人工验收标为通过。
+
+### 2026-11-11：测试基线修复与 Phase 1b 完成
+
+依赖变更：
+
+- 根目录、服务端、desktop 使用 `typescript@5.9.3`、`@types/node@24.19.2`；更新各自 lockfile。
+- 根目录 `ts-node` 升到 10.9.2，与服务端保持一致。
+- desktop 显式声明 React 17 类型，测试 renderer / renderer 类型对齐 React 17；React 运行时未升级。
+
+修复内容：
+
+- `Room.trigger` / `ServerRoom.trigger` 使用一致的受约束事件泛型，替换不兼容的条件类型。
+- Player 技能查询保留原泛型调用接口，以 overload 分离返回类型和实现；不改过滤逻辑。
+- 删除两处内容相同的重复对象属性；数字/二元数组先做类型缩窄再比较。
+- `wuxiekeji` 通知使用命名 enum，保留原 1500ms 等待。
+- timer handle 改用 `ReturnType<typeof setTimeout>`；压缩方法直接使用 zlib 返回的 Buffer，避免重复复制。
+- 移除未使用且缺失的 jest-dom 初始化导入，配置 Jest `src` 模块路径。
+- App 测试验证实际开场页/router 的渲染、跳转与 cleanup；无关页面和网络/媒体服务使用 mock。
+- 新增 WaitingRoomStore 的 deep / shallow / ref 响应性测试，以及压缩兼容性/损坏输入测试。
+- CI 新增顺序执行的 frontend type-check 与 headless test，跳过不需要的 Electron 二进制下载。
+
+验证（本容器 Node 26.12.0）：
+
+- `yarn lint`、服务端 `yarn build`、desktop `yarn build:vite` / `yarn tsc --noEmit` 通过。
+- desktop `CI=true yarn test --watchAll=false --runInBand`：3 suites / 16 tests 通过，无快照自动生成。
+- 编译后服务端与 ts-node 开发入口均启动成功；真实 Socket.IO 2 客户端连接 `/lobby` 并收到 PingServer 响应；检查后进程已清理。
+- gzip/base64 空串、ASCII、Unicode、大字符串 round trip 通过。
+- 仍有 Vite chunk size / ineffective dynamic import、旧 CRA 依赖 peer warning；未在本轮处理。
+- `.nvmrc` 对应 Node 24 的运行验证尚未执行；由 CI 矩阵进一步覆盖。
+- 根 `tsconfig.json` 现有范围包含独立 desktop 工程，根 `yarn tsc --noEmit` 试验存在跨工程路径/类型冲突；本轮验收使用各工程自己的配置，根构建范围留待工程化收尾。
+- UI / 完整游戏流程 / Electron 未做人工验证；不以 headless 测试替代此验收。
+
+下一步：先审查并提交本阶段变更，再独立开展 React/Router 迁移；MobX 7 与 Electron 升级不混入本阶段。
 
 ## 9. 手动 Smoke 清单
 

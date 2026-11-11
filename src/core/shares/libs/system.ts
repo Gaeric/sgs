@@ -207,10 +207,6 @@ export namespace System {
     [AwakeningSkillApplierEnum.WuJi]: (room: Room, player: Player) => room.Analytics.getDamage(player.Id, 'round') > 2,
     [AwakeningSkillApplierEnum.DuJiang]: (room: Room, player: Player) => player.Armor > 2,
     [AwakeningSkillApplierEnum.ZhanYuan]: (room: Room, player: Player) => player.getFlag<number>(ZhanYuan.Name) > 7,
-    [AwakeningSkillApplierEnum.PveClassicGuYong]: (room: Room, player: Player) =>
-      [MarkEnum.PveTanLang, MarkEnum.PveWenQu, MarkEnum.PveWuQu, MarkEnum.PvePoJun].every(
-        mark => player.getMark(mark) > 0,
-      ),
   };
 
   export const SkillTagsTransformer: Record<string, (values: any[]) => (Card | Character)[]> = {

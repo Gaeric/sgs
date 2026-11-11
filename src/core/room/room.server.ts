@@ -342,10 +342,7 @@ export class ServerRoom extends Room<WorkPlace.Server> {
     return canTriggerSkills;
   }
 
-  public async trigger<T = unknown>(
-    content: T extends unknown ? ServerEventFinder<GameEventIdentifiers> : T,
-    stage?: AllStage,
-  ) {
+  public async trigger<T extends ServerEventFinder<GameEventIdentifiers>>(content: T, stage?: AllStage) {
     if (!this.CurrentPlayer || !this.isPlaying()) {
       this.logger.debug('Do Not Need to Trigger Skill Because GameEnd Or Not CurrentPlayer');
       return;
@@ -378,7 +375,7 @@ export class ServerRoom extends Room<WorkPlace.Server> {
       }
     }
 
-    const { triggeredBySkills } = content as ServerEventFinder<GameEventIdentifiers>;
+    const { triggeredBySkills } = content;
     const bySkills = triggeredBySkills
       ? triggeredBySkills.map(skillName => Sanguosha.getSkillBySkillName(skillName))
       : undefined;
@@ -820,7 +817,7 @@ export class ServerRoom extends Room<WorkPlace.Server> {
         fromId: playerId,
         droppedCards: [],
       };
-      if (event.cardAmount <= 0) {
+      if (typeof event.cardAmount === 'number' && event.cardAmount <= 0) {
         return autoResponse;
       }
 

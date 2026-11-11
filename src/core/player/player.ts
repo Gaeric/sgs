@@ -776,50 +776,52 @@ export abstract class Player implements PlayerInfo {
     return room.CommonRules.getCardAdditionalNumberOfTargets(room, this, card);
   }
 
-  public getEquipSkills<T extends Skill = Skill>(skillType?: SkillStringType) {
+  public getEquipSkills<T extends Skill = Skill>(skillType?: SkillStringType): T[];
+  public getEquipSkills(skillType?: SkillStringType): Skill[] {
     const equipCards = this.playerCards[PlayerCardsArea.EquipArea].map(card => Sanguosha.getCardById(card));
     const skills = equipCards.reduce<Skill[]>((skills, card) => skills.concat([card.Skill, ...card.ShadowSkills]), []);
     if (skillType === undefined) {
-      return skills as T[];
+      return skills;
     }
 
     switch (skillType) {
       case 'filter':
-        return skills.filter(skill => skill instanceof FilterSkill) as T[];
+        return skills.filter(skill => skill instanceof FilterSkill);
       case 'globalFilter':
-        return skills.filter(skill => skill instanceof GlobalFilterSkill) as T[];
+        return skills.filter(skill => skill instanceof GlobalFilterSkill);
       case 'active':
-        return skills.filter(skill => skill instanceof ActiveSkill) as T[];
+        return skills.filter(skill => skill instanceof ActiveSkill);
       case 'viewAs':
-        return skills.filter(skill => skill instanceof ViewAsSkill) as T[];
+        return skills.filter(skill => skill instanceof ViewAsSkill);
       case 'trigger':
-        return skills.filter(skill => skill instanceof TriggerSkill) as T[];
+        return skills.filter(skill => skill instanceof TriggerSkill);
       case 'breaker':
-        return skills.filter(skill => skill instanceof RulesBreakerSkill) as T[];
+        return skills.filter(skill => skill instanceof RulesBreakerSkill);
       case 'globalBreaker':
-        return skills.filter(skill => skill instanceof GlobalRulesBreakerSkill) as T[];
+        return skills.filter(skill => skill instanceof GlobalRulesBreakerSkill);
       case 'compulsory':
-        return skills.filter(skill => skill.SkillType === SkillType.Compulsory) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Compulsory);
       case 'awaken':
-        return skills.filter(skill => skill.SkillType === SkillType.Awaken) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Awaken);
       case 'limit':
-        return skills.filter(skill => skill.SkillType === SkillType.Limit) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Limit);
       case 'common':
-        return skills.filter(skill => skill.SkillType === SkillType.Common) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Common);
       case 'transform':
-        return skills.filter(skill => skill instanceof TransformSkill) as T[];
+        return skills.filter(skill => skill instanceof TransformSkill);
       case 'switch':
-        return skills.filter(skill => skill.isSwitchSkill()) as T[];
+        return skills.filter(skill => skill.isSwitchSkill());
       case 'skillProhibited':
-        return skills.filter(skill => skill instanceof SkillProhibitedSkill) as T[];
+        return skills.filter(skill => skill instanceof SkillProhibitedSkill);
       case 'quest':
-        return skills.filter(skill => skill.SkillType === SkillType.Quest) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Quest);
       default:
         throw Precondition.UnreachableError(skillType);
     }
   }
 
-  public getPlayerSkills<T extends Skill = Skill>(skillType?: SkillStringType, includeDisabled?: boolean): T[] {
+  public getPlayerSkills<T extends Skill = Skill>(skillType?: SkillStringType, includeDisabled?: boolean): T[];
+  public getPlayerSkills(skillType?: SkillStringType, includeDisabled?: boolean): Skill[] {
     Precondition.assert(
       this.playerCharacter !== undefined,
       `Player ${this.playerName} has not been initialized with a character yet`,
@@ -829,40 +831,40 @@ export abstract class Player implements PlayerInfo {
       skill => (includeDisabled || !UniqueSkillRule.isProhibited(skill, this)) && !skill.isSideEffectSkill(),
     );
     if (skillType === undefined) {
-      return skills as T[];
+      return skills;
     }
 
     switch (skillType) {
       case 'filter':
-        return skills.filter(skill => skill instanceof FilterSkill) as T[];
+        return skills.filter(skill => skill instanceof FilterSkill);
       case 'globalFilter':
-        return skills.filter(skill => skill instanceof GlobalFilterSkill) as T[];
+        return skills.filter(skill => skill instanceof GlobalFilterSkill);
       case 'viewAs':
-        return skills.filter(skill => skill instanceof ViewAsSkill) as T[];
+        return skills.filter(skill => skill instanceof ViewAsSkill);
       case 'active':
-        return skills.filter(skill => skill instanceof ActiveSkill) as T[];
+        return skills.filter(skill => skill instanceof ActiveSkill);
       case 'trigger':
-        return skills.filter(skill => skill instanceof TriggerSkill) as T[];
+        return skills.filter(skill => skill instanceof TriggerSkill);
       case 'breaker':
-        return skills.filter(skill => skill instanceof RulesBreakerSkill) as T[];
+        return skills.filter(skill => skill instanceof RulesBreakerSkill);
       case 'globalBreaker':
-        return skills.filter(skill => skill instanceof GlobalRulesBreakerSkill) as T[];
+        return skills.filter(skill => skill instanceof GlobalRulesBreakerSkill);
       case 'transform':
-        return skills.filter(skill => skill instanceof TransformSkill) as T[];
+        return skills.filter(skill => skill instanceof TransformSkill);
       case 'compulsory':
-        return skills.filter(skill => skill.SkillType === SkillType.Compulsory) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Compulsory);
       case 'awaken':
-        return skills.filter(skill => skill.SkillType === SkillType.Awaken) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Awaken);
       case 'limit':
-        return skills.filter(skill => skill.SkillType === SkillType.Limit) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Limit);
       case 'common':
-        return skills.filter(skill => skill.SkillType === SkillType.Common) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Common);
       case 'switch':
-        return skills.filter(skill => skill.isSwitchSkill()) as T[];
+        return skills.filter(skill => skill.isSwitchSkill());
       case 'skillProhibited':
-        return skills.filter(skill => skill instanceof SkillProhibitedSkill) as T[];
+        return skills.filter(skill => skill instanceof SkillProhibitedSkill);
       case 'quest':
-        return skills.filter(skill => skill.SkillType === SkillType.Quest) as T[];
+        return skills.filter(skill => skill.SkillType === SkillType.Quest);
       default:
         throw Precondition.UnreachableError(skillType);
     }

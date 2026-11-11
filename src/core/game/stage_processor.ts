@@ -371,11 +371,6 @@ const gameEventStageList: {
     RecoverEffectStage.RecoverEffecting,
     RecoverEffectStage.AfterRecoverEffect,
   ],
-  [GameEventIdentifiers.DrawCardEvent]: [
-    DrawCardStage.BeforeDrawCardEffect,
-    DrawCardStage.CardDrawing,
-    DrawCardStage.AfterDrawCardEffect,
-  ],
   [GameEventIdentifiers.PinDianEvent]: [
     PinDianStage.BeforePinDianEffect,
     PinDianStage.PinDianEffect,

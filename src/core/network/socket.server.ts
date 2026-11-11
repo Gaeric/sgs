@@ -28,7 +28,7 @@ export class ServerSocket extends Socket<WorkPlace.Server> {
     };
   } = {} as any;
 
-  private playerReconnectTimer: { [K in string]: NodeJS.Timer } = {};
+  private playerReconnectTimer: { [K in string]: ReturnType<typeof setTimeout> } = {};
   private mapSocketIdToPlayerId: { [K in string]: string } = {};
   private mapPlayerIdToObservers: { [K in string]: string[] } = {};
   private lastResponsiveEvent:

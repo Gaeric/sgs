@@ -18,7 +18,7 @@ export type TooltipProps = {
       };
 };
 
-let timer: NodeJS.Timer | undefined;
+let timer: ReturnType<typeof setTimeout> | undefined;
 
 export const Tooltip = (props: TooltipProps) => {
   const { closeCallback, children, position, className, closeAfter, autoAnimation } = props;

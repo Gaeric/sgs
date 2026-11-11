@@ -47,7 +47,7 @@ import { getSkinName } from './ui/switch_avatar/switch_skin';
 
 export class GameClientProcessor {
   private isObserver: boolean = false;
-  protected onPlayTrustedActionTimer: NodeJS.Timer | undefined;
+  protected onPlayTrustedActionTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected excludedResponsiveEvents: GameEventIdentifiers[] = [
     GameEventIdentifiers.UserMessageEvent,

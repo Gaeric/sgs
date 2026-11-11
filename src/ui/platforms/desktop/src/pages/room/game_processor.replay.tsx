@@ -89,7 +89,7 @@ export class ReplayClientProcessor extends GameClientProcessor {
     type: T,
     content: ServerEventFinder<T>,
   ) {
-    if (content.cardAmount <= 0) {
+    if (typeof content.cardAmount === 'number' && content.cardAmount <= 0) {
       return;
     }
 

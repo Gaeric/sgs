@@ -2,7 +2,7 @@ import { WuXieKeJiSkillTrigger } from 'core/ai/skills/cards/wuxiekeji';
 import { CardMatcher } from 'core/cards/libs/card_matcher';
 import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
 import { EventPacker } from 'core/event/event_packer';
-import { Room } from 'core/room/room';
+import { Room, TimeLimitVariant } from 'core/room/room';
 import { System } from 'core/shares/libs/system';
 import { AI, CommonSkill, ResponsiveSkill } from 'core/skills/skill';
 
@@ -34,7 +34,7 @@ export class WuXieKeJiSkill extends ResponsiveSkill {
 
     room.doNotify(
       room.AlivePlayers.map(player => player.Id),
-      1500,
+      TimeLimitVariant.AskForWuxiekeji,
     );
     await System.MainThread.sleep(1500);
 

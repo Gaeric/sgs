@@ -35,3 +35,13 @@ jobs:
         run: yarn transpile:client
         env:
           CI: true
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      # Build first: build:vite syncs src/core, so these checks must be sequential.
+      - name: Type-check client
+        working-directory: src/ui/platforms/desktop
+        run: yarn tsc --noEmit
+      - name: Test client
+        working-directory: src/ui/platforms/desktop
+        run: yarn test --watchAll=false --runInBand
+        env:
+          CI: true

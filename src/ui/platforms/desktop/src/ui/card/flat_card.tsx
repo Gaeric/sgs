@@ -31,7 +31,7 @@ export class FlatClientCard extends React.PureComponent<FlatClientCardProps> {
   private equipName: string | undefined;
   @mobx.observable.ref
   onTooltipOpened: boolean = false;
-  private onTooltipOpeningTimer: NodeJS.Timer;
+  private onTooltipOpeningTimer: ReturnType<typeof setTimeout>;
 
   @mobx.action
   async componentDidUpdate() {
