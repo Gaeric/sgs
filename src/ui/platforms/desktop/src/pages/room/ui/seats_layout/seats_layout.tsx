@@ -84,7 +84,7 @@ export class SeatsLayout extends React.Component<SeatsLayoutProps> {
 
   private getLeftPlayers() {
     let numberOfPlayers = this.sideNumberOfPlayers;
-    const players: JSX.Element[] = [];
+    const players: React.ReactElement[] = [];
     if (this.ClientPlayerPosition === undefined) {
       return;
     }
@@ -128,7 +128,7 @@ export class SeatsLayout extends React.Component<SeatsLayoutProps> {
   }
   private getRightPlayers() {
     let numberOfPlayers = this.sideNumberOfPlayers;
-    const players: JSX.Element[] = [];
+    const players: React.ReactElement[] = [];
     if (this.ClientPlayerPosition === undefined) {
       return;
     }
@@ -173,7 +173,7 @@ export class SeatsLayout extends React.Component<SeatsLayoutProps> {
 
   private getTopPlayers() {
     let playerIndex = this.getTopPlayerOffsetPosition();
-    const players: JSX.Element[] = [];
+    const players: React.ReactElement[] = [];
 
     let numberOfPlayers = this.topNumberOfPlayers;
     while (numberOfPlayers > 0) {

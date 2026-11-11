@@ -77,7 +77,7 @@ const OneMask = (props: {
 const AllMasks = (props: { onClick?(role: PlayerRole): () => void; opened: boolean; gameMode: GameMode }) => {
   const { onClick, opened, gameMode } = props;
 
-  const masks: JSX.Element[] = [];
+  const masks: React.ReactElement[] = [];
   for (const role of [PlayerRole.Loyalist, PlayerRole.Rebel, PlayerRole.Renegade, PlayerRole.Unknown]) {
     masks.push(
       <OneMask

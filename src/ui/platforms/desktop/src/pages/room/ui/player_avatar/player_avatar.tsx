@@ -62,9 +62,9 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
   onTooltipOpened: boolean = false;
   private onTooltipOpeningTimer: ReturnType<typeof setTimeout>;
   @mobx.observable.ref
-  PlayerRoleCard: () => JSX.Element;
+  PlayerRoleCard: () => React.ReactElement;
   @mobx.observable.ref
-  PlayerImage: () => JSX.Element;
+  PlayerImage: () => React.ReactElement;
   @mobx.observable.ref
   private skinName: string;
   @mobx.observable.ref
@@ -508,7 +508,7 @@ export class PlayerAvatar extends React.Component<PlayerAvatarProps> {
       return;
     }
 
-    const marks: JSX.Element[] = [];
+    const marks: React.ReactElement[] = [];
     const limitSkills = clientPlayer.getSkills('limit');
     const awakenSkills = clientPlayer.getSkills('awaken');
     const switchSkills = clientPlayer.getSkills('switch').filter(skill => !skill.isShadowSkill());

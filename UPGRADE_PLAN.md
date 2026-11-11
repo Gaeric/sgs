@@ -198,11 +198,11 @@ MobX 装饰器类检查: 35/35 都有 makeObservable
 - [x] Phase 4a：`react`/`react-dom` 17 → 18.3.1（独立过渡检查点）
 - [x] Phase 4a：React/DOM/test-renderer 类型与 React 18 对齐
 - [x] Phase 4a：App 测试改为真实 DOM `createRoot`，新增动画根生命周期测试
-- [ ] `react`/`react-dom` → 19.x
-- [ ] `@types/react`/`@types/react-dom` → 19.x
+- [x] `react`/`react-dom` → 19.3.1（Phase 4b）
+- [x] `@types/react`/`@types/react-dom` → 19.3.0（Phase 4b）
 - [x] `ReactDOM.render` / `unmountComponentAtNode` → `createRoot` / `root.unmount`（入口与动画）
 - [ ] `react-router-dom` 5 → 7，迁移 Route API
-- [ ] 暂不开启 StrictMode
+- [x] 暂不开启 StrictMode（React 19 迁移保持关闭）
 - [ ] 检查生命周期与 socket 订阅清理
 
 验收：
@@ -401,6 +401,28 @@ desktop yarn build:mac            CRA 回退通过
 - 仍有既有 Vite chunk/import 警告和旧 CRA / Router peer dependency 警告。实际视觉动画、完整游戏、Electron、Node 24 运行验证仍待完成。
 
 下一步：审查/提交此 React 18 检查点后，再独立推进 React 19 与 Router API 迁移。
+
+### 2026-11-11：Phase 4b React 19 检查点
+
+变更：
+
+- 从 npm registry 确认稳定版后，将 desktop `react` / `react-dom` 固定到 19.3.1；类型更新到 19.3.0，统一 React 类型 resolution 并更新 lockfile。
+- 移除未使用的 `react-test-renderer` 与 `@types/react-test-renderer`，所有组件测试使用真实 DOM roots。
+- 旧全局 `JSX.Element` 改为显式 `React.ReactElement`，覆盖 desktop 与共享的 client translation 模块；不添加全局 JSX 兼容 shim。
+- desktop TypeScript `jsx` 改为 `react-jsx`，使用 React 19 所需的现代自动 JSX transform；Vite / Jest 已有对应配置。
+- 新增 4 个真实 DOM MobX class observer 集成测试，验证 legacy decorators + PureComponent 的 action/props 更新、ref store 替换、shallow 数组行为，以及 unmount 释放订阅。
+- MobX 仍为 6.16.1、mobx-react 仍为 9.2.2（其 peer range 支持 React 19），Router 运行时仍为 5.1.2；StrictMode 保持关闭。未进行 Router API、Electron 或服务端协议升级。
+
+验证（本容器 Node 26.12.0）：
+
+- desktop `yarn install --frozen-lockfile`、`yarn build:vite`、`yarn tsc --noEmit` 通过。
+- `CI=true yarn test --watchAll=false --runInBand`：5 suites / 26 tests 全部通过，测试输出无 React 警告。
+- 根 `yarn lint`、服务端 `yarn build` 通过。
+- 编译后服务端启动、Engine.IO v3 handshake 与真实 Socket.IO 2 `/lobby` ping 通过，进程已清理。
+- 仍有既有 Vite chunk/import 警告和旧 CRA / Router peer dependency 警告；Router 的未覆盖流程不能仅靠开场页测试认定完全兼容。
+- 完整游戏交互、视觉动画、Electron 运行与 Node 24 验证仍待执行；Phase 4 的 Router/全流程验收项未完成。
+
+下一步：审查并提交 React 19 检查点，再独立迁移 Router 5 API，扩展路由与房间订阅清理测试。MobX 7 与 Electron 升级不混入本阶段。
 
 ## 9. 手动 Smoke 清单
 

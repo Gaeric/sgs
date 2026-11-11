@@ -18,7 +18,7 @@ const getStatus = (hp: number, maxHp: number): HealthyStatusType => {
 };
 
 const getMagatama = (amount: number, size: 'regular' | 'small', status: HealthyStatusType) => {
-  const magatamas: JSX.Element[] = [];
+  const magatamas: React.ReactElement[] = [];
   for (let i = 0; i < amount; i++) {
     magatamas.push(
       status === 'damaged' ? <DamagedMagatama key={i} size={size} /> : <Magatama key={i} size={size} status={status} />,

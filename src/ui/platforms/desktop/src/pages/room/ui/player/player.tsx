@@ -64,9 +64,9 @@ export class PlayerCard extends React.Component<PlayerCardProps> {
   @mobx.observable.ref
   onTooltipOpened: boolean = false;
   @mobx.observable.ref
-  PlayerImage: () => JSX.Element;
+  PlayerImage: () => React.ReactElement;
   @mobx.observable.ref
-  PlayerRoleCard: () => JSX.Element;
+  PlayerRoleCard: () => React.ReactElement;
 
   @mobx.observable.ref
   mainImage: ImageProps | undefined;
@@ -422,7 +422,7 @@ export class PlayerCard extends React.Component<PlayerCardProps> {
       return;
     }
 
-    const marks: JSX.Element[] = [];
+    const marks: React.ReactElement[] = [];
     const limitSkills = clientPlayer.getSkills('limit');
     const awakenSkills = clientPlayer.getSkills('awaken');
     const switchSkills = clientPlayer.getSkills('switch').filter(skill => !skill.isShadowSkill());

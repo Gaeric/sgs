@@ -30,7 +30,7 @@ export type GuanXingDialogProps = {
 };
 
 const EmptyCardSlots = (props: { slotName: string; length: number; translator: ClientTranslationModule }) => {
-  const slots: JSX.Element[] = [];
+  const slots: React.ReactElement[] = [];
   for (let i = 0; i < props.length; i++) {
     slots.push(
       <CardSlot

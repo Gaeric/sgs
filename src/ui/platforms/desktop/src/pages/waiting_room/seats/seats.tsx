@@ -150,7 +150,7 @@ export class Seats extends React.Component<SeatsProps> {
   };
 
   createSeats = () => {
-    const seatComponents: JSX.Element[] = [];
+    const seatComponents: React.ReactElement[] = [];
     for (const seat of this.props.store.seats) {
       const hostControl = this.props.isHost && this.props.store.selfPlayerId !== (seat as any).playerId;
       seatComponents.push(

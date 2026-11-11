@@ -49,7 +49,7 @@ export class MoveInstantCardAnimation extends UiAnimation {
   }
 
   private createCards(cards: MoveCardProps[]) {
-    const cardsElement: JSX.Element[] = [];
+    const cardsElement: React.ReactElement[] = [];
     for (let i = 0; i < cards.length; i++) {
       const card = cards[i];
 

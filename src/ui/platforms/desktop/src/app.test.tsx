@@ -24,7 +24,7 @@ jest.mock('./pages/lobby/lobby', () => ({
 
 type AppProps = React.ComponentProps<typeof App>;
 
-describe('App startup with a React 18 DOM root', () => {
+describe('App startup with a React 19 DOM root', () => {
   let root: Root | undefined;
   let container: HTMLDivElement;
   let props: AppProps;

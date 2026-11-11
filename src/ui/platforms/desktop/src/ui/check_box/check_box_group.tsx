@@ -10,7 +10,7 @@ export type CheckBoxGroupProps = {
   onChecked?(checkedIds: (string | number)[]): void;
   itemsPerLine?: 4 | 5 | 6;
   className?: string;
-  head?: string | JSX.Element;
+  head?: string | React.ReactElement;
   disabled?: boolean;
 };
 

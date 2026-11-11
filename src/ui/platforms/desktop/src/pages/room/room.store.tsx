@@ -44,18 +44,18 @@ export class RoomStore {
   clientPlayerId: PlayerId;
 
   @mobx.observable.ref
-  selectorDialog: JSX.Element | undefined;
+  selectorDialog: React.ReactElement | undefined;
 
   @mobx.observable.ref
-  selectorViewDialog: JSX.Element | undefined;
+  selectorViewDialog: React.ReactElement | undefined;
 
   @mobx.observable.ref
-  incomingConversation: JSX.Element | undefined;
+  incomingConversation: React.ReactElement | undefined;
 
   @mobx.observable.shallow
-  gameLog: (string | JSX.Element)[] = [];
+  gameLog: (string | React.ReactElement)[] = [];
   @mobx.observable.shallow
-  messageLog: (string | JSX.Element)[] = [];
+  messageLog: (string | React.ReactElement)[] = [];
 
   @mobx.observable.shallow
   displayedCards: DisplayCardProp[] = [];

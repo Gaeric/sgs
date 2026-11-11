@@ -60,9 +60,9 @@ const CardSelector = (props: CardSelectorProps) => {
     setUpdate(!update);
   };
 
-  const optionCardsLine: JSX.Element[] = [];
+  const optionCardsLine: React.ReactElement[] = [];
   if (options instanceof Array || typeof options === 'number') {
-    const cardLine: JSX.Element[] = [];
+    const cardLine: React.ReactElement[] = [];
     if (typeof options === 'number') {
       for (let i = 0; i < options; i++) {
         cardLine.push(
@@ -113,7 +113,7 @@ const CardSelector = (props: CardSelectorProps) => {
       }
 
       const fromArea = parseInt(area, 10);
-      const cardLine: JSX.Element[] = [];
+      const cardLine: React.ReactElement[] = [];
       if (typeof cardIds === 'number') {
         for (let i = 0; i < cardIds; i++) {
           cardLine.push(

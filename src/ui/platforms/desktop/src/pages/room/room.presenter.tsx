@@ -139,11 +139,11 @@ export class RoomPresenter {
   }
 
   @mobx.action
-  addGameLog(log: string | JSX.Element) {
+  addGameLog(log: string | React.ReactElement) {
     this.store.gameLog.push(log);
   }
   @mobx.action
-  addUserMessage(text: string | JSX.Element) {
+  addUserMessage(text: string | React.ReactElement) {
     this.store.messageLog.push(text);
   }
 
@@ -230,7 +230,7 @@ export class RoomPresenter {
   }
 
   @mobx.action
-  createViewDialog = (dialog: JSX.Element) => {
+  createViewDialog = (dialog: React.ReactElement) => {
     this.store.selectorViewDialog = dialog;
   };
   @mobx.action
@@ -239,7 +239,7 @@ export class RoomPresenter {
   }
 
   @mobx.action
-  createDialog = (dialog: JSX.Element) => {
+  createDialog = (dialog: React.ReactElement) => {
     this.store.selectorDialog = dialog;
   };
 

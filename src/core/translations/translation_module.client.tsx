@@ -8,12 +8,12 @@ import { TranslationModule } from './translation_module';
 
 export type TranslatedCardObject = {
   cardSuit: CardSuit;
-  suitElement: JSX.Element;
+  suitElement: React.ReactElement;
   cardNumber: string;
   cardName: string;
 };
 type EmojiOrImageTranslationDictionary = {
-  [k: string]: JSX.Element;
+  [k: string]: React.ReactElement;
 };
 
 export class ClientTranslationModule extends TranslationModule {
@@ -62,7 +62,7 @@ export class ClientTranslationModule extends TranslationModule {
     this.currentPlayer = player;
   }
 
-  public addEmojiOrImageSymbolText(...symbolTextPair: [string | number, JSX.Element][]) {
+  public addEmojiOrImageSymbolText(...symbolTextPair: [string | number, React.ReactElement][]) {
     for (const [rawText, translatePath] of symbolTextPair) {
       this.emojiOrImageTextDict[TranslationPack.patchEmojiOrImageInTranslation(rawText)] = translatePath;
     }
@@ -71,7 +71,7 @@ export class ClientTranslationModule extends TranslationModule {
     return this.emojiOrImageTextDict[symbolText];
   }
 
-  public translatePatchedCardText(text: string, dictionary: TranslationsDictionary): JSX.Element {
+  public translatePatchedCardText(text: string, dictionary: TranslationsDictionary): React.ReactElement {
     const getCardNumberStyle = (cardSuit: CardSuit): React.CSSProperties => {
       if (cardSuit === CardSuit.Heart || cardSuit === CardSuit.Diamond) {
         return {
@@ -121,7 +121,7 @@ export class ClientTranslationModule extends TranslationModule {
     );
   }
 
-  public translatePatchedPlayerText(text: string, dictionary: TranslationsDictionary): JSX.Element {
+  public translatePatchedPlayerText(text: string, dictionary: TranslationsDictionary): React.ReactElement {
     const playerObjectArray: string[] = JSON.parse(text.slice(TranslationPack.translatePlayerObjectSign.length));
 
     const translatedPlayerObject = playerObjectArray.map(playerText => {
@@ -146,11 +146,11 @@ export class ClientTranslationModule extends TranslationModule {
     );
   }
 
-  public disPatchedPureText(text: string): JSX.Element {
+  public disPatchedPureText(text: string): React.ReactElement {
     return <span style={this.boldTextStyle}>{text.slice(TranslationPack.pureTextSign.length)}</span>;
   }
 
-  public trx(rawText: string): JSX.Element {
+  public trx(rawText: string): React.ReactElement {
     const dispatchedObject = TranslationPack.dispatch(rawText);
     const dictionary = this.dictionary.get(this.currentLanguage);
 
@@ -176,7 +176,7 @@ export class ClientTranslationModule extends TranslationModule {
       return <span>{this.tr(rawText)}</span>;
     }
 
-    const textCombinations: JSX.Element[] = dispatchedObject.params.map(param => {
+    const textCombinations: React.ReactElement[] = dispatchedObject.params.map(param => {
       if (typeof param === 'string' && dictionary) {
         if (TranslationPack.isCardObjectText(param)) {
           return <span key={Algorithm.generateUUID()}>{this.translatePatchedCardText(param, dictionary)}</span>;
@@ -212,7 +212,7 @@ export class ClientTranslationModule extends TranslationModule {
       );
     });
 
-    const translatedReactComponents: JSX.Element[] = [];
+    const translatedReactComponents: React.ReactElement[] = [];
     const splitRawText = translatedOriginalText.split(/\{[0-9]\}/).map(splitStr => splitStr.trim());
     for (let i = 0; i < splitRawText.length; i++) {
       if (splitRawText[i]) {

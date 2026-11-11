@@ -82,7 +82,7 @@ export class MessageDialog extends React.Component<MessageDialogProps> {
     this.textMessage = value;
   };
   @mobx.observable.shallow
-  private chatMessages: JSX.Element[] = [];
+  private chatMessages: React.ReactElement[] = [];
 
   private readonly onClickSendButton = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

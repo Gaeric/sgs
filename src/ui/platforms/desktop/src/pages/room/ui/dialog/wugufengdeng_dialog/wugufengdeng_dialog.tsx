@@ -40,9 +40,9 @@ const getCardsContainerLines = ({
 
   const maxCardsPerLine = Math.max(Math.round(cards.length / 2 + 0.5), 4);
   let index = 0;
-  const cardsLine: JSX.Element[][] = [];
+  const cardsLine: React.ReactElement[][] = [];
   while (index < cards.length) {
-    const cardLine: JSX.Element[] = [];
+    const cardLine: React.ReactElement[] = [];
     for (let i = index; i < Math.min(cards.length, maxCardsPerLine + index); i++) {
       const card = Sanguosha.getCardById(cards[i]);
       const isSelected = selected.find(selectedCard => selectedCard.card === card.Id);
