@@ -11,7 +11,7 @@ import { English, SimplifiedChinese, TraditionalChinese } from 'languages';
 import * as mobx from 'mobx';
 import { ClientFlavor } from 'props/config_props';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { App } from './app';
 import { emojiLoader } from './emoji_loader/emoji_loader';
@@ -46,11 +46,15 @@ async function onDeviceReady() {
   emojiLoader(translator);
   Sanguosha.initialize();
 
-  ReactDOM.render(
+  const container = document.getElementById('root');
+  if (!container) {
+    throw new Error('Cannot start the client: missing #root element');
+  }
+
+  createRoot(container).render(
     <MemoryRouter>
       <App config={config} electronLoader={electronLoader} translator={translator} logger={logger} />
     </MemoryRouter>,
-    document.getElementById('root'),
   );
 }
 

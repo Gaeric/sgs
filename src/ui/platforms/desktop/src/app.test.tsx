@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { act, create, ReactTestRenderer } from 'react-test-renderer';
+import { act } from 'react';
+import { createRoot, Root } from 'react-dom/client';
 import { App } from './app';
-import { Lobby } from './pages/lobby/lobby';
 
-// Keep the real App, router, opening page and event emitter. Other pages and
-// service factories are not needed to exercise startup, and would load the
-// entire game engine, socket clients and browser media APIs in jsdom.
+// Exercise the real App, router, opening page and event emitter, without
+// loading the entire engine, socket clients and browser media services.
 jest.mock('core/game/engine', () => ({ Sanguosha: { Version: 'test-version' } }));
 jest.mock('audio_loader/audio_loader_util', () => ({ getAudioLoader: () => ({}) }));
 jest.mock('image_loader/image_loader_util', () => ({ getImageLoader: () => ({}) }));
@@ -15,12 +14,19 @@ jest.mock('pages/characters_list/characters_list', () => ({ CharactersList: () =
 jest.mock('pages/room/replay_room', () => ({ ReplayRoomPage: () => null }));
 jest.mock('pages/room/room', () => ({ RoomPage: () => null }));
 jest.mock('pages/waiting_room/waiting_room', () => ({ WaitingRoom: () => null }));
-jest.mock('./pages/lobby/lobby', () => ({ Lobby: () => null }));
+const mockLobbyProps = jest.fn();
+jest.mock('./pages/lobby/lobby', () => ({
+  Lobby: (props: unknown) => {
+    mockLobbyProps(props);
+    return <div data-testid="lobby" />;
+  },
+}));
 
 type AppProps = React.ComponentProps<typeof App>;
 
-describe('App startup', () => {
-  let app: ReactTestRenderer | undefined;
+describe('App startup with a React 18 DOM root', () => {
+  let root: Root | undefined;
+  let container: HTMLDivElement;
   let props: AppProps;
   let originalTitle: string;
   let originalEventEmitter: unknown;
@@ -30,6 +36,9 @@ describe('App startup', () => {
     originalTitle = document.title;
     originalEventEmitter = (window as any).eventEmitter;
     delete (window as any).eventEmitter;
+    container = document.createElement('div');
+    document.body.append(container);
+    root = createRoot(container);
     props = {
       config: { ui: { language: 'en-US' }, flavor: 'dev', host: [] } as AppProps['config'],
       electronLoader: {} as AppProps['electronLoader'],
@@ -39,10 +48,9 @@ describe('App startup', () => {
   });
 
   afterEach(() => {
-    // Unmount while fake timers are active so the real opening page can remove
-    // its document listener and cancel its six-second navigation timeout.
-    act(() => app?.unmount());
-    app = undefined;
+    act(() => root?.unmount());
+    root = undefined;
+    container.remove();
     jest.clearAllTimers();
     jest.useRealTimers();
     jest.restoreAllMocks();
@@ -55,21 +63,19 @@ describe('App startup', () => {
   });
 
   function renderApp() {
-    act(() => {
-      app = create(<App {...props} />);
-    });
-    return app!;
+    act(() => root!.render(<App {...props} />));
   }
 
   test('redirects to the real opening screen and initializes the document', () => {
-    const rendered = renderApp();
+    renderApp();
 
-    expect(rendered.root.findAllByType('img').map(image => image.props.alt)).toEqual(['logo', 'description']);
-    for (const image of rendered.root.findAllByType('img')) {
-      expect(image.props.src).toEqual(expect.any(String));
-      expect(image.props.src).not.toBe('');
+    const images = Array.from(container.querySelectorAll('img'));
+    expect(images.map(image => image.alt)).toEqual(['logo', 'description']);
+    for (const image of images) {
+      expect(image.getAttribute('src')).toEqual(expect.any(String));
+      expect(image.getAttribute('src')).not.toBe('');
     }
-    expect(rendered.root.findAllByType(Lobby)).toHaveLength(0);
+    expect(container.querySelector('[data-testid="lobby"]')).toBeNull();
     expect(document.title).toBe('New QSanguosha - test-version');
     expect((window as any).eventEmitter.on).toEqual(expect.any(Function));
     expect((window as any).eventEmitter.emit).toEqual(expect.any(Function));
@@ -78,39 +84,43 @@ describe('App startup', () => {
   test.each(['click', 'keydown', 'timeout'])('enters the lobby on %s and cleans up opening effects', trigger => {
     const addListener = jest.spyOn(document, 'addEventListener');
     const removeListener = jest.spyOn(document, 'removeEventListener');
-    const rendered = renderApp();
+    renderApp();
     const keydownListener = addListener.mock.calls.find(([event]) => event === 'keydown')![1];
 
+    if (trigger === 'timeout') {
+      act(() => jest.advanceTimersByTime(5999));
+      expect(container.querySelector('[data-testid="lobby"]')).toBeNull();
+    }
     act(() => {
       if (trigger === 'click') {
-        rendered.root.findByProps({ className: 'scene' }).props.onClick();
+        container.querySelector('.scene')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       } else if (trigger === 'keydown') {
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
       } else {
-        jest.advanceTimersByTime(5999);
-        expect(rendered.root.findAllByType(Lobby)).toHaveLength(0);
         jest.advanceTimersByTime(1);
       }
     });
 
-    const lobby = rendered.root.findByType(Lobby);
-    expect(lobby.props.config).toBe(props.config);
-    expect(lobby.props.electronLoader).toBe(props.electronLoader);
-    expect(lobby.props.translator).toBe(props.translator);
-    expect(lobby.props.location.pathname).toBe('/lobby');
-    expect(rendered.root.findAllByType('img')).toHaveLength(0);
+    expect(container.querySelector('[data-testid="lobby"]')).not.toBeNull();
+    const lobbyProps = mockLobbyProps.mock.calls[mockLobbyProps.mock.calls.length - 1][0];
+    expect(lobbyProps.config).toBe(props.config);
+    expect(lobbyProps.electronLoader).toBe(props.electronLoader);
+    expect(lobbyProps.translator).toBe(props.translator);
+    expect(lobbyProps.location.pathname).toBe('/lobby');
+    expect(container.querySelectorAll('img')).toHaveLength(0);
     expect(removeListener).toHaveBeenCalledWith('keydown', keydownListener);
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  test('cancels opening navigation and removes its key listener when unmounted', () => {
+  test('unmounts its DOM, cancels opening navigation and removes its key listener', () => {
     const removeListener = jest.spyOn(document, 'removeEventListener');
     renderApp();
     expect(jest.getTimerCount()).toBe(1);
 
-    act(() => app!.unmount());
-    app = undefined;
+    act(() => root!.unmount());
+    root = undefined;
 
+    expect(container.childNodes).toHaveLength(0);
     expect(removeListener).toHaveBeenCalledWith('keydown', expect.any(Function));
     expect(jest.getTimerCount()).toBe(0);
   });

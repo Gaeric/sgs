@@ -195,9 +195,12 @@ MobX 装饰器类检查: 35/35 都有 makeObservable
 
 ### Phase 4：React 17 → 19
 
+- [x] Phase 4a：`react`/`react-dom` 17 → 18.3.1（独立过渡检查点）
+- [x] Phase 4a：React/DOM/test-renderer 类型与 React 18 对齐
+- [x] Phase 4a：App 测试改为真实 DOM `createRoot`，新增动画根生命周期测试
 - [ ] `react`/`react-dom` → 19.x
 - [ ] `@types/react`/`@types/react-dom` → 19.x
-- [ ] `ReactDOM.render` → `createRoot`
+- [x] `ReactDOM.render` / `unmountComponentAtNode` → `createRoot` / `root.unmount`（入口与动画）
 - [ ] `react-router-dom` 5 → 7，迁移 Route API
 - [ ] 暂不开启 StrictMode
 - [ ] 检查生命周期与 socket 订阅清理
@@ -375,6 +378,29 @@ desktop yarn build:mac            CRA 回退通过
 - UI / 完整游戏流程 / Electron 未做人工验证；不以 headless 测试替代此验收。
 
 下一步：先审查并提交本阶段变更，再独立开展 React/Router 迁移；MobX 7 与 Electron 升级不混入本阶段。
+
+### 2026-11-11：Phase 4a React 18 检查点
+
+变更：
+
+- desktop `react` / `react-dom` / `react-test-renderer` 固定到 18.3.1，更新对应类型和 lockfile；React 19 尚未升级。
+- React Router 运行时仍为原 5.x；仅更新 Router 5 类型定义，并用 desktop resolutions 统一 `@types/react@18.3.31` 与 `@types/react-router@5.1.20`，避免旧的嵌套类型导致 JSX / children 冲突。
+- `src/index.tsx` 使用 `createRoot`，缺少 `#root` 时明确报错；未开启 StrictMode。
+- `MoveInstantCardAnimation` 每个临时容器创建一个 root，后续帧复用，结束时先 unmount 再删除容器；异常路径也清理。仅首帧使用 `flushSync`，确保初始位置在 timer 前提交，避免并发渲染跳过 CSS 起始帧。
+- 隐藏卡牌采用稳定的 offset key，消除新增测试发现的列表 key 警告。
+- App 测试从 react-test-renderer 改为 jsdom 上的真实 DOM root，验证开场渲染、点击/键盘/超时跳转、props 传递和卸载清理。
+- 新增 6 个动画测试，覆盖真实 root 复用、帧样式与顺序、unmount 清理、异常清理和跳过条件；全套现在是 4 suites / 22 tests。
+- MobX 6、Router 5 运行时、Electron 和服务端协议均未升级。
+
+验证（本容器 Node 26.12.0）：
+
+- desktop `yarn build:vite`、`yarn tsc --noEmit`、`CI=true yarn test --watchAll=false --runInBand` 通过。
+- 根 `yarn lint`、服务端 `yarn build` 通过。
+- 编译后服务端启动与 Socket.IO 2 `/lobby` ping 通过；进程已停止。
+- 源码中不再使用 `ReactDOM.render` / `unmountComponentAtNode`；测试不再导入 react-test-renderer（匹配的依赖暂保留）。
+- 仍有既有 Vite chunk/import 警告和旧 CRA / Router peer dependency 警告。实际视觉动画、完整游戏、Electron、Node 24 运行验证仍待完成。
+
+下一步：审查/提交此 React 18 检查点后，再独立推进 React 19 与 Router API 迁移。
 
 ## 9. 手动 Smoke 清单
 

@@ -1,2 +1,3 @@
-// Tests use Jest's built-in assertions and react-test-renderer, so no global
-// DOM matcher extensions or browser/network service mocks are required here.
+// React 18 concurrent roots need an explicit act environment in this Jest setup.
+// DOM tests wrap renders, events, timer updates and unmounts in act().
+(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;

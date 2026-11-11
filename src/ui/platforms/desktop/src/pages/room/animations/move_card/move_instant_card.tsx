@@ -7,7 +7,8 @@ import { ClientTranslationModule } from 'core/translations/translation_module.cl
 import { ImageLoader } from 'image_loader/image_loader';
 import { RoomStore } from 'pages/room/room.store';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ClientCard } from 'ui/card/card';
 import styles from './move_instant_card.module.css';
 import { Point } from '../position';
@@ -37,7 +38,7 @@ export class MoveInstantCardAnimation extends UiAnimation {
     };
     return (
       <ClientCard
-        key={card?.Id}
+        key={card?.Id ?? `hidden-${offset}`}
         imageLoader={this.imageLoader}
         card={card}
         width={this.cardWidth}
@@ -94,41 +95,45 @@ export class MoveInstantCardAnimation extends UiAnimation {
 
       const container = document.createElement('div');
       document.getElementById('root')?.append(container);
-      ReactDOM.render(
-        <div className={styles.movingCards} style={animationStyles}>
-          {elements}
-        </div>,
-        container,
-      );
+      const root = createRoot(container);
+      try {
+        // Commit the initial position before starting the timer so concurrent rendering
+        // cannot batch it with the destination frame and skip the CSS transition.
+        flushSync(() => {
+          root.render(
+            <div className={styles.movingCards} style={animationStyles}>
+              {elements}
+            </div>,
+          );
+        });
 
-      await UiAnimation.play(100, () => {
-        const toPosition = this.store.animationPosition.getPosition(toId, toId === this.store.clientPlayerId);
-        const leftOffset = (this.cardWidth + (elements.length - 1) * 16) / 2;
+        await UiAnimation.play(100, () => {
+          const toPosition = this.store.animationPosition.getPosition(toId, toId === this.store.clientPlayerId);
+          const leftOffset = (this.cardWidth + (elements.length - 1) * 16) / 2;
 
-        ReactDOM.render(
-          <div
-            className={styles.movingCards}
-            style={{ opacity: 1, transform: `translate(${toPosition.x - leftOffset}px, ${toPosition.y}px)` }}
-          >
-            {elements}
-          </div>,
-          container,
-        );
-      });
+          root.render(
+            <div
+              className={styles.movingCards}
+              style={{ opacity: 1, transform: `translate(${toPosition.x - leftOffset}px, ${toPosition.y}px)` }}
+            >
+              {elements}
+            </div>,
+          );
+        });
 
-      await UiAnimation.play(1000, () => {
-        ReactDOM.render(
-          <div className={styles.movingCards} style={{ opacity: 0 }}>
-            {elements}
-          </div>,
-          container,
-        );
-      });
+        await UiAnimation.play(1000, () => {
+          root.render(
+            <div className={styles.movingCards} style={{ opacity: 0 }}>
+              {elements}
+            </div>,
+          );
+        });
 
-      await UiAnimation.play(150, () => {
-        ReactDOM.unmountComponentAtNode(container);
+        await UiAnimation.play(150);
+      } finally {
+        root.unmount();
         container.remove();
-      });
+      }
     }
   }
 
@@ -157,35 +162,38 @@ export class MoveInstantCardAnimation extends UiAnimation {
 
     const container = document.createElement('div');
     document.getElementById('root')?.append(container);
-    ReactDOM.render(
-      <div className={styles.movingCards} style={animationStyles}>
-        {elements}
-      </div>,
-      container,
-    );
+    const root = createRoot(container);
+    try {
+      // The hidden starting frame must exist before the first animation timer.
+      flushSync(() => {
+        root.render(
+          <div className={styles.movingCards} style={animationStyles}>
+            {elements}
+          </div>,
+        );
+      });
 
-    await UiAnimation.play(100, () => {
-      ReactDOM.render(
-        <div className={styles.movingCards} style={{ ...animationStyles, opacity: 1 }}>
-          {elements}
-        </div>,
-        container,
-      );
-    });
+      await UiAnimation.play(100, () => {
+        root.render(
+          <div className={styles.movingCards} style={{ ...animationStyles, opacity: 1 }}>
+            {elements}
+          </div>,
+        );
+      });
 
-    await UiAnimation.play(1000, () => {
-      ReactDOM.render(
-        <div className={styles.movingCards} style={{ opacity: 0 }}>
-          {elements}
-        </div>,
-        container,
-      );
-    });
+      await UiAnimation.play(1000, () => {
+        root.render(
+          <div className={styles.movingCards} style={{ opacity: 0 }}>
+            {elements}
+          </div>,
+        );
+      });
 
-    await UiAnimation.play(150, () => {
-      ReactDOM.unmountComponentAtNode(container);
+      await UiAnimation.play(150);
+    } finally {
+      root.unmount();
       container.remove();
-    });
+    }
   }
 
   async animate(identifier: GameEventIdentifiers, event: ServerEventFinder<GameEventIdentifiers>) {
