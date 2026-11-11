@@ -15,6 +15,15 @@ export class GuideLine extends UiAnimation {
   ];
 
   private readonly rooElement = document.getElementById('root')!;
+  private readonly activeLines = new Set<HTMLElement>();
+
+  public dispose() {
+    super.dispose();
+    for (const line of this.activeLines) {
+      line.remove();
+    }
+    this.activeLines.clear();
+  }
 
   private calculateAngle(from: Point, to: Point) {
     const xrad = Math.atan2(to.x - from.x, to.y - from.y);
@@ -44,33 +53,40 @@ export class GuideLine extends UiAnimation {
   }
 
   async animate(identifier: GameEventIdentifiers, event: ServerEventFinder<GameEventIdentifiers>) {
-    if (!this.includedEvents.includes(identifier)) {
+    if (this.disposed || !this.includedEvents.includes(identifier)) {
       return;
     }
 
     const steps = this.createAnimationGuidelineSteps(event);
     for (const step of steps) {
+      if (this.disposed) {
+        return;
+      }
       const lines = this.render(step);
+      for (const [line] of lines) {
+        this.activeLines.add(line);
+      }
       this.rooElement.append(...lines.map(line => line[0]));
       for (const [element, length] of lines) {
-        UiAnimation.play(100, () => {
+        this.play(100, () => {
           element.style.transition = `width ${this.animationTime}ms, opacity ${this.defaultAnimationTime}ms`;
           element.style.width = `${length}px`;
           element.style.opacity = '1';
         });
-        UiAnimation.play(this.remainTime - this.defaultAnimationTime * 2 - 10, () => {
+        this.play(this.remainTime - this.defaultAnimationTime * 2 - 10, () => {
           element.style.transition = `opacity ${this.defaultAnimationTime * 2}ms`;
           element.style.opacity = '0';
         });
       }
 
-      UiAnimation.play(this.remainTime, () => {
+      this.play(this.remainTime, () => {
         for (const line of lines) {
           line[0].remove();
+          this.activeLines.delete(line[0]);
         }
       });
 
-      await UiAnimation.play(this.animationTime + this.defaultAnimationTime);
+      await this.play(this.animationTime + this.defaultAnimationTime);
     }
   }
 

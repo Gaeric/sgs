@@ -102,14 +102,22 @@ export class Lobby extends React.Component<LobbyProps> {
   private audioService = installAudioPlayerService(this.props.audioLoader, this.props.electronLoader);
 
   private currentInteractiveRoomInfo: HostRoomInfo;
+  private disposed = false;
+  private roomListQueryGeneration = 0;
 
   private readonly settings = {
     onVolumeChange: mobx.action((volume: number) => {
+      if (this.disposed) {
+        return;
+      }
       this.props.electronLoader.setData(ElectronData.GameVolume, volume.toString());
       this.defaultGameVolume = volume;
       this.audioService.changeGameVolume();
     }),
     onMainVolumeChange: mobx.action((volume: number) => {
+      if (this.disposed) {
+        return;
+      }
       this.props.electronLoader.setData(ElectronData.MainVolume, volume.toString());
       this.defaultMainVolume = volume;
       this.audioService.changeBGMVolume();
@@ -133,6 +141,9 @@ export class Lobby extends React.Component<LobbyProps> {
     this.props.electronLoader.whenUpdate(
       mobx.action(
         (nextVersion: string, progress: number, totalFile: number, complete?: boolean, downloadingFile?: number) => {
+          if (this.disposed) {
+            return;
+          }
           this.updateTo = nextVersion;
           this.updateComplete = !!complete;
           this.updateProgress = progress;
@@ -141,13 +152,29 @@ export class Lobby extends React.Component<LobbyProps> {
         },
       ),
     );
-    this.props.electronLoader.getGameLog().then(mobx.action(inlineHtml => (this.gameLog = inlineHtml)));
+    this.props.electronLoader
+      .getGameLog()
+      .then(
+        mobx.action(inlineHtml => {
+          if (!this.disposed) {
+            this.gameLog = inlineHtml;
+          }
+        }),
+      )
+      .catch(error => this.props.logger.error(error));
   }
 
   private readonly queryRoomList = () => {
+    if (this.disposed) {
+      return;
+    }
+    const generation = ++this.roomListQueryGeneration;
     mobx.runInAction(() => (this.roomList = []));
     this.props.connectionService.Lobby.getRoomList(
       mobx.action(content => {
+        if (this.disposed || generation !== this.roomListQueryGeneration) {
+          return;
+        }
         this.roomList.push(
           ...content.packet.map(roomInfo => ({ info: roomInfo, host: content.hostTag, ping: content.ping })),
         );
@@ -213,8 +240,14 @@ export class Lobby extends React.Component<LobbyProps> {
   );
 
   private createRoom(roomInfo: TemporaryRoomCreationInfo, roomName: string, passcode?: string) {
+    if (this.disposed) {
+      return;
+    }
     if (roomInfo.campaignMode) {
       this.props.campaignService.createRoom(this.props.config.flavor, roomInfo, event => {
+        if (this.disposed) {
+          return;
+        }
         const { packet, ping, hostTag, error } = event;
         if (packet) {
           const { roomId, roomInfo: gameInfo } = packet;
@@ -235,6 +268,9 @@ export class Lobby extends React.Component<LobbyProps> {
       });
     } else {
       this.props.connectionService.Lobby.createWaitingRoom(roomInfo, event => {
+        if (this.disposed) {
+          return;
+        }
         const { packet, ping, hostTag, error } = event;
         if (packet && 'roomId' in packet) {
           const { roomId, roomInfo } = packet;
@@ -254,6 +290,7 @@ export class Lobby extends React.Component<LobbyProps> {
   }
 
   componentWillUnmount() {
+    this.disposed = true;
     const excludedBgmStopList = ['/characters'];
     if (!excludedBgmStopList.includes(this.props.getCurrentLocation().pathname)) {
       this.audioService.stop();
@@ -262,7 +299,7 @@ export class Lobby extends React.Component<LobbyProps> {
 
   @mobx.action
   private readonly onCreateRoom = () => {
-    if (this.unmatchedCoreVersion) {
+    if (this.disposed || this.unmatchedCoreVersion) {
       return;
     }
 
@@ -270,7 +307,7 @@ export class Lobby extends React.Component<LobbyProps> {
   };
 
   private readonly onClickRefresh = () => {
-    if (this.unmatchedCoreVersion) {
+    if (this.disposed || this.unmatchedCoreVersion) {
       return;
     }
 
@@ -279,12 +316,18 @@ export class Lobby extends React.Component<LobbyProps> {
 
   @mobx.action
   private readonly enterRoom = (hostInfo: HostRoomInfo) => () => {
+    if (this.disposed) {
+      return;
+    }
     const { info, host } = hostInfo;
     if (info.passcode) {
       this.openPasscodeEnterDialog = true;
       this.currentInteractiveRoomInfo = hostInfo;
     } else {
       this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
+        if (this.disposed) {
+          return;
+        }
         if (exist) {
           this.props.navigate(`/waiting-room/${info.id}`, {
             state: {
@@ -309,8 +352,14 @@ export class Lobby extends React.Component<LobbyProps> {
 
   @mobx.action
   private readonly enterRoomAsObserver = (hostInfo: HostRoomInfo) => () => {
+    if (this.disposed) {
+      return;
+    }
     const { info, host } = hostInfo;
     this.props.connectionService.Lobby.checkRoomExist(host, info.id, (exist, ping) => {
+      if (this.disposed) {
+        return;
+      }
       if (exist) {
         this.props.navigate(`/room/${info.id}`, {
           state: {
@@ -335,42 +384,66 @@ export class Lobby extends React.Component<LobbyProps> {
 
   @mobx.action
   private readonly onRoomCreated = (roomInfo: TemporaryRoomCreationInfo, roomName: string, passcode?: string) => {
+    if (this.disposed) {
+      return;
+    }
     this.openRoomCreationDialog = false;
     this.createRoom(roomInfo, roomName, passcode);
   };
 
   @mobx.action
   private readonly onRoomCreationCancelled = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openRoomCreationDialog = false;
   };
 
   @mobx.action
   private readonly onClickSettings = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openSettings = true;
   };
 
   private readonly onClickCharactersList = () => {
+    if (this.disposed) {
+      return;
+    }
     this.props.navigate('/characters');
   };
 
   @mobx.action
   private readonly onCloseSettings = () => {
+    if (this.disposed) {
+      return;
+    }
     this.username = this.props.electronLoader.getData(ElectronData.PlayerName);
     this.openSettings = false;
   };
 
   @mobx.action
   private readonly onOpenAcknowledgement = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openAcknowledgement = true;
   };
 
   @mobx.action
   private readonly onCloseAcknowledgement = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openAcknowledgement = false;
   };
 
   @mobx.action
   private readonly onPasscodeSubmit = (passcode?: string) => {
+    if (this.disposed) {
+      return;
+    }
     if (this.currentInteractiveRoomInfo && passcode && this.currentInteractiveRoomInfo.info.passcode === passcode) {
       this.openPasscodeEnterDialog = false;
       this.showPasscodeError = false;
@@ -378,6 +451,9 @@ export class Lobby extends React.Component<LobbyProps> {
         this.currentInteractiveRoomInfo.host,
         this.currentInteractiveRoomInfo.info.id,
         exist => {
+          if (this.disposed) {
+            return;
+          }
           if (exist) {
             this.props.navigate(`/waiting-room/${this.currentInteractiveRoomInfo.info.id}`, {
               state: {
@@ -406,37 +482,58 @@ export class Lobby extends React.Component<LobbyProps> {
 
   @mobx.action
   private readonly onPasscodeDialogClose = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openPasscodeEnterDialog = false;
     this.showPasscodeError = false;
   };
 
   @mobx.action
   private readonly onOpenFeedback = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openFeedback = true;
   };
 
   @mobx.action
   private readonly onFeedbackDialogClose = () => {
+    if (this.disposed) {
+      return;
+    }
     this.openFeedback = false;
   };
 
   @mobx.action
   private readonly viewGameCharaterExtensions = (index: number) => () => {
+    if (this.disposed) {
+      return;
+    }
     this.viewCharacterExtenstions = index;
   };
   @mobx.action
   private readonly closeGameCharaterExtensions = () => {
+    if (this.disposed) {
+      return;
+    }
     this.viewCharacterExtenstions = undefined;
   };
 
   private readonly onOpenReplay = () => {
-    this.props.electronLoader.readReplay(Sanguosha.Version).then(replay => {
-      if (!replay) {
-        return;
-      }
+    if (this.disposed) {
+      return;
+    }
+    this.props.electronLoader
+      .readReplay(Sanguosha.Version)
+      .then(replay => {
+        if (this.disposed || !replay) {
+          return;
+        }
 
-      this.props.navigate('/replay', { state: { replayData: replay } });
-    });
+        this.props.navigate('/replay', { state: { replayData: replay } });
+      })
+      .catch(error => this.props.logger.error(error));
   };
 
   render() {

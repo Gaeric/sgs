@@ -63,6 +63,7 @@ export class RoomPage extends React.Component<
   private connectionService: ConnectionService;
 
   private lastEventTimeStamp: number;
+  private disposed = false;
 
   @mobx.observable.ref
   private roomPing: number = 999;
@@ -150,6 +151,9 @@ export class RoomPage extends React.Component<
   }
 
   private readonly createWaitingRoomCaller = (roomInfo: TemporaryRoomCreationInfo, roomId: number) => {
+    if (this.disposed) {
+      return;
+    }
     this.props.navigate(`/waiting-room/${roomId}`, {
       state: {
         ping: 0,
@@ -159,10 +163,19 @@ export class RoomPage extends React.Component<
   };
 
   private readonly onHandleBulkEvents = async (events: ServerEventFinder<GameEventIdentifiers>[]) => {
+    if (this.disposed) {
+      return;
+    }
     this.store.room.emitStatus('trusted', this.playerId!);
     for (const content of events) {
+      if (this.disposed) {
+        return;
+      }
       const identifier = Precondition.exists(EventPacker.getIdentifier(content), 'Unable to load event identifier');
       await this.gameProcessor.onHandleIncomingEvent(identifier, content);
+      if (this.disposed) {
+        return;
+      }
       this.showMessageFromEvent(content);
       this.updateGameStatus(content);
     }
@@ -183,26 +196,14 @@ export class RoomPage extends React.Component<
     }
 
     this.socket.on(GameEventIdentifiers.PlayerEnterRefusedEvent, () => {
-      this.props.navigate('/lobby');
+      if (!this.disposed) {
+        this.props.navigate('/lobby');
+      }
     });
 
     clientActiveListenerEvents().forEach(identifier => {
-      this.socket.on(identifier, async (content: ServerEventFinder<GameEventIdentifiers>) => {
-        const timestamp = EventPacker.getTimestamp(content);
-        if (timestamp) {
-          this.lastEventTimeStamp = timestamp;
-        }
-
-        if (identifier === GameEventIdentifiers.PlayerBulkPacketEvent) {
-          await this.onHandleBulkEvents(
-            (content as ServerEventFinder<GameEventIdentifiers.PlayerBulkPacketEvent>).stackedLostMessages,
-          );
-        } else {
-          await this.gameProcessor.onHandleIncomingEvent(identifier, content);
-          this.showMessageFromEvent(content);
-          this.animation(identifier, content);
-          this.updateGameStatus(content);
-        }
+      this.socket.on(identifier, (content: ServerEventFinder<GameEventIdentifiers>) => {
+        void this.handleIncomingEvent(identifier, content).catch(error => this.props.logger.error(error));
       });
     });
 
@@ -212,10 +213,37 @@ export class RoomPage extends React.Component<
     window.addEventListener('beforeunload', this.disconnect);
   }
 
+  private async handleIncomingEvent(
+    identifier: GameEventIdentifiers,
+    content: ServerEventFinder<GameEventIdentifiers>,
+  ) {
+    if (this.disposed) {
+      return;
+    }
+    const timestamp = EventPacker.getTimestamp(content);
+    if (timestamp) {
+      this.lastEventTimeStamp = timestamp;
+    }
+
+    if (identifier === GameEventIdentifiers.PlayerBulkPacketEvent) {
+      await this.onHandleBulkEvents(
+        (content as ServerEventFinder<GameEventIdentifiers.PlayerBulkPacketEvent>).stackedLostMessages,
+      );
+    } else {
+      await this.gameProcessor.onHandleIncomingEvent(identifier, content);
+      if (this.disposed) {
+        return;
+      }
+      this.showMessageFromEvent(content);
+      this.animation(identifier, content);
+      this.updateGameStatus(content);
+    }
+  }
+
   private readonly setupReconnection = () => {
     this.socket.onReconnected(() => {
       const playerId = this.playerId;
-      if (!playerId) {
+      if (this.disposed || !playerId) {
         return;
       }
 
@@ -244,22 +272,31 @@ export class RoomPage extends React.Component<
   };
 
   private readonly disconnect = () => {
-    if (this.roomMode === RoomMode.Campaign) {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    window.removeEventListener('beforeunload', this.disconnect);
+    try {
+      if (this.roomMode !== RoomMode.Campaign) {
+        this.socket.notify(
+          GameEventIdentifiers.PlayerLeaveEvent,
+          EventPacker.createIdentifierEvent(GameEventIdentifiers.PlayerLeaveEvent, {
+            playerId: this.playerId,
+          }),
+        );
+      }
+    } finally {
       this.socket.disconnect();
-    } else {
-      this.socket.notify(
-        GameEventIdentifiers.PlayerLeaveEvent,
-        EventPacker.createIdentifierEvent(GameEventIdentifiers.PlayerLeaveEvent, {
-          playerId: this.store.clientPlayerId,
-        }),
-      );
+      this.gameProcessor.dispose();
+      this.baseService.Animation.GuideLineAnimation.dispose();
+      this.baseService.Animation.MoveInstantCardAnimation.dispose();
+      this.audioService.stop();
     }
   };
 
   componentWillUnmount() {
-    window.removeEventListener('beforeunload', this.disconnect);
     this.disconnect();
-    this.audioService.stop();
   }
 
   private updateGameStatus(event: ServerEventFinder<GameEventIdentifiers>) {
@@ -269,8 +306,12 @@ export class RoomPage extends React.Component<
   }
 
   private animation<T extends GameEventIdentifiers>(identifier: T, event: ServerEventFinder<T>) {
-    this.baseService.Animation.GuideLineAnimation.animate(identifier, event);
-    this.baseService.Animation.MoveInstantCardAnimation.animate(identifier, event);
+    void this.baseService.Animation.GuideLineAnimation.animate(identifier, event).catch(error =>
+      this.props.logger.error(error),
+    );
+    void this.baseService.Animation.MoveInstantCardAnimation.animate(identifier, event).catch(error =>
+      this.props.logger.error(error),
+    );
   }
 
   private showMessageFromEvent(event: ServerEventFinder<GameEventIdentifiers>) {

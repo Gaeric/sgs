@@ -31,13 +31,23 @@ export class WaitingRoomProcessor {
 
   private messages = createTranslationMessages(this.translator);
 
-  private playerEnterListener: (content: WaitingRoomProcessorListenerData[WaitingRoomEvent.PlayerEnter]) => void;
-  private hostChangedListener: (content: WaitingRoomProcessorListenerData['hostChange']) => void;
+  private disposed = false;
+  private initialized = false;
+  private readonly socketHandlers = new Map<
+    WaitingRoomEvent,
+    (evt: WaitingRoomServerEventFinder<WaitingRoomEvent>) => void
+  >();
+
+  private playerEnterListener?: (content: WaitingRoomProcessorListenerData[WaitingRoomEvent.PlayerEnter]) => void;
+  private hostChangedListener?: (content: WaitingRoomProcessorListenerData['hostChange']) => void;
 
   public on<Event extends WaitingRoomEvent.PlayerEnter | 'hostChange'>(
     event: Event,
     listener: (content: WaitingRoomProcessorListenerData[Event]) => void,
   ) {
+    if (this.disposed) {
+      return;
+    }
     switch (event) {
       case WaitingRoomEvent.PlayerEnter: {
         this.playerEnterListener = listener as any;
@@ -54,8 +64,15 @@ export class WaitingRoomProcessor {
   }
 
   initWaitingRoomConnectionListeners() {
+    if (this.disposed || this.initialized) {
+      return;
+    }
+    this.initialized = true;
     activeWaitingRoomListeningEvents.forEach(identifier => {
-      this.socket.on(identifier, (evt: WaitingRoomServerEventFinder<WaitingRoomEvent>) => {
+      const handler = (evt: WaitingRoomServerEventFinder<WaitingRoomEvent>) => {
+        if (this.disposed) {
+          return;
+        }
         switch (identifier) {
           case WaitingRoomEvent.GameInfoUpdate:
             this.onGameInfoUpdate(evt as WaitingRoomServerEventFinder<WaitingRoomEvent.GameInfoUpdate>);
@@ -87,11 +104,29 @@ export class WaitingRoomProcessor {
           default:
             throw Precondition.UnreachableError(identifier);
         }
-      });
+      };
+      this.socketHandlers.set(identifier, handler);
+      this.socket.on(identifier, handler);
     });
   }
 
+  public dispose() {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    for (const [identifier, handler] of this.socketHandlers) {
+      this.socket.off(identifier, handler);
+    }
+    this.socketHandlers.clear();
+    this.playerEnterListener = undefined;
+    this.hostChangedListener = undefined;
+  }
+
   public saveSettingsLocally() {
+    if (this.disposed) {
+      return;
+    }
     this.electronLoader.setData(ElectronData.RoomSettingsAllowObserver, this.store.gameSettings.allowObserver || false);
     this.electronLoader.setData(ElectronData.RoomSettingsCardExtensions, this.store.gameSettings.cardExtensions);
     this.electronLoader.setData(
@@ -230,6 +265,9 @@ export class WaitingRoomProcessor {
       this.presenter.initSeatsInfo(this.store);
 
       const avatarIndex = await this.avatarService.getRandomAvatarIndex();
+      if (this.disposed) {
+        return;
+      }
       this.socket.emit(WaitingRoomEvent.PlayerEnter, {
         playerInfo: { playerId: this.store.selfPlayerId, avatarId: avatarIndex, playerName: this.selfPlayerName },
         isHost: true,

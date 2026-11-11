@@ -75,6 +75,7 @@ describe('MoveInstantCardAnimation React roots', () => {
 
   afterEach(() => {
     act(() => {
+      animation.dispose();
       for (const root of roots) {
         if (!(root.unmount as jest.Mock).mock.calls.length) {
           root.unmount();
@@ -211,7 +212,7 @@ describe('MoveInstantCardAnimation React roots', () => {
     'unmounts and removes the container if animation %s rejects',
     async identifier => {
       const failure = new Error('animation interrupted');
-      jest.spyOn(UiAnimation, 'play').mockRejectedValueOnce(failure);
+      jest.spyOn(UiAnimation.prototype as any, 'play').mockRejectedValueOnce(failure);
       const finished = start(identifier, identifier === GameEventIdentifiers.MoveCardEvent ? moveEvent() : useEvent());
       const container = host.firstElementChild!;
       await act(async () => {
@@ -223,6 +224,122 @@ describe('MoveInstantCardAnimation React roots', () => {
       expect(host.childNodes).toHaveLength(0);
     },
   );
+
+  describe.each([GameEventIdentifiers.MoveCardEvent, GameEventIdentifiers.CardUseEvent])(
+    'disposing animation %s',
+    identifier => {
+      test.each([0, 50, 100, 1100, 1249])(
+        'synchronously cleans up at %sms and settles without new frames',
+        async time => {
+          const event = identifier === GameEventIdentifiers.MoveCardEvent ? moveEvent() : useEvent();
+          if ('infos' in event) {
+            event.infos.push({ ...event.infos[0] });
+          }
+          const finished = start(identifier, event);
+          const container = host.firstElementChild!;
+          const remove = jest.spyOn(container, 'remove');
+          if (time >= 100) {
+            await advance(100);
+          }
+          if (time >= 1100) {
+            await advance(1000);
+          }
+          const elapsed = time >= 1100 ? 1100 : time >= 100 ? 100 : 0;
+          await advance(time - elapsed);
+          const renders = (roots[0].render as jest.Mock).mock.calls.length;
+          expect(jest.getTimerCount()).toBe(1);
+
+          act(() => {
+            animation.dispose();
+            // Cleanup must happen immediately, before pending promises resume.
+            expect(roots[0].unmount).toHaveBeenCalledTimes(1);
+            expect(container.isConnected).toBe(false);
+            expect(container.childNodes).toHaveLength(0);
+            expect(host.childNodes).toHaveLength(0);
+            expect(jest.getTimerCount()).toBe(0);
+            animation.dispose();
+          });
+          await act(async () => {
+            await finished;
+            await animation.animate(identifier, event);
+            await animation.animateCardUse(useEvent());
+            jest.runAllTimers();
+          });
+
+          expect(roots).toHaveLength(1);
+          expect(remove).toHaveBeenCalledTimes(1);
+          expect(roots[0].render).toHaveBeenCalledTimes(renders);
+          expect(roots[0].unmount).toHaveBeenCalledTimes(1);
+          expect(mockCardUnmount.mock.calls.every(([connected]) => connected)).toBe(true);
+          expect(jest.getTimerCount()).toBe(0);
+          expect(host.childNodes).toHaveLength(0);
+        },
+      );
+    },
+  );
+
+  test.each([GameEventIdentifiers.MoveCardEvent, GameEventIdentifiers.CardUseEvent])(
+    'cancels animation %s after a frame fires but before its continuation resumes',
+    async identifier => {
+      const finished = start(identifier, identifier === GameEventIdentifiers.MoveCardEvent ? moveEvent() : useEvent());
+      act(() => {
+        jest.advanceTimersByTime(100);
+        animation.dispose();
+      });
+      await act(async () => {
+        await finished;
+      });
+      expect(roots[0].render).toHaveBeenCalledTimes(2);
+      expect(roots[0].unmount).toHaveBeenCalledTimes(1);
+      expect(host.childNodes).toHaveLength(0);
+      expect(jest.getTimerCount()).toBe(0);
+    },
+  );
+
+  test('disposes all concurrently active roots without double unmounting in finally', async () => {
+    const move = start(GameEventIdentifiers.MoveCardEvent, moveEvent());
+    const use = start(GameEventIdentifiers.CardUseEvent, useEvent());
+    expect(roots).toHaveLength(2);
+    await advance(100);
+    act(() => {
+      animation.dispose();
+      expect(host.childNodes).toHaveLength(0);
+      expect(jest.getTimerCount()).toBe(0);
+      for (const root of roots) {
+        expect(root.unmount).toHaveBeenCalledTimes(1);
+      }
+    });
+    await act(async () => {
+      await Promise.all([move, use]);
+    });
+    for (const root of roots) {
+      expect(root.render).toHaveBeenCalledTimes(2);
+      expect(root.unmount).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  test('still disposes every root if one unmount reports a cleanup failure', async () => {
+    const move = start(GameEventIdentifiers.MoveCardEvent, moveEvent());
+    const use = start(GameEventIdentifiers.CardUseEvent, useEvent());
+    const failure = new Error('cleanup failed');
+    const unmount = (roots[0].unmount as jest.Mock).getMockImplementation()!;
+    (roots[0].unmount as jest.Mock).mockImplementationOnce(() => {
+      unmount.call(roots[0]);
+      throw failure;
+    });
+    act(() => {
+      expect(() => animation.dispose()).toThrow(failure);
+      expect(host.childNodes).toHaveLength(0);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+    await act(async () => {
+      await Promise.all([move, use]);
+    });
+    for (const root of roots) {
+      expect(root.unmount).toHaveBeenCalledTimes(1);
+    }
+    expect(() => animation.dispose()).not.toThrow();
+  });
 
   test('does not allocate roots for skipped moves or local card uses', async () => {
     const event = moveEvent();

@@ -8,7 +8,7 @@ import { ImageLoader } from 'image_loader/image_loader';
 import { RoomStore } from 'pages/room/room.store';
 import * as React from 'react';
 import { flushSync } from 'react-dom';
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 import { ClientCard } from 'ui/card/card';
 import styles from './move_instant_card.module.css';
 import { Point } from '../position';
@@ -19,6 +19,36 @@ type MoveCardProps = { cardId: CardId; public: boolean };
 export class MoveInstantCardAnimation extends UiAnimation {
   private readonly cardWidth = 120;
   private readonly cardHeight = 160;
+  private readonly activeRoots = new Map<Root, HTMLElement>();
+
+  public dispose() {
+    super.dispose();
+    const errors: unknown[] = [];
+    for (const root of this.activeRoots.keys()) {
+      try {
+        this.removeRoot(root);
+      } catch (error) {
+        // One failing React cleanup must not leave other animation roots mounted.
+        errors.push(error);
+      }
+    }
+    if (errors.length > 0) {
+      throw errors[0];
+    }
+  }
+
+  private removeRoot(root: Root) {
+    const container = this.activeRoots.get(root);
+    if (!container) {
+      return;
+    }
+    this.activeRoots.delete(root);
+    try {
+      root.unmount();
+    } finally {
+      container.remove();
+    }
+  }
 
   constructor(private store: RoomStore, private translator: ClientTranslationModule, private imageLoader: ImageLoader) {
     super();
@@ -60,6 +90,9 @@ export class MoveInstantCardAnimation extends UiAnimation {
 
   private async animateCardMove(content: ServerEventFinder<GameEventIdentifiers.MoveCardEvent>) {
     for (const info of content.infos) {
+      if (this.disposed) {
+        return;
+      }
       const { fromId, toId, toArea, movingCards } = info;
       if (
         toId === undefined ||
@@ -96,6 +129,7 @@ export class MoveInstantCardAnimation extends UiAnimation {
       const container = document.createElement('div');
       document.getElementById('root')?.append(container);
       const root = createRoot(container);
+      this.activeRoots.set(root, container);
       try {
         // Commit the initial position before starting the timer so concurrent rendering
         // cannot batch it with the destination frame and skip the CSS transition.
@@ -107,7 +141,7 @@ export class MoveInstantCardAnimation extends UiAnimation {
           );
         });
 
-        await UiAnimation.play(100, () => {
+        await this.play(100, () => {
           const toPosition = this.store.animationPosition.getPosition(toId, toId === this.store.clientPlayerId);
           const leftOffset = (this.cardWidth + (elements.length - 1) * 16) / 2;
 
@@ -121,7 +155,10 @@ export class MoveInstantCardAnimation extends UiAnimation {
           );
         });
 
-        await UiAnimation.play(1000, () => {
+        if (this.disposed) {
+          return;
+        }
+        await this.play(1000, () => {
           root.render(
             <div className={styles.movingCards} style={{ opacity: 0 }}>
               {elements}
@@ -129,15 +166,20 @@ export class MoveInstantCardAnimation extends UiAnimation {
           );
         });
 
-        await UiAnimation.play(150);
+        if (this.disposed) {
+          return;
+        }
+        await this.play(150);
       } finally {
-        root.unmount();
-        container.remove();
+        this.removeRoot(root);
       }
     }
   }
 
   async animateCardUse(content: ServerEventFinder<GameEventIdentifiers.CardUseEvent>) {
+    if (this.disposed) {
+      return;
+    }
     const { fromId, targetGroup, cardId } = content;
     if (
       fromId === this.store.clientPlayerId ||
@@ -163,6 +205,7 @@ export class MoveInstantCardAnimation extends UiAnimation {
     const container = document.createElement('div');
     document.getElementById('root')?.append(container);
     const root = createRoot(container);
+    this.activeRoots.set(root, container);
     try {
       // The hidden starting frame must exist before the first animation timer.
       flushSync(() => {
@@ -173,7 +216,7 @@ export class MoveInstantCardAnimation extends UiAnimation {
         );
       });
 
-      await UiAnimation.play(100, () => {
+      await this.play(100, () => {
         root.render(
           <div className={styles.movingCards} style={{ ...animationStyles, opacity: 1 }}>
             {elements}
@@ -181,7 +224,10 @@ export class MoveInstantCardAnimation extends UiAnimation {
         );
       });
 
-      await UiAnimation.play(1000, () => {
+      if (this.disposed) {
+        return;
+      }
+      await this.play(1000, () => {
         root.render(
           <div className={styles.movingCards} style={{ opacity: 0 }}>
             {elements}
@@ -189,14 +235,19 @@ export class MoveInstantCardAnimation extends UiAnimation {
         );
       });
 
-      await UiAnimation.play(150);
+      if (this.disposed) {
+        return;
+      }
+      await this.play(150);
     } finally {
-      root.unmount();
-      container.remove();
+      this.removeRoot(root);
     }
   }
 
   async animate(identifier: GameEventIdentifiers, event: ServerEventFinder<GameEventIdentifiers>) {
+    if (this.disposed) {
+      return;
+    }
     if (identifier === GameEventIdentifiers.MoveCardEvent) {
       await this.animateCardMove(event as unknown as ServerEventFinder<GameEventIdentifiers.MoveCardEvent>);
     } else if (identifier === GameEventIdentifiers.CardUseEvent) {

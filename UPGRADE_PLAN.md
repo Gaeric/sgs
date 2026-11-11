@@ -459,3 +459,15 @@ desktop yarn build:mac            CRA 回退通过
 - 回放页面加载。
 - Electron 启动、配置读写、窗口关闭。
 - mac/win 构建产物安装启动。
+
+### 2026-11-11：连接与异步任务生命周期清理
+
+- ClientSocket 移除额外的无用 Manager，仅创建一个 namespace socket；精确解绑自身 listener，disconnect 幂等且不关闭共享的 sibling namespace。
+- RoomPage 离开时先发送原 PlayerLeave 通知（campaign 保留本地断开行为），再断开自己的 socket、dispose processor/animations、停止音频；beforeunload 与 unmount 共用幂等清理。迟到的事件、重连、导航回调和 await 后页面更新被阻止。
+- GameClientProcessor dispose 清理 trusted timer，阻止过期响应与 await 后继续广播/更新；Replay 取消自己的 step timer 并 resolve 等待，停止嵌套 bulk 与过期事件后续更新。
+- 动画 dispose 清理 timer、React roots 与临时 DOM，并使取消的等待正常结束。
+- WaitingRoom processor/sender 精确解绑自身 listener，等待头像期间离开不再继续处理；页面按 leave → dispose → disconnect 顺序清理。
+- Lobby 不关闭共享服务，仅忽略过期回调；room list 查询 generation 防止旧刷新响应覆盖新结果。
+- 无依赖/协议升级。真实 Socket.IO 2 测试覆盖 polling/WebSocket leave 后断开与 sibling namespace 存活；不保证断网或进程退出时 leave 必达。
+- 验证：Vite build、desktop type-check、服务端 build、根 lint 通过；12 suites / 154 tests 通过。
+- 限制：mock-based 页面测试不替代完整联机/UI验收；不能撤销已开始的 core 操作或取消所有 action selection promise；共享 Electron updater 的旧 callback 以 guard 阻止副作用，未新增取消 API。Node 24/桌面端人工验证仍待进行。

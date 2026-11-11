@@ -3,7 +3,6 @@ import { GameEventIdentifiers, ServerEventFinder } from 'core/event/event';
 import { EventPacker } from 'core/event/event_packer';
 import { ClientOfflineSocket } from 'core/network/socket.offline';
 import { PlayerInfo } from 'core/player/player_props';
-import { System } from 'core/shares/libs/system';
 import { TranslationPack } from 'core/translations/translation_json_tool';
 import { ClientTranslationModule } from 'core/translations/translation_module.client';
 import { ElectronData } from 'electron_loader/electron_data';
@@ -50,6 +49,7 @@ export class ReplayRoomPage extends React.Component<
 
   private replayStepDelay = 2000;
   private dumped = false;
+  private cancelStepDelay?: () => void;
 
   @mobx.observable.ref
   openSettings = false;
@@ -128,12 +128,22 @@ export class ReplayRoomPage extends React.Component<
     GameEventIdentifiers.UnhookSkillsEvent,
   ];
 
-  private async stepDelay(identifier: GameEventIdentifiers) {
-    if (ReplayRoomPage.nonDelayedEvents.includes(identifier)) {
-      await System.MainThread.sleep(0);
-    } else {
-      await System.MainThread.sleep(this.replayStepDelay);
+  private stepDelay(identifier: GameEventIdentifiers): Promise<void> {
+    if (this.dumped) {
+      return Promise.resolve();
     }
+    return new Promise(resolve => {
+      const finish = () => {
+        this.cancelStepDelay = undefined;
+        resolve();
+      };
+      const timer = setTimeout(finish, ReplayRoomPage.nonDelayedEvents.includes(identifier) ? 0 : this.replayStepDelay);
+      // Clearing a timer must also release the replay loop waiting on it.
+      this.cancelStepDelay = () => {
+        clearTimeout(timer);
+        finish();
+      };
+    });
   }
 
   private async loadSteps(events: ServerEventFinder<GameEventIdentifiers>[]) {
@@ -150,22 +160,32 @@ export class ReplayRoomPage extends React.Component<
       if (identifier === GameEventIdentifiers.PlayerBulkPacketEvent) {
         const { stackedLostMessages } = content as ServerEventFinder<GameEventIdentifiers.PlayerBulkPacketEvent>;
         await this.loadSteps(stackedLostMessages);
+        if (this.dumped) {
+          return;
+        }
       } else {
         await this.gameProcessor.onHandleIncomingEvent(identifier, content);
+        if (this.dumped) {
+          return;
+        }
         this.showMessageFromEvent(content);
         this.animation(identifier, content);
         this.updateGameStatus(content);
         await this.stepDelay(identifier);
+        if (this.dumped) {
+          return;
+        }
       }
     }
   }
 
   componentDidMount() {
-    this.audioService.playRoomBGM();
-    const { replayData } = this.props.location.state as { replayData: ReplayDataType };
+    const { replayData } = (this.props.location.state as { replayData?: ReplayDataType } | null) || {};
     if (!replayData) {
       this.props.navigate('/lobby');
+      return;
     }
+    this.audioService.playRoomBGM();
 
     this.presenter.setupClientPlayerId(replayData.viewerId);
     this.presenter.createClientRoom(
@@ -177,11 +197,17 @@ export class ReplayRoomPage extends React.Component<
     this.props.translator.setupPlayer(this.presenter.ClientPlayer);
     this.store.animationPosition.insertPlayer(replayData.viewerId);
 
-    this.loadSteps(replayData.events);
+    // Cancellation resolves normally; genuine replay failures still need reporting,
+    // including a handler that rejects after this page has unmounted.
+    void this.loadSteps(replayData.events).catch(error => this.props.logger.error(error));
   }
 
   componentWillUnmount() {
     this.dumped = true;
+    this.cancelStepDelay?.();
+    this.gameProcessor.dispose();
+    this.baseService.Animation.GuideLineAnimation.dispose();
+    this.baseService.Animation.MoveInstantCardAnimation.dispose();
     this.audioService.stop();
   }
 
@@ -222,7 +248,10 @@ export class ReplayRoomPage extends React.Component<
   private readonly onSwitchSideBoard = () => (this.renderSideBoard = !this.renderSideBoard);
 
   render() {
-    const { replayData } = this.props.location.state as { replayData: ReplayDataType };
+    const { replayData } = (this.props.location.state as { replayData?: ReplayDataType } | null) || {};
+    if (!replayData) {
+      return null;
+    }
     const background = this.props.imageLoader.getBackgroundImage();
 
     return (

@@ -60,7 +60,19 @@ describe('RoomPage routing and beforeunload lifecycle', () => {
   let router: { navigate: NavigateFunction; location: Location };
   let sockets: SocketFixture[];
   let audio: { playRoomBGM: jest.Mock; stop: jest.Mock };
-  let presenter: { createStore: jest.Mock; setupRoomStatus: jest.Mock };
+  let processor: { onHandleIncomingEvent: jest.Mock; dispose: jest.Mock };
+  let animations: {
+    GuideLineAnimation: { animate: jest.Mock; dispose: jest.Mock };
+    MoveInstantCardAnimation: { animate: jest.Mock; dispose: jest.Mock };
+  };
+  let presenter: {
+    createStore: jest.Mock;
+    setupRoomStatus: jest.Mock;
+    addGameLog: jest.Mock;
+    updateNumberOfDrawStack: jest.Mock;
+    updateGameCircle: jest.Mock;
+  };
+  let emitStatus: jest.Mock;
   let addListener: jest.SpyInstance;
   let removeListener: jest.SpyInstance;
 
@@ -95,17 +107,30 @@ describe('RoomPage routing and beforeunload lifecycle', () => {
     (LocalClientEmitter as jest.Mock).mockImplementation(createSocket);
     audio = { playRoomBGM: jest.fn(), stop: jest.fn() };
     (installAudioPlayerService as jest.Mock).mockReturnValue(audio);
-    (installService as jest.Mock).mockReturnValue({});
-    (GameClientProcessor as jest.Mock).mockImplementation(() => ({}));
+    animations = {
+      GuideLineAnimation: { animate: jest.fn().mockResolvedValue(undefined), dispose: jest.fn() },
+      MoveInstantCardAnimation: { animate: jest.fn().mockResolvedValue(undefined), dispose: jest.fn() },
+    };
+    (installService as jest.Mock).mockReturnValue({ Animation: animations });
+    processor = { onHandleIncomingEvent: jest.fn().mockResolvedValue(undefined), dispose: jest.fn() };
+    (GameClientProcessor as jest.Mock).mockImplementation(() => processor);
+    emitStatus = jest.fn();
     presenter = {
-      createStore: jest.fn(() => ({ clientPlayerId: 'player-id', clientRoomInfo: { timestamp: 123 } })),
+      createStore: jest.fn(() => ({
+        clientPlayerId: 'player-id',
+        clientRoomInfo: { timestamp: 123 },
+        room: { emitStatus, getRoomInfo: () => ({ name: 'Test room' }) },
+      })),
       setupRoomStatus: jest.fn(),
+      addGameLog: jest.fn(),
+      updateNumberOfDrawStack: jest.fn(),
+      updateGameCircle: jest.fn(),
     };
     (RoomPresenter as jest.Mock).mockImplementation(() => presenter);
     props = {
       config: { host: [localHost, remoteHost] } as RoomProps['config'],
-      logger: {} as RoomProps['logger'],
-      translator: {} as RoomProps['translator'],
+      logger: { error: jest.fn() } as unknown as RoomProps['logger'],
+      translator: { trx: jest.fn(message => message) } as unknown as RoomProps['translator'],
       audioLoader: {} as RoomProps['audioLoader'],
       imageLoader: { getBackgroundImage: jest.fn() } as unknown as RoomProps['imageLoader'],
       electronLoader: {
@@ -164,7 +189,7 @@ describe('RoomPage routing and beforeunload lifecycle', () => {
       expect(removed[index]).toBe(registered[index]);
       expect(leaveCalls(socket)).toHaveLength(1);
       expect(leaveCalls(socket)[0][1]).toEqual(expect.objectContaining({ playerId: 'player-id' }));
-      expect(socket.disconnect).not.toHaveBeenCalled();
+      expect(socket.disconnect).toHaveBeenCalledTimes(1);
 
       // With no room mounted, beforeunload must not reach any previous socket.
       act(() => window.dispatchEvent(new Event('beforeunload')));
@@ -206,25 +231,40 @@ describe('RoomPage routing and beforeunload lifecycle', () => {
       );
       // The active listener still performs the existing unload behavior.
       act(() => window.dispatchEvent(new Event('beforeunload')));
+      expect(processor.dispose).toHaveBeenCalledTimes(1);
+      expect(animations.GuideLineAnimation.dispose).toHaveBeenCalledTimes(1);
+      expect(animations.MoveInstantCardAnimation.dispose).toHaveBeenCalledTimes(1);
+      expect(audio.stop).toHaveBeenCalledTimes(1);
       if (roomMode === RoomMode.Campaign) {
         expect(socket.disconnect).toHaveBeenCalledTimes(1);
         expect(leaveCalls(socket)).toHaveLength(0);
       } else {
         expect(leaveCalls(socket)).toHaveLength(1);
-        expect(socket.disconnect).not.toHaveBeenCalled();
+        expect(socket.disconnect).toHaveBeenCalledTimes(1);
       }
       act(() => root!.unmount());
       root = undefined;
       expect(unloadListeners(removeListener)).toEqual(unloadListeners(addListener));
-      // Unmount keeps its own disconnect call, even after a beforeunload event.
-      const disconnectCount = roomMode === RoomMode.Campaign ? 2 : 0;
-      const leaveCount = roomMode === RoomMode.Campaign ? 0 : 2;
+      // Cleanup is terminal and idempotent even after a beforeunload event.
+      const disconnectCount = 1;
+      const leaveCount = roomMode === RoomMode.Campaign ? 0 : 1;
       expect(socket.disconnect).toHaveBeenCalledTimes(disconnectCount);
       expect(leaveCalls(socket)).toHaveLength(leaveCount);
       act(() => window.dispatchEvent(new Event('beforeunload')));
       expect(socket.disconnect).toHaveBeenCalledTimes(disconnectCount);
       expect(leaveCalls(socket)).toHaveLength(leaveCount);
       expect(audio.stop).toHaveBeenCalledTimes(1);
+      expect(processor.dispose).toHaveBeenCalledTimes(1);
+      expect(animations.GuideLineAnimation.dispose).toHaveBeenCalledTimes(1);
+      expect(animations.MoveInstantCardAnimation.dispose).toHaveBeenCalledTimes(1);
+      if (roomMode !== RoomMode.Campaign) {
+        const leaveIndex = socket.notify.mock.calls.findIndex(
+          ([identifier]) => identifier === GameEventIdentifiers.PlayerLeaveEvent,
+        );
+        expect(socket.notify.mock.invocationCallOrder[leaveIndex]).toBeLessThan(
+          socket.disconnect.mock.invocationCallOrder[0],
+        );
+      }
     },
   );
 
@@ -256,5 +296,97 @@ describe('RoomPage routing and beforeunload lifecycle', () => {
     expect(audio.stop).toHaveBeenCalledTimes(1);
     act(() => window.dispatchEvent(new Event('beforeunload')));
     expect(leaveCalls(socket)).toHaveLength(1);
+  });
+
+  test('active incoming events reach the messages, animations and status services', async () => {
+    renderRoom();
+    const onIncoming = sockets[0].on.mock.calls.find(
+      ([identifier]) => identifier === GameEventIdentifiers.PlayerEnterEvent,
+    )![1];
+    const content = {
+      identifier: GameEventIdentifiers.PlayerEnterEvent,
+      messages: ['room message'],
+      numberOfDrawStack: 12,
+      circle: 3,
+    };
+    await act(async () => onIncoming(content));
+    expect(processor.onHandleIncomingEvent).toHaveBeenCalledWith(GameEventIdentifiers.PlayerEnterEvent, content);
+    expect(presenter.addGameLog).toHaveBeenCalledWith('room message');
+    expect(animations.GuideLineAnimation.animate).toHaveBeenCalledWith(GameEventIdentifiers.PlayerEnterEvent, content);
+    expect(animations.MoveInstantCardAnimation.animate).toHaveBeenCalledWith(
+      GameEventIdentifiers.PlayerEnterEvent,
+      content,
+    );
+    expect(presenter.updateNumberOfDrawStack).toHaveBeenCalledWith(12);
+    expect(presenter.updateGameCircle).toHaveBeenCalledWith(3);
+    expect(props.logger.error).not.toHaveBeenCalled();
+  });
+
+  test.each([false, true])('does not resume incoming event effects after route unmount (bulk: %s)', async bulk => {
+    let resolveIncoming!: () => void;
+    const pending = new Promise<void>(resolve => (resolveIncoming = resolve));
+    processor.onHandleIncomingEvent.mockReturnValueOnce(pending);
+    renderRoom();
+    const identifier = bulk ? GameEventIdentifiers.PlayerBulkPacketEvent : GameEventIdentifiers.PlayerEnterEvent;
+    const onIncoming = sockets[0].on.mock.calls.find(([event]) => event === identifier)![1];
+    const content = {
+      identifier: GameEventIdentifiers.PlayerEnterEvent,
+      messages: ['late room message'],
+      numberOfDrawStack: 12,
+      circle: 3,
+    };
+    act(() => onIncoming(bulk ? { stackedLostMessages: [content, { ...content }] } : content));
+    expect(processor.onHandleIncomingEvent).toHaveBeenCalledTimes(1);
+    expect(processor.onHandleIncomingEvent).toHaveBeenCalledWith(GameEventIdentifiers.PlayerEnterEvent, content);
+    if (bulk) {
+      expect(emitStatus).toHaveBeenCalledWith('trusted', 'player-id');
+    }
+    expect(presenter.addGameLog).not.toHaveBeenCalled();
+    act(() => router.navigate('/lobby'));
+    expect(processor.dispose).toHaveBeenCalledTimes(1);
+    emitStatus.mockClear();
+    await act(async () => {
+      resolveIncoming();
+      await pending;
+    });
+    // Neither the pending event nor another queued bulk event may resume work.
+    expect(processor.onHandleIncomingEvent).toHaveBeenCalledTimes(1);
+    expect(presenter.addGameLog).not.toHaveBeenCalled();
+    expect(animations.GuideLineAnimation.animate).not.toHaveBeenCalled();
+    expect(animations.MoveInstantCardAnimation.animate).not.toHaveBeenCalled();
+    expect(presenter.updateNumberOfDrawStack).not.toHaveBeenCalled();
+    expect(presenter.updateGameCircle).not.toHaveBeenCalled();
+    expect(emitStatus).not.toHaveBeenCalled();
+    expect(props.logger.error).not.toHaveBeenCalled();
+    expect(router.location.pathname).toBe('/lobby');
+  });
+
+  test('captured reconnect, refusal, waiting-room and incoming callbacks are inert after unmount', async () => {
+    renderRoom();
+    const socket = sockets[0];
+    const onReconnect = socket.onReconnected.mock.calls[0][0];
+    const onRefused = socket.on.mock.calls.find(
+      ([identifier]) => identifier === GameEventIdentifiers.PlayerEnterRefusedEvent,
+    )![1];
+    const onIncoming = socket.on.mock.calls.find(
+      ([identifier]) => identifier === GameEventIdentifiers.PlayerBulkPacketEvent,
+    )![1];
+    const createWaitingRoom = (GameClientProcessor as jest.Mock).mock.calls[0][7] as CreateWaitingRoom;
+    act(() => router.navigate('/lobby'));
+    // Use a different destination so even a stale refusal navigation is observable.
+    act(() => router.navigate('/destination'));
+    const destination = router.location;
+    socket.notify.mockClear();
+    await act(async () => {
+      onReconnect();
+      onRefused();
+      createWaitingRoom({} as TemporaryRoomCreationInfo, 98);
+      onIncoming({ stackedLostMessages: [] });
+    });
+    expect(router.location).toBe(destination);
+    expect(socket.notify).not.toHaveBeenCalled();
+    expect(processor.onHandleIncomingEvent).not.toHaveBeenCalled();
+    expect(emitStatus).not.toHaveBeenCalled();
+    expect(props.logger.error).not.toHaveBeenCalled();
   });
 });

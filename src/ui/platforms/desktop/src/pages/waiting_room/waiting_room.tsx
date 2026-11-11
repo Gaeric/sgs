@@ -44,6 +44,7 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   @mobx.observable.ref
   private hostPlayerId: PlayerId;
 
+  private disposed = false;
   private socket: SocketIOClient.Socket;
   @mobx.observable.ref
   private isHost: boolean;
@@ -97,7 +98,9 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
 
     if (!roomInfo) {
       this.services.roomProcessorService.on(WaitingRoomEvent.PlayerEnter, content => {
-        this.initWithRoomInfo(content.roomInfo);
+        if (!this.disposed) {
+          this.initWithRoomInfo(content.roomInfo);
+        }
       });
 
       this.presenter.initSeatsInfo(this.store);
@@ -118,7 +121,9 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
     this.services.roomProcessorService.on(
       'hostChange',
       mobx.action(content => {
-        this.isHost = content.newHostPlayerId === this.selfPlayerId;
+        if (!this.disposed) {
+          this.isHost = content.newHostPlayerId === this.selfPlayerId;
+        }
       }),
     );
   }
@@ -135,10 +140,16 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   }
 
   private readonly backwardsToLoddy = () => {
+    if (this.disposed) {
+      return;
+    }
     this.props.navigate('/lobby');
   };
 
   private readonly joinIntoTheGame = (ping: number) => (roomId: RoomId, roomInfo: GameInfo) => {
+    if (this.disposed) {
+      return;
+    }
     const hostConfig = this.props.config.host.find(config => config.hostTag === this.gameHostedServer);
 
     this.props.navigate(`/room/${roomId}`, {
@@ -165,8 +176,16 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   }
 
   componentWillUnmount() {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    // Leave while the sender/socket are still active, then detach our listeners.
     this.services.eventSenderService.leaveRoom(this.selfPlayerId);
+    this.services.roomProcessorService.dispose();
+    this.services.eventSenderService.dispose();
     this.socket.disconnect();
+    this.services.audioService.stop();
   }
 
   @mobx.computed
@@ -186,6 +205,9 @@ export class WaitingRoom extends React.Component<WaitingRoomProps> {
   }
 
   private readonly onSaveSettings = () => {
+    if (this.disposed) {
+      return;
+    }
     this.services.eventSenderService.saveSettings(this.store.gameSettings);
     this.services.roomProcessorService.saveSettingsLocally();
   };

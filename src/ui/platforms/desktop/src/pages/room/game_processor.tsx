@@ -47,6 +47,7 @@ import { getSkinName } from './ui/switch_avatar/switch_skin';
 
 export class GameClientProcessor {
   private isObserver: boolean = false;
+  protected disposed = false;
   protected onPlayTrustedActionTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected excludedResponsiveEvents: GameEventIdentifiers[] = [
@@ -64,6 +65,21 @@ export class GameClientProcessor {
     protected skinData?: CharacterSkinInfo[],
     protected createWaitingRoomCaller?: (roomInfo: TemporaryRoomCreationInfo, roomId: number) => void,
   ) {}
+
+  public dispose() {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    this.clearTrustedActionTimer();
+  }
+
+  private clearTrustedActionTimer() {
+    if (this.onPlayTrustedActionTimer !== undefined) {
+      clearTimeout(this.onPlayTrustedActionTimer);
+      this.onPlayTrustedActionTimer = undefined;
+    }
+  }
 
   protected tryToThrowNotReadyException(e: GameEventIdentifiers) {
     if (
@@ -147,6 +163,9 @@ export class GameClientProcessor {
   }
 
   public onPlayTrustedAction() {
+    if (this.disposed) {
+      return;
+    }
     const { identifier, event } = this.store.awaitingResponseEvent;
     if (identifier === undefined) {
       // tslint:disable-next-line:no-console
@@ -163,16 +182,20 @@ export class GameClientProcessor {
   }
 
   private doTrustedAction() {
-    this.onPlayTrustedActionTimer = setTimeout(
-      () => this.onPlayTrustedAction(),
-      this.store.notificationTime * (this.presenter.ClientPlayer!.isTrusted() ? 0 : 1000),
-    );
+    if (this.disposed) {
+      return;
+    }
+    this.clearTrustedActionTimer();
+    this.onPlayTrustedActionTimer = setTimeout(() => {
+      this.onPlayTrustedActionTimer = undefined;
+      this.onPlayTrustedAction();
+    }, this.store.notificationTime * (this.presenter.ClientPlayer!.isTrusted() ? 0 : 1000));
   }
 
   public endAction() {
-    if (this.onPlayTrustedActionTimer !== undefined) {
-      clearTimeout(this.onPlayTrustedActionTimer);
-      this.onPlayTrustedActionTimer = undefined;
+    this.clearTrustedActionTimer();
+    if (this.disposed) {
+      return;
     }
     this.presenter.endAction();
   }
@@ -185,6 +208,9 @@ export class GameClientProcessor {
   }
 
   async onHandleIncomingEvent<T extends GameEventIdentifiers>(e: T, content: ServerEventFinder<T>) {
+    if (this.disposed) {
+      return;
+    }
     this.tryToThrowNotReadyException(e);
     this.eventFilter(e, content);
     this.record(e, content);
@@ -578,6 +604,9 @@ export class GameClientProcessor {
       EventPacker.createUncancellableEvent(content),
     );
     const selectedCards = await action.onSelectCard([PlayerCardsArea.HandArea], 1);
+    if (this.disposed) {
+      return;
+    }
 
     this.presenter.closeIncomingConversation();
     const event: ClientEventFinder<T> = {
@@ -610,6 +639,9 @@ export class GameClientProcessor {
       content.except,
       content.hideExclusive ? cardId => content.except!.includes(cardId) : undefined,
     );
+    if (this.disposed) {
+      return;
+    }
 
     this.presenter.closeIncomingConversation();
     const event: ClientEventFinder<T> = {
@@ -639,6 +671,9 @@ export class GameClientProcessor {
       cardMatcher && new CardMatcher(cardMatcher),
     );
     const selectedCards = await action.onSelectCard([PlayerCardsArea.HandArea], cardAmount);
+    if (this.disposed) {
+      return;
+    }
 
     this.presenter.closeIncomingConversation();
     const displayEvent: ClientEventFinder<T> = {
@@ -667,6 +702,9 @@ export class GameClientProcessor {
       cardMatcher && new CardMatcher(cardMatcher),
     );
     const selectedCards = await action.onSelectCard(fromArea, cardAmount || cardAmountRange!);
+    if (this.disposed) {
+      return;
+    }
 
     this.presenter.closeIncomingConversation();
     const askForCardEvent: ClientEventFinder<GameEventIdentifiers.AskForCardEvent> = {
@@ -710,6 +748,9 @@ export class GameClientProcessor {
     ) as Player[];
 
     await this.store.room.useCard(content);
+    if (this.disposed) {
+      return;
+    }
     const showCards = VirtualCard.getActualCards([content.cardId]).map(cardId => ({
       card: Sanguosha.getCardById(cardId),
       tag: TranslationPack.translationJsonPatcher(
@@ -765,6 +806,9 @@ export class GameClientProcessor {
     const from = content.fromId ? this.store.room.getPlayerById(content.fromId) : undefined;
     if (content.engagedPlayerIds && content.engagedPlayerIds.includes(this.store.clientPlayerId)) {
       const onCloseDialog = () => {
+        if (this.disposed) {
+          return;
+        }
         this.presenter.closeDialog();
         this.presenter.broadcastUIUpdate();
       };
@@ -1120,6 +1164,9 @@ export class GameClientProcessor {
     const selectedCharacters: CharacterId[] = [];
 
     const onClick = (character: Character) => {
+      if (this.disposed) {
+        return;
+      }
       const index = selectedCharacters.indexOf(character.Id);
       if (index === -1) {
         selectedCharacters.push(character.Id);
@@ -1139,6 +1186,9 @@ export class GameClientProcessor {
     };
 
     this.presenter.defineConfirmButtonActions(() => {
+      if (this.disposed) {
+        return;
+      }
       this.presenter.closeDialog();
 
       if (!content.byHuaShen) {
@@ -1196,6 +1246,9 @@ export class GameClientProcessor {
     }
 
     this.presenter.defineConfirmButtonActions(() => {
+      if (this.disposed) {
+        return;
+      }
       const response: ClientEventFinder<T> = {
         doChange: true,
         fromId: this.store.clientPlayerId,
@@ -1205,6 +1258,9 @@ export class GameClientProcessor {
       this.endAction();
     });
     this.presenter.defineCancelButtonActions(() => {
+      if (this.disposed) {
+        return;
+      }
       const response: ClientEventFinder<T> = {
         doChange: false,
         fromId: this.store.clientPlayerId,
@@ -1241,6 +1297,9 @@ export class GameClientProcessor {
     content: ServerEventFinder<T>,
   ) {
     await this.store.room.obtainSkill(content.toId, content.skillName, false, content.insertIndex);
+    if (this.disposed) {
+      return;
+    }
     this.presenter.broadcastUIUpdate();
   }
 
@@ -1475,6 +1534,9 @@ export class GameClientProcessor {
     content: ServerEventFinder<T>,
   ) {
     const onSelectedCard = (card: Card | number, fromArea: PlayerCardsArea) => {
+      if (this.disposed) {
+        return;
+      }
       this.presenter.closeDialog();
 
       const event: ClientEventFinder<T> = {
@@ -1527,6 +1589,9 @@ export class GameClientProcessor {
       : undefined;
 
     const onSelectedCard = (card: Card | number) => {
+      if (this.disposed) {
+        return;
+      }
       if (card instanceof Card) {
         const index = selectedCards.findIndex(cardId => cardId === card.Id);
         if (index >= 0) {
@@ -1596,6 +1661,9 @@ export class GameClientProcessor {
     if (!EventPacker.isUncancellableEvent(content)) {
       this.presenter.enableActionButton('cancel');
       this.presenter.defineCancelButtonActions(() => {
+        if (this.disposed) {
+          return;
+        }
         this.presenter.closeDialog();
 
         const event: ClientEventFinder<T> = {
@@ -1608,6 +1676,9 @@ export class GameClientProcessor {
     }
 
     this.presenter.defineConfirmButtonActions(() => {
+      if (this.disposed) {
+        return;
+      }
       this.presenter.closeDialog();
 
       const event: ClientEventFinder<T> = {
@@ -1626,6 +1697,9 @@ export class GameClientProcessor {
     const selectedCards: CardId[] = [];
     const selectedCardsIndex: number[] = [];
     const onSelectedCard = (card: Card | number) => {
+      if (this.disposed) {
+        return;
+      }
       if (card instanceof Card) {
         const index = selectedCards.findIndex(cardId => cardId === card.Id);
         if (index >= 0) {
@@ -1671,6 +1745,9 @@ export class GameClientProcessor {
     if (!EventPacker.isUncancellableEvent(content)) {
       this.presenter.enableActionButton('cancel');
       this.presenter.defineCancelButtonActions(() => {
+        if (this.disposed) {
+          return;
+        }
         this.presenter.closeDialog();
 
         const event: ClientEventFinder<T> = {
@@ -1692,6 +1769,9 @@ export class GameClientProcessor {
     const actionHandlers = {};
     options.forEach(option => {
       actionHandlers[option] = () => {
+        if (this.disposed) {
+          return;
+        }
         if (this.isObserver) {
           return;
         }
@@ -1716,6 +1796,9 @@ export class GameClientProcessor {
     if (!EventPacker.isUncancellableEvent(content)) {
       this.presenter.enableActionButton('cancel');
       this.presenter.defineCancelButtonActions(() => {
+        if (this.disposed) {
+          return;
+        }
         const response: ClientEventFinder<GameEventIdentifiers.AskForChoosingOptionsEvent> = {
           fromId: toId,
         };
@@ -1747,6 +1830,9 @@ export class GameClientProcessor {
       );
 
     await this.store.room.useSkill(content);
+    if (this.disposed) {
+      return;
+    }
     if (skill.SkillType === SkillType.Limit || skill.SkillType === SkillType.Awaken) {
       this.presenter.onceSkillUsed(content.fromId, content.skillName);
     } else if (skill.isSwitchSkill() && skill.isSwitchable()) {
@@ -1778,6 +1864,9 @@ export class GameClientProcessor {
   }
 
   private readonly onBackingToWaitingRoom = () => {
+    if (this.disposed) {
+      return;
+    }
     this.store.room.broadcast(GameEventIdentifiers.BackToWaitingRoomEvent, {
       playerId: this.store.clientPlayerId!,
       playerName: this.store.clientRoomInfo.playerName,
@@ -1817,6 +1906,9 @@ export class GameClientProcessor {
     });
     const action = new SelectAction(content.toId, this.store, this.presenter, this.translator, content);
     const selectedPlayers = await action.onSelectPlayer(requiredAmount, players);
+    if (this.disposed) {
+      return;
+    }
 
     const choosePlayerEvent: ClientEventFinder<GameEventIdentifiers.AskForChoosingPlayerEvent> = {
       fromId: content.toId,
@@ -1837,6 +1929,9 @@ export class GameClientProcessor {
     });
     const action = new SelectAction(this.store.clientPlayerId, this.store, this.presenter, this.translator, content);
     const selectedPlayers = await action.onSelectCardTargets(user, cardId, exclude);
+    if (this.disposed) {
+      return;
+    }
 
     const choosePlayerEvent: ClientEventFinder<GameEventIdentifiers.AskForChoosingCardAvailableTargetEvent> = {
       fromId: this.store.clientPlayerId,
@@ -1867,6 +1962,9 @@ export class GameClientProcessor {
     const cards = cardIds.map(cardId => Sanguosha.getCardById(cardId));
 
     const onConfirm = (top: Card[], bottom: Card[]) => () => {
+      if (this.disposed) {
+        return;
+      }
       const responseEvent: ClientEventFinder<T> = {
         top: top.map(card => card.Id),
         bottom: bottom.map(card => card.Id),
@@ -1909,6 +2007,9 @@ export class GameClientProcessor {
 
     let selected = false;
     const onClick = (card: Card) => {
+      if (this.disposed) {
+        return;
+      }
       if (selected) {
         return;
       }
@@ -2018,6 +2119,9 @@ export class GameClientProcessor {
     type: T,
     content: ServerEventFinder<T>,
   ) {
+    if (this.disposed) {
+      return;
+    }
     const { roomId, roomInfo } = content;
     this.createWaitingRoomCaller?.(roomInfo, roomId);
   }
